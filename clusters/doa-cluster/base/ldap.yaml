@@ -33,4 +33,4 @@ spec:
   install:
     createNamespace: true
   interval: '1m0s'
-  targetNamespace: 'production-base'
+  targetNamespace: 'base'
