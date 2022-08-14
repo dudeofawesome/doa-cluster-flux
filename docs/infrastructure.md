@@ -88,6 +88,26 @@ flowchart LR
                 end
                 DOA_SERVER_KUBELET-->DOA_NEXTCLOUD
 
+                subgraph home_assistant ["fa:fa-home Home Assistant"]
+                    DOA_HASS["Home Assistant"]
+                    click DOA_HASS "https://hass.oc.orleans.io"
+                    DOA_HASS_DB[("Postgres")]
+                    DOA_MQTT_BROKER["MQTT Broker"]
+
+                    DOA_HASS-->DOA_HASS_DB
+                    DOA_HASS-->DOA_MQTT_BROKER
+                end
+                DOA_SERVER_KUBELET-->DOA_HASS
+
+                subgraph wikijs ["WikiJS"]
+                    DOA_WIKI["Wiki"]
+                    click DOA_WIKI "https://kb.orleans.io"
+                    DOA_WIKI_DB[("Postgres")]
+
+                    DOA_WIKI-->DOA_WIKI_DB
+                end
+                DOA_SERVER_KUBELET-->DOA_WIKI
+
                 subgraph media ["fa:fa-music Media"]
                     subgraph view ["fa:fa-play View"]
                         DOA_PLEX["Plex"]
@@ -176,6 +196,7 @@ flowchart LR
             JOSH_K8S_CONTROL_PLANE["K8s Control Plane"]
             JOSH_K8S_ETCD[("ETCD")]
             JOSH_K8S_CONTROL_PLANE-->JOSH_K8S_ETCD
+            JOSH_SERVER_SCRUTINY_COLLECTOR["Scrutiny Collector"]
         end
     end
 
@@ -184,6 +205,7 @@ flowchart LR
             SHEOL_K8S_CONTROL_PLANE["K8s Control Plane"]
             SHEOL_K8S_ETCD[("ETCD")]
             SHEOL_K8S_CONTROL_PLANE-->SHEOL_K8S_ETCD
+            SHEOL_SERVER_SCRUTINY_COLLECTOR["Scrutiny Collector"]
         end
     end
 
