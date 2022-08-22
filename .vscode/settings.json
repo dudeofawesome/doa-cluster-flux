@@ -7,5 +7,7 @@
     "kubernetes": "*.yaml"
     // "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.22.4-standalone-strict/_definitions.json": "*.yaml"
     // "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.24.2-standalone-strict/_definitions.json": "*.yaml"
-  }
+  },
+
+  "markdown.styles": ["https://use.fontawesome.com/releases/v6.1.2/css/all.css"]
 }

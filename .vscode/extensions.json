@@ -4,6 +4,8 @@
     "jdforsythe.add-new-line-to-files",
     "editorconfig.editorconfig",
     "esbenp.prettier-vscode",
-    "ms-kubernetes-tools.vscode-kubernetes-tools"
+    "ms-kubernetes-tools.vscode-kubernetes-tools",
+    "bpruitt-goddard.mermaid-markdown-syntax-highlighting",
+    "bierner.markdown-mermaid"
   ]
 }
