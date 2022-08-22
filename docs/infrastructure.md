@@ -9,6 +9,7 @@ flowchart LR
     LB-->DOA_K8S_CONTROL_PLANE
     LB-->JOSH_K8S_CONTROL_PLANE
     LB-->SHEOL_K8S_CONTROL_PLANE
+    LB-->EDGAR_K8S_CONTROL_PLANE
 
     subgraph oc_north_1 ["oc-north-1"]
         subgraph doa_server [fa:fa-server doa-server]
@@ -19,8 +20,8 @@ flowchart LR
             subgraph doa_server_worker ["Worker Node"]
                 DOA_SERVER_KUBELET["Kubelet"]
 
-                subgraph authentication ["fa:fa-key Authentication"]
-                    subgraph ldap ["LDAP"]
+                subgraph doa_authentication ["fa:fa-key Authentication"]
+                    subgraph doa_ldap ["LDAP"]
                         DOA_OPENLDAP[("openLDAP")]
                         DOA_LAM["LDAP Account Manager"]
                         click DOA_LAM "https://lam.orleans.io"
@@ -30,7 +31,7 @@ flowchart LR
                         DOA_LAM-->DOA_OPENLDAP
                         DOA_LDAP_CHERRY-->DOA_OPENLDAP
                     end
-                    subgraph authentik ["Authentik"]
+                    subgraph doa_authentik ["Authentik"]
                         DOA_AUTHENTIK_SERVER["Authentik Server"]
                         click DOA_AUTHENTIK_SERVER "https://identity.orleans.io"
                         DOA_AUTHENTIK_WORKER["Worker"]
@@ -48,7 +49,7 @@ flowchart LR
                 DOA_SERVER_KUBELET-->DOA_LDAP_CHERRY
                 DOA_SERVER_KUBELET-->DOA_AUTHENTIK_SERVER
 
-                subgraph unifi ["fa:fa-wifi Unifi"]
+                subgraph doa_unifi ["fa:fa-wifi Unifi"]
                     DOA_UNIFI_CONTROLLER["Unifi Controller"]
                     click DOA_UNIFI_CONTROLLER "https://unifi.oc.orleans.io"
                     DOA_UNIFI_DB[("MongoDB")]
@@ -57,7 +58,7 @@ flowchart LR
                 end
                 DOA_SERVER_KUBELET-->DOA_UNIFI_CONTROLLER
 
-                subgraph scrutiny ["fa:fa-hdd Scrutiny"]
+                subgraph doa_scrutiny ["fa:fa-hdd Scrutiny"]
                     DOA_SCRUTINY_WEB["Scrutiny Web"]
                     click DOA_SCRUTINY_WEB "https://scrutiny.orleans.io"
                     DOA_SCRUTINY_DB[("Influx DB")]
@@ -76,7 +77,7 @@ flowchart LR
                 click DOA_PIHOLE "https://pihole.oc.orleans.io"
                 DOA_SERVER_KUBELET-->DOA_PIHOLE
 
-                subgraph nextcloud ["Nextcloud"]
+                subgraph doa_nextcloud ["Nextcloud"]
                     DOA_NEXTCLOUD["Nextcloud"]
                     click DOA_NEXTCLOUD "https://drive.orleans.io"
                     DOA_NEXTCLOUD_DB[("Postgres")]
@@ -88,7 +89,7 @@ flowchart LR
                 end
                 DOA_SERVER_KUBELET-->DOA_NEXTCLOUD
 
-                subgraph home_assistant ["fa:fa-home Home Assistant"]
+                subgraph doa_home_assistant ["fa:fa-home Home Assistant"]
                     DOA_HASS["Home Assistant"]
                     click DOA_HASS "https://hass.oc.orleans.io"
                     DOA_HASS_DB[("Postgres")]
@@ -99,7 +100,7 @@ flowchart LR
                 end
                 DOA_SERVER_KUBELET-->DOA_HASS
 
-                subgraph wikijs ["WikiJS"]
+                subgraph doa_wikijs ["WikiJS"]
                     DOA_WIKI["Wiki"]
                     click DOA_WIKI "https://kb.orleans.io"
                     DOA_WIKI_DB[("Postgres")]
@@ -108,8 +109,8 @@ flowchart LR
                 end
                 DOA_SERVER_KUBELET-->DOA_WIKI
 
-                subgraph media ["fa:fa-music Media"]
-                    subgraph view ["fa:fa-play View"]
+                subgraph doa_media ["fa:fa-music Media"]
+                    subgraph doa_media_view ["fa:fa-play View"]
                         DOA_PLEX["Plex"]
                         click DOA_PLEX "https://plex.orleans.io"
                         DOA_KAVITA["Kavita"]
@@ -117,7 +118,7 @@ flowchart LR
                         DOA_KAVITA-->DOA_AUTHENTIK_SERVER
                     end
 
-                    subgraph manage ["Manage"]
+                    subgraph doa_media_manage ["Manage"]
                         DOA_TAUTULLI["Tautulli"]
                         click DOA_TAUTULLI "https://tautulli.orleans.io"
                         DOA_OVERSEER["Overseer"]
@@ -153,7 +154,6 @@ flowchart LR
                         DOA_READARR_EBOOK<-->DOA_PROWLARR
                     end
                 end
-
                 DOA_SERVER_KUBELET-->DOA_PLEX
                 DOA_SERVER_KUBELET-->DOA_KAVITA
                 DOA_SERVER_KUBELET-->DOA_OVERSEER
@@ -163,6 +163,13 @@ flowchart LR
                 DOA_SERVER_KUBELET-->DOA_LIDARR
                 DOA_SERVER_KUBELET-->DOA_READARR_AUDIO
                 DOA_SERVER_KUBELET-->DOA_READARR_EBOOK
+
+                subgraph doa_game_servers ["fa:fa-gamepad Game Servers"]
+                    DOA_VALHEIM["Valheim"]
+                    DOA_DCS["DCS: World"]
+                end
+                DOA_SERVER_KUBELET-->DOA_VALHEIM
+                DOA_SERVER_KUBELET-->DOA_DCS
             end
         end
 
@@ -170,12 +177,15 @@ flowchart LR
             subgraph doa_printer_pi_worker ["Worker Node"]
                 DOA_PRINTER_PI_KUBELET["Kubelet"]
 
-                DOA_PRINTER_FLUIDD["Fluidd"]
-                click DOA_PRINTER_FLUIDD "https://fluidd.oc.orleans.io"
-                DOA_PRINTER_MOONRAKER["Moonraker"]
-                DOA_PRINTER_KLIPPER["Klipper"]
+                subgraph doa_klipper ["Klipper"]
+                    DOA_PRINTER_FLUIDD["Fluidd"]
+                    click DOA_PRINTER_FLUIDD "https://fluidd.oc.orleans.io"
+                    DOA_PRINTER_MOONRAKER["Moonraker"]
+                    DOA_PRINTER_KLIPPER["Klipper"]
+                    DOA_PRINTER_FLUIDD-->DOA_PRINTER_MOONRAKER-->DOA_PRINTER_KLIPPER
+                end
 
-                DOA_PRINTER_PI_KUBELET-->DOA_PRINTER_FLUIDD-->DOA_PRINTER_MOONRAKER-->DOA_PRINTER_KLIPPER
+                DOA_PRINTER_PI_KUBELET-->DOA_PRINTER_FLUIDD
 
                 DOA_PRINTER_PI_SCRUTINY_COLLECTOR["Scrutiny Collector"]
             end
@@ -195,8 +205,25 @@ flowchart LR
         subgraph josh_server [fa:fa-server josh-server]
             JOSH_K8S_CONTROL_PLANE["K8s Control Plane"]
             JOSH_K8S_ETCD[("ETCD")]
+            JOSH_SERVER_KUBELET["Kubelet"]
+
             JOSH_K8S_CONTROL_PLANE-->JOSH_K8S_ETCD
+            JOSH_K8S_CONTROL_PLANE-->JOSH_SERVER_KUBELET
+
             JOSH_SERVER_SCRUTINY_COLLECTOR["Scrutiny Collector"]
+            JOSH_SERVER_KUBELET-->JOSH_SERVER_SCRUTINY_COLLECTOR
+
+            subgraph josh_nextcloud ["Nextcloud"]
+                JOSH_NEXTCLOUD["Nextcloud"]
+                click JOSH_NEXTCLOUD "https://drive.gibbs.tk"
+                JOSH_NEXTCLOUD_DB[("Postgres")]
+                JOSH_NEXTCLOUD_CACHE[("Redis")]
+
+                JOSH_NEXTCLOUD-->JOSH_NEXTCLOUD_DB
+                JOSH_NEXTCLOUD-->JOSH_NEXTCLOUD_CACHE
+                JOSH_NEXTCLOUD-->JOSH_AUTHENTIK_SERVER
+            end
+            JOSH_SERVER_KUBELET-->JOSH_NEXTCLOUD
         end
     end
 
@@ -204,12 +231,48 @@ flowchart LR
         subgraph sheol_server [fa:fa-server sheol-server]
             SHEOL_K8S_CONTROL_PLANE["K8s Control Plane"]
             SHEOL_K8S_ETCD[("ETCD")]
+            SHEOL_SERVER_KUBELET["Kubelet"]
+
             SHEOL_K8S_CONTROL_PLANE-->SHEOL_K8S_ETCD
+            SHEOL_K8S_CONTROL_PLANE-->SHEOL_SERVER_KUBELET
+
             SHEOL_SERVER_SCRUTINY_COLLECTOR["Scrutiny Collector"]
+            SHEOL_SERVER_KUBELET-->SHEOL_SERVER_SCRUTINY_COLLECTOR
+        end
+    end
+
+    subgraph la_east_1 ["la-east-1"]
+        subgraph edgar_server [fa:fa-server edgar-server]
+            EDGAR_K8S_CONTROL_PLANE["K8s Control Plane"]
+            EDGAR_K8S_ETCD[("ETCD")]
+            EDGAR_SERVER_KUBELET["Kubelet"]
+
+            EDGAR_K8S_CONTROL_PLANE-->EDGAR_K8S_ETCD
+            EDGAR_K8S_CONTROL_PLANE-->EDGAR_SERVER_KUBELET
+
+            EDGAR_SERVER_SCRUTINY_COLLECTOR["Scrutiny Collector"]
+            EDGAR_SERVER_KUBELET-->EDGAR_SERVER_SCRUTINY_COLLECTOR
+
+            subgraph edgar_nextcloud ["Nextcloud"]
+                EDGAR_NEXTCLOUD["Nextcloud"]
+                click EDGAR_NEXTCLOUD "https://drive.saldivar.io"
+                EDGAR_NEXTCLOUD_DB[("Postgres")]
+                EDGAR_NEXTCLOUD_CACHE[("Redis")]
+
+                EDGAR_NEXTCLOUD-->EDGAR_NEXTCLOUD_DB
+                EDGAR_NEXTCLOUD-->EDGAR_NEXTCLOUD_CACHE
+                EDGAR_NEXTCLOUD-->EDGAR_AUTHENTIK_SERVER
+            end
+            EDGAR_SERVER_KUBELET-->EDGAR_NEXTCLOUD
         end
     end
 
     DOA_K8S_ETCD<-->JOSH_K8S_ETCD
     JOSH_K8S_ETCD<-->SHEOL_K8S_ETCD
-    SHEOL_K8S_ETCD<-->DOA_K8S_ETCD
+    SHEOL_K8S_ETCD<-->EDGAR_K8S_ETCD
+    EDGAR_K8S_ETCD<-->DOA_K8S_ETCD
+
+    DOA_NEXTCLOUD_DB<-->EDGAR_NEXTCLOUD_DB
+    EDGAR_NEXTCLOUD_DB<-->JOSH_NEXTCLOUD_DB
+    JOSH_NEXTCLOUD_DB<-->DOA_NEXTCLOUD_DB
 ```
