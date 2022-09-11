@@ -7,7 +7,7 @@ metadata:
     environment: 'production'
     tier: 'backend'
   name: 'ldap'
-  namespace: 'flux-system'
+  namespace: 'base'
 spec:
   chart:
     spec:
@@ -16,20 +16,21 @@ spec:
       sourceRef:
         kind: 'HelmRepository'
         name: 'geek-cookbook'
-    env:
-      #LDAP_LOG_LEVEL: '-1'
-      LDAP_ORGANISATION: 'Orleans'
-      LDAP_DOMAIN: 'orleans.io'
-      #LDAP_BASE_DN: 'dc=orleans,dc=io'
-      LDAP_TLS: 'true'
-      LDAP_TLS_CRT_FILENAME: 'live/orleans.io-0001/cert.pem'
-      LDAP_TLS_KEY_FILENAME: 'live/orleans.io-0001/privkey.pem'
-      LDAP_TLS_CA_CRT_FILENAME: 'live/orleans.io-0001/fullchain.pem'
-      #LDAP_TLS_ENFORCE: 'true'
-      #DISABLE_CHOWN: 'true'
-      LDAP_ADMIN_PASSWORD: '${LDAP_ADMIN_PASSWORD}'
-      LDAP_CONFIG_PASSWORD: '${LDAP_CONFIG_PASSWORD}'
-      LDAP_USER: '${LDAP_ADMIN_DN}'
+    values:
+      env:
+        #LDAP_LOG_LEVEL: '-1'
+        LDAP_ORGANISATION: 'Orleans'
+        LDAP_DOMAIN: 'orleans.io'
+        #LDAP_BASE_DN: 'dc=orleans,dc=io'
+        LDAP_TLS: 'true'
+        LDAP_TLS_CRT_FILENAME: 'live/orleans.io-0001/cert.pem'
+        LDAP_TLS_KEY_FILENAME: 'live/orleans.io-0001/privkey.pem'
+        LDAP_TLS_CA_CRT_FILENAME: 'live/orleans.io-0001/fullchain.pem'
+        #LDAP_TLS_ENFORCE: 'true'
+        #DISABLE_CHOWN: 'true'
+        LDAP_ADMIN_PASSWORD: '${LDAP_ADMIN_PASSWORD}'
+        LDAP_CONFIG_PASSWORD: '${LDAP_CONFIG_PASSWORD}'
+        LDAP_USER: '${LDAP_ADMIN_DN}'
   install:
     createNamespace: true
   interval: '1m0s'
