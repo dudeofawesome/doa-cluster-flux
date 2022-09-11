@@ -7,7 +7,7 @@ metadata:
     environment: 'production'
     tier: 'backend'
   name: 'ldap'
-  namespace: 'base'
+  namespace: 'flux-system'
 spec:
   chart:
     spec:
