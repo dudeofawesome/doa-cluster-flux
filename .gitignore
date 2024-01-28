@@ -20,3 +20,4 @@ node_modules/
 *.bin
 *.key
 *passwd*
+*.*key
