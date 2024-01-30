@@ -30,8 +30,8 @@ spec:
     - match: 'Host(`traefik.orleans.io`)'
       kind: 'Rule'
       services:
-        - name: 'traefik'
-          port: 8080
+        - name: 'traefik-dashboard'
+          port: 9000
       # middlewares:
       #   - name: security-no-frame-deny
       #     namespace: kube-system
