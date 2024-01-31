@@ -6,7 +6,6 @@ commonLabels:
 
 resources:
   - namespace.yaml
-  - repository.yaml
   - release.yaml
   - ingress.yaml
   - issuer.yaml
