@@ -7,5 +7,4 @@ commonLabels:
 resources:
   - namespace.yaml
   - release.yaml
-  - ingress.yaml
   - secrets.yaml
