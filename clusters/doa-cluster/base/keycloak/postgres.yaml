@@ -1,3 +1,4 @@
+# TODO: https://cloudnative-pg.io/
 ---
 apiVersion: v1
 kind: Service
@@ -13,7 +14,6 @@ spec:
       port: 5432
       protocol: TCP
       targetPort: 5432
-      nodePort: 30007
 ---
 apiVersion: apps/v1
 kind: StatefulSet

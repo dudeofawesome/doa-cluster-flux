@@ -1,4 +1,3 @@
----
 apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
@@ -7,4 +6,3 @@ metadata:
 spec:
   interval: 1m0s
   url: https://geek-cookbook.github.io/charts/
-
