@@ -8,5 +8,4 @@ resources:
   - namespace.yaml
   - release.yaml
   - ingress.yaml
-  - issuer.yaml
   - secrets.yaml
