@@ -18,6 +18,7 @@ spec:
   tls:
     - secretName: letsencrypt-staging-key
       options:
+        name: tls.key
         namespace: cert-manager
       hosts:
         - keycloak.orleans.io
