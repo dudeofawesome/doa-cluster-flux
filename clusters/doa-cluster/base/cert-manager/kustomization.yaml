@@ -9,4 +9,3 @@ resources:
   - release.yaml
   - issuer.yaml
   - secrets.yaml
-  - certificates.yaml
