@@ -3,7 +3,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: wildcard-orleans-io
-  namespace: cert-manager
+  namespace: kube-system
 spec:
   secretName: wildcard-orleans-io-secret
   secretTemplate:
