@@ -33,5 +33,3 @@ spec:
       # middlewares:
       #   - name: security-no-frame-deny
       #     namespace: kube-system
-  tls:
-    secretName: wildcard-orleans-io-secret
