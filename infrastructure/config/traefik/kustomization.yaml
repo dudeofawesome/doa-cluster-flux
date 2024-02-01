@@ -3,3 +3,4 @@ kind: Kustomization
 namespace: kube-system
 resources:
   - middleware/use-https.yaml
+  - certificates.yaml
