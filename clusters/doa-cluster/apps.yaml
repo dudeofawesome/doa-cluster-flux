@@ -5,13 +5,13 @@ metadata:
   name: apps-base
   namespace: flux-system
 spec:
+  dependsOn:
+    - name: infrastructure
   interval: 10m0s
   wait: true
   timeout: 5m0s
   retryInterval: 2m0s
   prune: true
-  dependsOn:
-    - name: infra-configs
   sourceRef:
     kind: GitRepository
     name: flux-system

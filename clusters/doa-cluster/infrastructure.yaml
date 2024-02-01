@@ -21,6 +21,8 @@ metadata:
   name: infrastructure
   namespace: flux-system
 spec:
+  dependsOn:
+    - name: sources
   interval: 1h
   wait: true
   timeout: 5m0s
