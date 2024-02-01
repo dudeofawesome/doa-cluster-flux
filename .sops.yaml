@@ -26,6 +26,12 @@ keys:
   clusters:
     - &cluster_doa-cluster 'age1meara2mcpfxz9xzj0q0tur82a09paacevld6vnpfgkht2w8yayyq8y35pc'
 
+  groups:
+    all-age-keys: &all-age-keys
+      age:
+        - *user_dudeofawesome
+        - *cluster_doa-cluster
+
   # When adding new keys, make sure to update the encrypted files:
   # `sops updatekeys ENCRYPTED_FILE`
   # https://github.com/getsops/sops#27adding-and-removing-keys
@@ -33,16 +39,12 @@ keys:
   # `find . \( -wholename "*/secrets/*.yaml" -o -name "secrets.yaml" \) -type f -exec sops updatekeys --yes {} \;`
 
 creation_rules:
-  - path_regex: 'secrets/[^/]+\.(yaml|json|env|ini)$'
-    key_groups:
-      - age:
-          - *user_dudeofawesome
-          - *cluster_doa-cluster
-
   # Clusters
-  - path_regex: 'clusters/[^/]+/.+secrets\.ya?ml$'
+  - path_regex: '.+/secrets?\.ya?ml$'
     encrypted_regex: '^(data|stringData)$'
-  - path_regex: 'clusters/doa-cluster/.+secrets\.ya?ml$'
+    key_groups:
+      - *all-age-keys
+  - path_regex: 'clusters/doa-cluster/.+secrets?\.ya?ml$'
     key_groups:
       - age:
           - *user_dudeofawesome

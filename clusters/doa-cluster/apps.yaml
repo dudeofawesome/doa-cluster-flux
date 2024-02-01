@@ -6,7 +6,7 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    - name: infrastructure
+    - name: infrastructure-config
   interval: 10m0s
   wait: true
   timeout: 5m0s
