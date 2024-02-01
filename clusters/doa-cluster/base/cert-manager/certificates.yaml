@@ -1,0 +1,23 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wildcard-orleans-io
+  namespace: cert-manager
+spec:
+  secretName: wildcard-orleans-io-secret
+  secretTemplate:
+    annotations:
+      reflector.v1.k8s.emberstack.com/reflection-allowed: 'true'
+      reflector.v1.k8s.emberstack.com/reflection-auto-enabled: 'true'
+      reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: 'kube-system'
+      reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: 'kube-system'
+  issuerRef:
+    name: letsencrypt
+    kind: ClusterIssuer
+  commonName: orleans.io
+  dnsNames:
+    - orleans.io
+    - '*.orleans.io'
+  privateKey:
+    rotationPolicy: Always
