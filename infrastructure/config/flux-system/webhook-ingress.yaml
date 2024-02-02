@@ -1,0 +1,16 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: 'webhook-receiver'
+spec:
+  entryPoints:
+    - 'websecure'
+  routes:
+    - match: 'Host(`flux-webhook.orleans.io`)'
+      kind: 'Rule'
+      services:
+        - name: 'webhook-receiver'
+          port: 80
+      # middlewares:
+      #   - name: security-no-frame-deny
+      #     namespace: kube-system
