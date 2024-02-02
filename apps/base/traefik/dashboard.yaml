@@ -41,7 +41,7 @@ spec:
       # middlewares:
       # - name: security-no-frame-deny
       #   namespace: kube-system
-    - match: Host(`traefik.orleans.io`) && PathPrefix(`/`)
+    - match: Host(`traefik.orleans.io`) && Path(`/`)
       kind: Rule
       services:
         - name: 'traefik-dashboard'
