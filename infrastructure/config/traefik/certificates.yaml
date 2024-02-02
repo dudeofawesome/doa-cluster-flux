@@ -17,7 +17,6 @@ spec:
     kind: ClusterIssuer
   commonName: orleans.io
   dnsNames:
-    - orleans.io
     - '*.orleans.io'
   privateKey:
     rotationPolicy: Always
