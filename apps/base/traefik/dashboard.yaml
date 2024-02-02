@@ -21,7 +21,7 @@ metadata:
   name: traefik-dashboard-path
 spec:
   addPrefix:
-    prefix: /dashboard/
+    prefix: /dashboard
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
