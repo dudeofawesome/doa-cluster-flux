@@ -15,7 +15,6 @@ spec:
   issuerRef:
     name: letsencrypt
     kind: ClusterIssuer
-  commonName: orleans.io
   dnsNames:
     - '*.orleans.io'
   privateKey:
