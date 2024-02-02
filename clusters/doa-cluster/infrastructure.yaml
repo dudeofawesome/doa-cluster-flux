@@ -14,6 +14,10 @@ spec:
     kind: GitRepository
     name: flux-system
   path: ./sources
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
@@ -32,6 +36,10 @@ spec:
     kind: GitRepository
     name: flux-system
   path: ./infrastructure/controllers
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
@@ -50,3 +58,7 @@ spec:
     kind: GitRepository
     name: flux-system
   path: ./infrastructure/config
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
