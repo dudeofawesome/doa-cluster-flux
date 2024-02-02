@@ -33,7 +33,7 @@ spec:
   entryPoints:
     - 'websecure'
   routes:
-    - match: 'Host(`traefik.orleans.io`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))'
+    - match: 'Host(`traefik.orleans.io`)'
       kind: 'Rule'
       services:
         - name: 'traefik-dashboard'
