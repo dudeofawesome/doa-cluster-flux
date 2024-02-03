@@ -1,8 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  labels:
-    app: home-assistant
   name: home-assistant
 spec:
   revisionHistoryLimit: 3

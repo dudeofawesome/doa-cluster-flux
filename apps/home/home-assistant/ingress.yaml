@@ -7,7 +7,7 @@ spec:
   entryPoints:
     - 'websecure'
   routes:
-    - match: 'Host(`hass.park.orleans.io`)'
+    - match: 'Host(`hass.orleans.io`)'
       kind: 'Rule'
       services:
         - name: 'home-assistant'
