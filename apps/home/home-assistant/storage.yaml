@@ -3,9 +3,37 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: config-root
+  labels:
+    type: local
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 1Gi
+      storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: config-root
+  labels:
+    type: local
+spec:
+  capacity:
+    storage: 5G
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  claimRef:
+    name: config-root
+  local:
+    path: /mnt/home-assistant
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - monongahela
