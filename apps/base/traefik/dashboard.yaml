@@ -48,5 +48,3 @@ spec:
     #       port: 9000
     #   middlewares:
     #     - name: traefik-dashboard-path
-  tls:
-    secretName: wildcard-orleans-io
