@@ -29,3 +29,6 @@ spec:
         fields:
           headers:
             defaultmode: keep
+
+    globalArguments:
+      - "--serversTransport.insecureSkipVerify=true"
