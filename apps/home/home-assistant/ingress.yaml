@@ -11,6 +11,7 @@ spec:
       kind: 'Rule'
       services:
         - name: 'home-assistant'
+          port: 8123
       # middlewares:
       #   - name: security-no-frame-deny
       #     namespace: kube-system
