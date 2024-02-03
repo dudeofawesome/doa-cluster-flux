@@ -1,0 +1,31 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    ports:
+      web:
+        redirectTo:
+          port: websecure
+      websecure:
+        tls:
+          # options: default
+
+    providers:
+      kubernetesCRD:
+        allowCrossNamespace: true # Use Middlewares across namespaces
+
+    ingressRoute:
+      healthcheck:
+        enabled: true
+
+    logs:
+      general:
+        level: DEBUG
+      access:
+        enabled: true
+        fields:
+          headers:
+            defaultmode: keep
