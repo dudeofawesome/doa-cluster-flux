@@ -11,11 +11,11 @@ spec:
     type: Recreate
   selector:
     matchLabels:
-      app: home-assistant
+      component: app
   template:
     metadata:
       labels:
-        app: home-assistant
+        component: app
     spec:
       # securityContext:
       #   fsGroup: 33
