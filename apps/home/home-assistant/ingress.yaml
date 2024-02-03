@@ -27,4 +27,3 @@ spec:
   ports:
     - name: http
       port: 8123
-      targetPort: http
