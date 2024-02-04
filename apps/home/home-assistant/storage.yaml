@@ -6,11 +6,9 @@ metadata:
   labels:
     type: local
 spec:
+  volumeName: config-root
   accessModes:
     - ReadWriteOnce
-  resources:
-    requests:
-      storage: 5Gi
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -25,8 +23,6 @@ spec:
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
-  claimRef:
-    name: config-root
   local:
     path: /mnt/home-assistant
   nodeAffinity:
