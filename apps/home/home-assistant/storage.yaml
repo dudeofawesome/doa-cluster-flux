@@ -9,6 +9,9 @@ spec:
   volumeName: config-root
   accessModes:
     - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -18,7 +21,7 @@ metadata:
     type: local
 spec:
   capacity:
-    storage: 5G
+    storage: 5Gi
   volumeMode: Filesystem
   accessModes:
     - ReadWriteOnce
