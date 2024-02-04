@@ -26,7 +26,13 @@ spec:
             privileged: false
           envFrom:
             - configMapRef:
-                name: config
+                name: environment
+          env:
+            - name: DB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-app
+                  key: uri
           ports:
             - name: http
               containerPort: 8123
@@ -56,8 +62,17 @@ spec:
           volumeMounts:
             - name: ha-config-root
               mountPath: /config
+            - name: ha-configuration-base
+              mountPath: /config/configuration.yaml
+              subPath: configuration.yaml
       restartPolicy: Always
       volumes:
         - name: ha-config-root
           persistentVolumeClaim:
             claimName: config-root
+        - name: ha-configuration-base
+          configMap:
+            name: configuration
+            items:
+              - key: configuration.yaml
+                path: configuration.yaml
