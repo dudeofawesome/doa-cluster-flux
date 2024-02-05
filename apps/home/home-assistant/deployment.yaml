@@ -34,17 +34,17 @@ spec:
                   name: postgres-app
                   key: uri
 
-            - name: issuer_url
+            - name: oidc_issuer_url
               valueFrom:
                 secretKeyRef:
                   name: oidc
                   key: issuer_url
-            - name: client_id
+            - name: oidc_client_id
               valueFrom:
                 secretKeyRef:
                   name: oidc
                   key: client_id
-            - name: client_secret
+            - name: oidc_client_secret
               valueFrom:
                 secretKeyRef:
                   name: oidc

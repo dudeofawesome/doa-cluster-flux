@@ -52,7 +52,7 @@ data:
     curl="curl --silent"
     jq="jq --raw-output"
 
-    openid_config="$issuer_url/.well-known/openid-configuration"
+    openid_config="$oidc_issuer_url/.well-known/openid-configuration"
 
     main() {
       config_data="$($curl "$openid_config")"
@@ -63,8 +63,8 @@ data:
           "$token_endpoint" \
           --request POST \
           --header 'content-type: application/x-www-form-urlencoded' \
-          --data 'client_id='"$client_id" \
-          --data 'client_secret='"$client_secret" \
+          --data 'client_id='"$oidc_client_id" \
+          --data 'client_secret='"$oidc_client_secret" \
           --data grant_type=password \
           --data 'username='"$username" \
           --data 'password='"$password" \
