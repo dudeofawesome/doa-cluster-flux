@@ -15,8 +15,6 @@ spec:
       # middlewares:
       #   - name: security-no-frame-deny
       #     namespace: kube-system
-  tls:
-    secretName: wildcard-orleans-io
 ---
 apiVersion: notification.toolkit.fluxcd.io/v1
 kind: Receiver
