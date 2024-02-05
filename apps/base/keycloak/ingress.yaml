@@ -15,6 +15,7 @@ spec:
       # middlewares:
       #   - name: security-no-frame-deny
       #     namespace: kube-system
+  tls:
 ---
 apiVersion: v1
 kind: Service
