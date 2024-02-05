@@ -54,8 +54,6 @@ data:
     #!/usr/bin/env bash
     set -e
 
-    >&2 echo 1
-
     curl="curl --silent"
     jq="jq --raw-output"
 
@@ -65,12 +63,9 @@ data:
 
     openid_config="$oidc_issuer_url/.well-known/openid-configuration"
 
-    >&2 echo 2 "$openid_config"
-
     main() {
       config_data="$($curl "$openid_config")"
       token_endpoint="$(echo "$config_data" | $jq '.token_endpoint')"
-      >&2 echo 3 "$token_endpoint"
 
       res="$(
         $curl \
@@ -86,10 +81,9 @@ data:
       )"
 
       access_token="$(echo "$res" | $jq '.access_token')"
-      >&2 echo 3 "$access_token"
+      >&2 echo "auth-oidc.sh: User authenticated"
 
       jwt_payload="$(echo "$access_token" | $jq --raw-input 'split(".") | .[1] | @base64d')"
-      >&2 echo 3 "$jwt_payload"
       name="$(echo $jwt_payload | $jq '.name')"
       group="$(echo $jwt_payload | $jq 'if (.realm_access.roles | index("admin")) then "admin" else "users" end')"
 
