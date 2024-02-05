@@ -31,9 +31,14 @@ data:
 
     homeassistant:
       auth_providers:
-        - type: command_line
-          command: /usr/bin/auth-oidc.sh
+        - name: Sequoia
+          type: command_line
           meta: true
+          command: /usr/bin/auth-oidc.sh
+          args:
+            - !env_var oidc_issuer_url
+            - !env_var oidc_client_id
+            - !env_var oidc_client_secret
         - type: homeassistant
 
     recorder:
@@ -54,9 +59,13 @@ data:
     curl="curl --silent"
     jq="jq --raw-output"
 
+    oidc_issuer_url="${1:-$oidc_issuer_url}"
+    oidc_client_id="${2:-$oidc_client_id}"
+    oidc_client_secret="${3:-$oidc_client_secret}"
+
     openid_config="$oidc_issuer_url/.well-known/openid-configuration"
 
-    >&2 echo 2
+    >&2 echo 2 "$openid_config"
 
     main() {
       config_data="$($curl "$openid_config")"
