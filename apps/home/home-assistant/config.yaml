@@ -75,7 +75,7 @@ data:
 
       jwt_payload="$(echo "$access_token" | $jq --raw-input 'split(".") | .[1] | @base64d')"
       name="$(echo $jwt_payload | $jq '.name')"
-      group="$(echo $jwt_payload | $jq '.realm_access.roles.[] | select(. == "admin")')"
+      group="$(echo $jwt_payload | $jq 'if (.realm_access.roles | index("admin")) then "admin" else "users" end')"
 
       echo "name = $name"
       echo "group = system-${group:-users}"
