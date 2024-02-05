@@ -101,4 +101,4 @@ spec:
             items:
               - key: auth-oidc.sh
                 path: auth-oidc.sh
-                mode: 555
+                mode: 0555
