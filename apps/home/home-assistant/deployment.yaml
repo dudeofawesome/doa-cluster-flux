@@ -33,6 +33,22 @@ spec:
                 secretKeyRef:
                   name: postgres-app
                   key: uri
+
+            - name: issuer_url
+              valueFrom:
+                secretKeyRef:
+                  name: oidc
+                  key: issuer_url
+            - name: client_id
+              valueFrom:
+                secretKeyRef:
+                  name: oidc
+                  key: client_id
+            - name: client_secret
+              valueFrom:
+                secretKeyRef:
+                  name: oidc
+                  key: client_secret
           ports:
             - name: http
               containerPort: 8123
@@ -65,6 +81,9 @@ spec:
             - name: ha-configuration-base
               mountPath: /config/configuration.yaml
               subPath: configuration.yaml
+            - name: auth-oidc
+              mountPath: /usr/bin/auth-oidc.sh
+              subPath: auth-oidc.sh
       restartPolicy: Always
       volumes:
         - name: ha-config-root

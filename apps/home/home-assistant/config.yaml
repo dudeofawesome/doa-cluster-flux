@@ -29,6 +29,51 @@ data:
         - 127.0.0.1
         - 10.0.0.0/8
 
+    homeassistant:
+      auth_providers:
+        - type: homeassistant
+        - type: command_line
+          command: /usr/bin/auth-oidc.sh
+          meta: true
+
     recorder:
       db_url: !env_var DB_URI
       purge_keep_days: 30
+  auth-oidc.sh: |
+    #!/usr/bin/env bash
+    set -e
+
+    curl="curl --silent"
+    jq="jq --raw-output"
+
+    openid_config="$issuer_url/.well-known/openid-configuration"
+
+    main() {
+      config_data="$($curl "$openid_config")"
+      token_endpoint="$(echo "$config_data" | $jq '.token_endpoint')"
+
+      res="$(
+        $curl \
+          "$token_endpoint" \
+          --request POST \
+          --header 'content-type: application/x-www-form-urlencoded' \
+          --data 'client_id='"$client_id" \
+          --data 'client_secret='"$client_secret" \
+          --data grant_type=password \
+          --data 'username='"$username" \
+          --data 'password='"$password" \
+          ;
+      )"
+
+      access_token="$(echo "$res" | $jq '.access_token')"
+
+      jwt_payload="$(echo "$access_token" | $jq --raw-input 'split(".") | .[1] | @base64d')"
+      name="$(echo $jwt_payload | $jq '.name')"
+      group="$(echo $jwt_payload | $jq '.realm_access.roles.[] | select(. == "admin")')"
+
+      echo "name = $name"
+      echo "group = system-${group:-users}"
+      echo "local_only = false"
+    }
+
+    main
