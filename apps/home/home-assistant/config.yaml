@@ -31,10 +31,10 @@ data:
 
     homeassistant:
       auth_providers:
-        - type: homeassistant
         - type: command_line
           command: /usr/bin/auth-oidc.sh
           meta: true
+        - type: homeassistant
 
     recorder:
       db_url: !env_var DB_URI
