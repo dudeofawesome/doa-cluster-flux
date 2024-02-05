@@ -7,7 +7,7 @@ spec:
   entryPoints:
     - 'websecure'
   routes:
-    - match: 'Host(`keycloak.orleans.io`)'
+    - match: 'Host(`auth.orleans.io`)'
       kind: 'Rule'
       services:
         - name: 'keycloak'
