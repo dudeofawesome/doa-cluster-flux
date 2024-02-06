@@ -1,3 +1,18 @@
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres
+spec:
+  bootstrap:
+    initdb:
+      database: keycloak
+      owner: keycloak
+
+  instances: 1
+
+  storage:
+    size: 5Gi
 # TODO: https://cloudnative-pg.io/
 ---
 apiVersion: v1
