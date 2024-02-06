@@ -48,27 +48,27 @@ spec:
             - name: KC_DB_URL_HOST
               valueFrom:
                 secretKeyRef:
-                  name: postgres-keycloak
+                  name: postgres-app
                   key: host
             - name: KC_DB_URL_PORT
               valueFrom:
                 secretKeyRef:
-                  name: postgres-keycloak
+                  name: postgres-app
                   key: port
             - name: KC_DB_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: postgres-keycloak
+                  name: postgres-app
                   key: username
             - name: KC_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres-keycloak
+                  name: postgres-app
                   key: password
             - name: 'KC_DB_URL_DATABASE'
               valueFrom:
                 secretKeyRef:
-                  name: postgres-keycloak
+                  name: postgres-app
                   key: dbname
           ports:
             - name: http
