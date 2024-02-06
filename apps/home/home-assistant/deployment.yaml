@@ -85,6 +85,8 @@ spec:
               mountPath: /usr/bin/auth-oidc.sh
               subPath: auth-oidc.sh
       restartPolicy: Always
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
       volumes:
         - name: ha-config-root
           persistentVolumeClaim:
