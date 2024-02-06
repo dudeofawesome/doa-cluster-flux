@@ -6,7 +6,7 @@ commonLabels:
 
 resources:
   - namespace.yaml
-  - postgres.yaml
+  - database.yaml
   - deployment.yaml
   - ingress.yaml
   - secrets.yaml

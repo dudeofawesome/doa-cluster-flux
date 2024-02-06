@@ -43,27 +43,33 @@ spec:
             - name: 'KC_SPI_ADMIN_REALM'
               value: 'sequoia'
 
-            - name: 'KC_DB'
-              value: 'postgres'
-            - name: 'KC_DB_URL_HOST'
-              value: 'postgres'
+            - name: KC_DB
+              value: postgres
+            - name: KC_DB_URL_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-keycloak
+                  key: host
             - name: KC_DB_URL_PORT
-              value: '5432'
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-keycloak
+                  key: port
             - name: KC_DB_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: database
+                  name: postgres-keycloak
                   key: username
             - name: KC_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: database
+                  name: postgres-keycloak
                   key: password
             - name: 'KC_DB_URL_DATABASE'
               valueFrom:
                 secretKeyRef:
-                  name: database
-                  key: database
+                  name: postgres-keycloak
+                  key: dbname
           ports:
             - name: http
               containerPort: 8080
