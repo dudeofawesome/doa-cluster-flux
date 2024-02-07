@@ -106,6 +106,8 @@ kind: Service
 metadata:
   name: forward-auth
 spec:
+  selector:
+    component: forward-auth
   ports:
     - name: auth-http
       port: 4181
