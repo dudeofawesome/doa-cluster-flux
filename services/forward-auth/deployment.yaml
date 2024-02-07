@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: forward-auth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: forward-auth
+  template:
+    metadata:
+      labels:
+        component: forward-auth
+    spec:
+      containers:
+        - name: 'forward-auth'
+          image: 'docker.io/thomseddon/traefik-forward-auth:2'
+          args:
+            - --config=/config-base.ini
+            - --config=/config.ini
+          env:
+            - name: LOG_LEVEL
+              value: debug
+
+            - name: SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: forward-auth
+                  key: secret
+
+            - name: PROVIDERS_OIDC_ISSUER_URL
+              valueFrom:
+                secretKeyRef:
+                  name: oidc
+                  key: issuer_url
+            - name: PROVIDERS_OIDC_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: oidc
+                  key: client_id
+            - name: PROVIDERS_OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: oidc
+                  key: client_secret
+          volumeMounts:
+            - name: forward-auth-base
+              mountPath: /config-base.ini
+              subPath: config-base.ini
+            - name: forward-auth
+              mountPath: /config.ini
+              subPath: config.ini
+          ports:
+            - name: http
+              containerPort: 4181
+          resources:
+            requests:
+              cpu: 10m
+              memory: 400Mi
+            limits:
+              cpu: 300m
+              memory: 500Mi
+          livenessProbe:
+            failureThreshold: 3
+            tcpSocket:
+              port: 4181
+            initialDelaySeconds: 2
+            periodSeconds: 10
+      volumes:
+        - name: forward-auth-base
+          configMap:
+            name: forward-auth-base
+            items:
+              - key: config-base.ini
+                path: config-base.ini
+        - name: forward-auth
+          configMap:
+            name: forward-auth
+            items:
+              - key: config.ini
+                path: config.ini
