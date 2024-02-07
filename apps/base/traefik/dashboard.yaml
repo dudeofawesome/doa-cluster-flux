@@ -37,8 +37,8 @@ spec:
         - name: 'forward-auth'
           image: 'docker.io/thomseddon/traefik-forward-auth:2'
           args:
-            - --config /config-base.ini
-            - --config /config.ini
+            - --config=/config-base.ini
+            - --config=/config.ini
           env:
             - name: LOG_LEVEL
               value: debug
