@@ -128,12 +128,6 @@ metadata:
 data:
   config.ini: |
     logout-redirect = https://traefik.orleans.io
-
-    rule.dashboard-redirect.action = allow
-    rule.dashboard-redirect.rule = Path(`/`)
-
-    rule.dashboard.action = allow
-    rule.dashboard.rule = PathPrefix(`/dashboard`) || PathPrefix(`/api`)
 ---
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
