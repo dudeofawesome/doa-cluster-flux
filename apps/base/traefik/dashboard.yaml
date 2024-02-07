@@ -36,13 +36,10 @@ spec:
       containers:
         - name: 'forward-auth'
           image: 'docker.io/thomseddon/traefik-forward-auth:2'
-          command:
-            - echo
-            - /config.ini
+          args:
+            - --config /config-base.ini
+            - --config /config.ini
           env:
-            - name: CONFIG
-              value: '/config.ini'
-
             - name: LOG_LEVEL
               value: debug
 
@@ -68,7 +65,9 @@ spec:
                   name: oidc
                   key: client_secret
           volumeMounts:
-            - name: merged-config
+            - name: forward-auth-base
+              mountPath: /config-base.ini
+            - name: forward-auth
               mountPath: /config.ini
           ports:
             - name: http
@@ -86,14 +85,6 @@ spec:
               port: 4181
             initialDelaySeconds: 2
             periodSeconds: 10
-      volumes:
-        - name: merged-config
-          projected:
-            sources:
-              - configMap:
-                  name: forward-auth-base
-              - configMap:
-                  name: forward-auth
 ---
 apiVersion: v1
 kind: Service
