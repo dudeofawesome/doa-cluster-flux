@@ -36,7 +36,9 @@ spec:
       containers:
         - name: 'forward-auth'
           image: 'docker.io/thomseddon/traefik-forward-auth:2'
-          command: 'echo /config.ini'
+          command:
+            - echo
+            - /config.ini
           env:
             - name: CONFIG
               value: '/config.ini'
