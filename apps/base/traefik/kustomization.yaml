@@ -4,3 +4,4 @@ namespace: kube-system
 
 resources:
   - dashboard.yaml
+  - secrets.yaml

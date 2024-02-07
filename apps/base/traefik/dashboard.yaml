@@ -1,3 +1,4 @@
+---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
@@ -11,8 +12,125 @@ spec:
       services:
         - kind: TraefikService
           name: api@internal
-      # middlewares:
-      # - name: security-no-frame-deny
-      #   namespace: kube-system
+      middlewares:
+        # - name: security-no-frame-deny
+        #   namespace: kube-system
+        - name: forward-auth
   tls:
     secretName: wildcard-orleans-io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: forward-auth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: forward-auth
+  template:
+    metadata:
+      labels:
+        component: forward-auth
+    spec:
+      containers:
+        - name: 'forward-auth'
+          image: 'docker.io/mesosphere/traefik-forward-auth:3.1.0'
+          env:
+            - name: CONFIG
+              value: '/config.ini'
+
+            - name: LOG_LEVEL
+              value: debug
+
+            - name: SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: forward-auth
+                  key: secret
+
+            - name: PROVIDERS_OIDC_ISSUER_URL
+              valueFrom:
+                secretKeyRef:
+                  name: oidc
+                  key: issuer_url
+            - name: PROVIDERS_OIDC_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: oidc
+                  key: client_id
+            - name: PROVIDERS_OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: oidc
+                  key: client_secret
+          volumeMounts:
+            - name: merged-config
+              mountPath: /config.ini
+          ports:
+            - name: http
+              containerPort: 4181
+          resources:
+            requests:
+              cpu: 10m
+              memory: 400Mi
+            limits:
+              cpu: 300m
+              memory: 500Mi
+          livenessProbe:
+            failureThreshold: 3
+            tcpSocket:
+              port: 4181
+            initialDelaySeconds: 2
+            periodSeconds: 10
+      volumes:
+        - name: merged-config
+          projected:
+            sources:
+              - configMap:
+                  name: forward-auth-base
+              - configMap:
+                  name: forward-auth
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: forward-auth
+spec:
+  ports:
+    - name: auth-http
+      port: 4181
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: forward-auth-base
+data:
+  default-provider: oidc
+  lifetime: '604800'
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: forward-auth
+data:
+  default-provider: oidc
+  lifetime: '604800'
+
+  logout-redirect: https://traefik.orleans.io
+
+  rule.dashboard-redirect.action: allow
+  rule.dashboard-redirect.rule: Path(`/`)
+
+  rule.dashboard.action: allow
+  rule.dashboard.rule: PathPrefix(`/dashboard`) || PathPrefix(`/api`)
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: forward-auth
+spec:
+  forwardAuth:
+    address: http://forward-auth:4181
+    authResponseHeaders:
+      - X-Forwarded-User
