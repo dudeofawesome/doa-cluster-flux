@@ -67,8 +67,10 @@ spec:
           volumeMounts:
             - name: forward-auth-base
               mountPath: /config-base.ini
+              subPath: config-base.ini
             - name: forward-auth
               mountPath: /config.ini
+              subPath: config.ini
           ports:
             - name: http
               containerPort: 4181
