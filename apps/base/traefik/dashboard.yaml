@@ -89,9 +89,15 @@ spec:
         - name: forward-auth-base
           configMap:
             name: forward-auth-base
+            items:
+              - key: config-base.ini
+                path: config-base.ini
         - name: forward-auth
           configMap:
             name: forward-auth
+            items:
+              - key: config.ini
+                path: config.ini
 ---
 apiVersion: v1
 kind: Service
@@ -107,24 +113,23 @@ kind: ConfigMap
 metadata:
   name: forward-auth-base
 data:
-  default-provider: oidc
-  lifetime: '604800'
+  config-base.ini: |
+    default-provider = oidc
+    lifetime = 604800
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: forward-auth
 data:
-  default-provider: oidc
-  lifetime: '604800'
+  config-base.ini: |
+    logout-redirect = https://traefik.orleans.io
 
-  logout-redirect: https://traefik.orleans.io
+    rule.dashboard-redirect.action = allow
+    rule.dashboard-redirect.rule = Path(`/`)
 
-  rule.dashboard-redirect.action: allow
-  rule.dashboard-redirect.rule: Path(`/`)
-
-  rule.dashboard.action: allow
-  rule.dashboard.rule: PathPrefix(`/dashboard`) || PathPrefix(`/api`)
+    rule.dashboard.action = allow
+    rule.dashboard.rule = PathPrefix(`/dashboard`) || PathPrefix(`/api`)
 ---
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
