@@ -122,7 +122,7 @@ kind: ConfigMap
 metadata:
   name: forward-auth
 data:
-  config-base.ini: |
+  config.ini: |
     logout-redirect = https://traefik.orleans.io
 
     rule.dashboard-redirect.action = allow
