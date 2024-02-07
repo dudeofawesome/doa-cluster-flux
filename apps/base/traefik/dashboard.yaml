@@ -85,6 +85,13 @@ spec:
               port: 4181
             initialDelaySeconds: 2
             periodSeconds: 10
+      volumes:
+        - name: forward-auth-base
+          configMap:
+            name: forward-auth-base
+        - name: forward-auth
+          configMap:
+            name: forward-auth
 ---
 apiVersion: v1
 kind: Service
