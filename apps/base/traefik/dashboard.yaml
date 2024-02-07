@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
         - name: 'forward-auth'
-          image: 'docker.io/mesosphere/traefik-forward-auth:3.1.0'
+          image: 'docker.io/thomseddon/traefik-forward-auth:2'
           env:
             - name: CONFIG
               value: '/config.ini'
