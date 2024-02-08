@@ -72,7 +72,6 @@ spec:
       useExisting: true
       ## Name of existing PVC to be used in the influx deployment
       name: influxdb-data
-      size: 5Gi
 
     ingress:
       enabled: false

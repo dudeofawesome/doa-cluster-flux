@@ -1,3 +1,19 @@
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: influxdb-data
+  labels:
+    type: local
+spec:
+  volumeName: influxdb-data
+  storageClassName: local-path
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
 apiVersion: v1
 kind: PersistentVolume
 metadata:
