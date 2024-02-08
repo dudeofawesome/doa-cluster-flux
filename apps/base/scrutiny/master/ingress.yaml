@@ -9,7 +9,7 @@ spec:
     - match: 'Host(`scrutiny-db.orleans.io`)'
       kind: 'Rule'
       services:
-        - name: 'influxdb2'
+        - name: influxdb-influxdb2
           port: 80
       # middlewares:
       #   - name: security-no-frame-deny
