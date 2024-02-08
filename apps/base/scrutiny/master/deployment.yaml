@@ -22,7 +22,7 @@ spec:
             - name: SCRUTINY_WEB_INFLUXDB_HOST
               value: influxdb-influxdb2
             - name: SCRUTINY_WEB_INFLUXDB_PORT
-              value: 80
+              value: '80'
             - name: SCRUTINY_WEB_INFLUXDB_TOKEN
               valueFrom:
                 secretKeyRef:
