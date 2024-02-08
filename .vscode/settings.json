@@ -9,5 +9,12 @@
     // "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.24.2-standalone-strict/_definitions.json": "*.yaml"
   },
 
-  "markdown.styles": ["https://use.fontawesome.com/releases/v6.1.2/css/all.css"]
+  "markdown.styles": [
+    "https://use.fontawesome.com/releases/v6.1.2/css/all.css"
+  ],
+
+  "editor.formatOnSave": true,
+  "editor.formatOnType": true,
+  "editor.formatOnPaste": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode"
 }
