@@ -22,8 +22,8 @@ spec:
         enabled: true
 
     logs:
-      general:
-        level: DEBUG
+      # general:
+      #   level: DEBUG
       access:
         enabled: true
         fields:
