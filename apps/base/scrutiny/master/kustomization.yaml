@@ -8,5 +8,7 @@ resources:
   - namespace.yaml
   - database.yaml
   - storage.yaml
+  - deployment.yaml
   - ingress.yaml
   - secrets.yaml
+  - /services/forward-auth

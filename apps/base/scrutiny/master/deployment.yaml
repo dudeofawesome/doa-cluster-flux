@@ -1,0 +1,50 @@
+# Reference:
+# https://github.com/keycloak/keycloak/discussions/12594
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scrutiny
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: app
+  template:
+    metadata:
+      labels:
+        component: app
+    spec:
+      containers:
+        - name: scrutiny
+          image: ghcr.io/analogj/scrutiny:master-web
+          env:
+            - name: SCRUTINY_WEB_INFLUXDB_HOST
+              value: influxdb-influxdb2
+            - name: SCRUTINY_WEB_INFLUXDB_PORT
+              value: 80
+            - name: SCRUTINY_WEB_INFLUXDB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: influxdb
+                  key: admin-token
+            - name: SCRUTINY_WEB_INFLUXDB_ORG
+              value: orleans
+            - name: SCRUTINY_WEB_INFLUXDB_BUCKET
+              value: scrutiny
+          ports:
+            - name: http
+              containerPort: 8080
+          resources:
+            requests:
+              cpu: 10m
+              memory: 400Mi
+            limits:
+              cpu: 300m
+              memory: 500Mi
+          # readinessProbe:
+          #   initialDelaySeconds: 30
+          #   timeoutSeconds: 30
+          #   httpGet:
+          #     path: /realms/sequoia
+          #     port: 8080
