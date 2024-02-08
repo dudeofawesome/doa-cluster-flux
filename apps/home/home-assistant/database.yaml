@@ -4,6 +4,11 @@ kind: Cluster
 metadata:
   name: postgres
 spec:
+  bootstrap:
+    initdb:
+      database: recorder
+      owner: home-assistant
+
   instances: 1
 
   storage:
