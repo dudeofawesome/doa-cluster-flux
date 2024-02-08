@@ -1,0 +1,18 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: 'influxdb'
+spec:
+  entryPoints:
+    - 'websecure'
+  routes:
+    - match: 'Host(`scrutiny-db.orleans.io`)'
+      kind: 'Rule'
+      services:
+        - name: 'influxdb2'
+          port: 80
+      # middlewares:
+      #   - name: security-no-frame-deny
+      #     namespace: kube-system
+  tls:
+    secretName: wildcard-orleans-io
