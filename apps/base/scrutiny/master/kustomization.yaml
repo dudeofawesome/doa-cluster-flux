@@ -11,4 +11,4 @@ resources:
   - deployment.yaml
   - ingress.yaml
   - secrets.yaml
-  - /services/forward-auth
+  - ../../../../services/forward-auth
