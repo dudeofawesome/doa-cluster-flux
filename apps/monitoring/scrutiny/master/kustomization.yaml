@@ -12,3 +12,12 @@ resources:
   - ingress.yaml
   - secrets.yaml
   - ../../../../services/forward-auth
+
+patches:
+  - patch: |
+      - op: replace
+        path: /spec/forwardAuth/address
+        value: http://forward-auth.scrutiny.svc.cluster.local:4181
+    target:
+      kind: Middleware
+      name: forward-auth
