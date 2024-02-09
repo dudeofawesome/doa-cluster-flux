@@ -10,8 +10,8 @@ spec:
     - match: 'Host(`scrutiny.orleans.io`)'
       kind: Rule
       services:
-        - name: influxdb-influxdb2
-          port: 80
+        - name: scrutiny
+          port: 8080
       middlewares:
         - name: forward-auth
           namespace: scrutiny
