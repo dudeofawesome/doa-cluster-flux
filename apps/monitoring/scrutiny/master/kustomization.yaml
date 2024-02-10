@@ -9,7 +9,8 @@ resources:
   - database.yaml
   - storage.yaml
   - deployment.yaml
-  - ingress.yaml
+  - ingress-dashboard.yaml
+  - ingress-collector-api.yaml
   - secrets.yaml
   - ../../../../services/forward-auth
 
