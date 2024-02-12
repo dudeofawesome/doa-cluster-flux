@@ -1,0 +1,31 @@
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: atuin
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`atuin.orleans.io`)
+      kind: Rule
+      services:
+        - name: atuin
+      # middlewares:
+      #   - name: security-no-frame-deny
+      #     namespace: kube-system
+  tls:
+    secretName: wildcard-orleans-io
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: home-assistant
+  labels:
+    monitor: home-assistant
+spec:
+  selector:
+    component: app
+  ports:
+    - name: http
+      port: 8888

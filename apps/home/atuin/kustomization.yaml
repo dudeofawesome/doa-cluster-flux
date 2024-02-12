@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: atuin
+commonLabels:
+  app: atuin
+
+resources:
+  - namespace.yaml
+  - database.yaml
+  - storage.yaml
+  - config.yaml
+  - deployment.yaml
+  - ingress.yaml
+  - secrets.yaml

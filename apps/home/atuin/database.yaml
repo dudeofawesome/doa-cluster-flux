@@ -1,0 +1,15 @@
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres
+spec:
+  bootstrap:
+    initdb:
+      database: atuin
+      owner: atuin
+
+  instances: 1
+
+  storage:
+    size: 5Gi
