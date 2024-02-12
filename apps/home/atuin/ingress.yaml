@@ -20,9 +20,9 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: home-assistant
+  name: atuin
   labels:
-    monitor: home-assistant
+    monitor: atuin
 spec:
   selector:
     component: app
