@@ -11,6 +11,7 @@ spec:
       kind: Rule
       services:
         - name: atuin
+          port: 8888
       # middlewares:
       #   - name: security-no-frame-deny
       #     namespace: kube-system
