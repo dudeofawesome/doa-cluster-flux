@@ -49,8 +49,8 @@ spec:
                   name: zigbee
                   key: ext_pan_id
 
-            - name: DEBUG
-              value: zigbee-herdsman*
+            # - name: DEBUG
+            #   value: zigbee-herdsman*
 
           ports:
             - name: http
