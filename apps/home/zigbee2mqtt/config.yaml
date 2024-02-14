@@ -6,15 +6,16 @@ metadata:
 data:
   configuration.yaml: |-
 
-    # Let new devices join our zigbee network
+    # let new devices join our zigbee network
     permit_join: true
     # Home Assistant integration (MQTT discovery)
     homeassistant: true
-    # Enable the Zigbee2MQTT frontend
+    # enable the Zigbee2MQTT frontend
     frontend: true
     advanced:
-      # Let Zigbee2MQTT generate a new network key on first start
-      #network_key: GENERATE
+      # set zigbee channel
+      channel: 25
+
       log_level: debug
       log_output:
         - console
