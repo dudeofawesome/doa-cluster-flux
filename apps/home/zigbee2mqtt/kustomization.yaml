@@ -6,12 +6,11 @@ commonLabels:
 
 resources:
   - namespace.yaml
-  - core/database.yaml
-  - core/storage.yaml
-  - core/config.yaml
-  - core/deployment.yaml
-  - core/ingress.yaml
-  - core/secrets.yaml
+  - storage.yaml
+  - config.yaml
+  - deployment.yaml
+  - ingress.yaml
+  - secrets.yaml
   - ../../../services/forward-auth
 
 patches:
