@@ -47,9 +47,11 @@ spec:
             - name: forward-auth-base
               mountPath: /config-base.ini
               subPath: config-base.ini
+              readOnly: true
             - name: forward-auth
               mountPath: /config.ini
               subPath: config.ini
+              readOnly: true
           ports:
             - name: http
               containerPort: 4181

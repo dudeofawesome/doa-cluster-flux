@@ -81,9 +81,11 @@ spec:
             - name: ha-configuration-base
               mountPath: /config/configuration.yaml
               subPath: configuration.yaml
+              readOnly: true
             - name: authentication-scripts
               mountPath: /usr/bin/auth-oidc.sh
               subPath: auth-oidc.sh
+              readOnly: true
       restartPolicy: Always
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet

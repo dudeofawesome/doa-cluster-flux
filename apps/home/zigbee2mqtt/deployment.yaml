@@ -48,6 +48,7 @@ spec:
             - name: configuration
               mountPath: /app/configuration.yaml
               subPath: configuration.yaml
+              readOnly: true
             - name: data
               mountPath: /app/data
             - name: skyconnect
