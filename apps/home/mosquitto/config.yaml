@@ -8,5 +8,6 @@ data:
     # enable listener
     listener 1883
 
+    # TODO: require auth
     # Disable authentication
     allow_anonymous true

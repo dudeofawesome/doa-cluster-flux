@@ -25,7 +25,7 @@ spec:
               value: America/Los_Angeles
 
             - name: ZIGBEE2MQTT_CONFIG_MQTT_SERVER
-              value: mqtt://mqtt-cleartext.mosquitto.svc.cluster.local
+              value: mqtt://mqtt-cleartext.mosquitto.svc.cluster.local:1883
             # - name: ZIGBEE2MQTT_CONFIG_MQTT_USER
             # - name: ZIGBEE2MQTT_CONFIG_MQTT_PASSWORD
 
@@ -37,6 +37,9 @@ spec:
                 secretKeyRef:
                   name: zigbee
                   key: network_key
+
+            - name: DEBUG
+              value: zigbee-herdsman*
 
           ports:
             - name: http
