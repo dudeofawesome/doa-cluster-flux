@@ -1,0 +1,44 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mosquitto
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: app
+  template:
+    metadata:
+      labels:
+        component: app
+    spec:
+      containers:
+        - name: mosquitto
+          image: docker.io/library/eclipse-mosquitto:2
+          env:
+            - name: TZ
+              value: 'America/Los_Angeles'
+          ports:
+            - name: mqtt-cleartext
+              containerPort: 1883
+            - name: websocket
+              containerPort: 9001
+          resources:
+            # limits:
+            #   cpu: 250m
+            #   memory: 1Gi
+            # requests:
+            #   cpu: 250m
+            #   memory: 1Gi
+          volumeMounts:
+            - name: configuration
+              mountPath: /mosquitto/config/mosquitto.conf
+              subPath: mosquitto.conf
+      volumes:
+        - name: configuration
+          configMap:
+            name: configuration
+            items:
+              - key: mosquitto.conf
+                path: mosquitto.conf
