@@ -4,5 +4,9 @@ metadata:
   name: configuration
 data:
   mosquitto.conf: |
+
+    # enable listener
+    listener 1883
+
     # Disable authentication
     allow_anonymous true
