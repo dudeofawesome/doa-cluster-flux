@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: zigbee2mqtt
+commonLabels:
+  app: zigbee2mqtt
+
+resources:
+  - namespace.yaml
+  - core/database.yaml
+  - core/storage.yaml
+  - core/config.yaml
+  - core/deployment.yaml
+  - core/ingress.yaml
+  - core/secrets.yaml
+  - ../../../services/forward-auth
+
+patches:
+  - patch: |
+      - op: replace
+        path: /spec/forwardAuth/address
+        value: http://forward-auth.zigbee2mqtt.svc.cluster.local:4181
+    target:
+      kind: Middleware
+      name: forward-auth

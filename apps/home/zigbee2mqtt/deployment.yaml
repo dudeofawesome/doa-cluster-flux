@@ -1,0 +1,73 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zigbee2mqtt
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: zigbee-coordinator
+  template:
+    metadata:
+      labels:
+        component: zigbee-coordinator
+    spec:
+      containers:
+        - name: zigbee2mqtt
+          image: docker.io/koenkk/zigbee2mqtt:latest
+          env:
+            - name: TZ
+              value: America/Los_Angeles
+
+            - name: ZIGBEE2MQTT_CONFIG_MQTT_SERVER
+              value: mqtt://mqtt-cleartext.mosquitto.svc.cluster.local
+            # - name: ZIGBEE2MQTT_CONFIG_MQTT_USER
+            # - name: ZIGBEE2MQTT_CONFIG_MQTT_PASSWORD
+
+            - name: ZIGBEE2MQTT_CONFIG_SERIAL_PORT
+              value: /dev/ttyACM0
+
+            - name: ZIGBEE2MQTT_CONFIG_ADVANCED_NETWORK_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: zigbee
+                  key: network_key
+
+          ports:
+            - name: http
+              containerPort: 8080
+          resources:
+            # limits:
+            #   cpu: 250m
+            #   memory: 1Gi
+            # requests:
+            #   cpu: 250m
+            #   memory: 1Gi
+          volumeMounts:
+            - name: configuration
+              mountPath: /app/configuration.yaml
+            - name: data
+              mountPath: /app/data
+            - name: skyconnect
+              mountPath: /dev/ttyACM0
+          livenessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 0
+            failureThreshold: 3
+            timeoutSeconds: 1
+            periodSeconds: 10
+      volumes:
+        - name: configuration
+          configMap:
+            name: configuration
+            items:
+              - key: configuration.yaml
+                path: configuration.yaml
+        - name: data
+          persistentVolumeClaim:
+            claimName: data
+        - name: skyconnect
+          hostPath:
+            path: /dev/serial/by-id/usb-Nabu_Casa_SkyConnect_v1.0_065b344abf18ec11a1baeb9a47486eb0-if00-port0

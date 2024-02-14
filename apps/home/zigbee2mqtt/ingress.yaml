@@ -1,0 +1,40 @@
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: zigbee2mqtt
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`z2m.park.orleans.io`)
+      kind: Rule
+      services:
+        - name: zigbee2mqtt
+          port: 8080
+      middlewares:
+        - name: forward-auth
+          namespace: zigbee2mqtt
+  tls:
+    secretName: wildcard-orleans-io
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zigbee2mqtt
+  labels:
+    monitor: zigbee2mqtt
+spec:
+  selector:
+    component: app
+  ports:
+    - name: http
+      port: 8080
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: forward-auth
+data:
+  config.ini: |
+    logout-redirect = https://z2m.park.orleans.io
