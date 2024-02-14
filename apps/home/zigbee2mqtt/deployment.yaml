@@ -18,6 +18,7 @@ spec:
           image: docker.io/koenkk/zigbee2mqtt:latest
 
           securityContext:
+            privileged: true
             runAsGroup: 27 # dialout
 
           env:
