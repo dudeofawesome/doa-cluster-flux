@@ -38,6 +38,16 @@ spec:
                 secretKeyRef:
                   name: zigbee
                   key: network_key
+            - name: ZIGBEE2MQTT_CONFIG_ADVANCED_PAN_ID
+              valueFrom:
+                secretKeyRef:
+                  name: zigbee
+                  key: pan_id
+            - name: ZIGBEE2MQTT_CONFIG_ADVANCED_EXT_PAN_ID
+              valueFrom:
+                secretKeyRef:
+                  name: zigbee
+                  key: ext_pan_id
 
             - name: DEBUG
               value: zigbee-herdsman*
