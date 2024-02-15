@@ -17,7 +17,6 @@ data:
       channel: 25
       channel_mask: [25]
 
-      log_level: debug
       log_output:
         - console
 

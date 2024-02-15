@@ -51,6 +51,8 @@ spec:
 
             # - name: DEBUG
             #   value: zigbee-herdsman*
+            - name: ZIGBEE2MQTT_CONFIG_ADVANCED_LOG_LEVEL
+              value: debug
 
           ports:
             - name: http
