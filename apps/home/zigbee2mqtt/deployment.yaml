@@ -68,7 +68,7 @@ spec:
 
           volumeMounts:
             - name: configuration
-              mountPath: /app/configuration.yaml
+              mountPath: /app/data/configuration.yaml
               subPath: configuration.yaml
               readOnly: true
             - name: data
