@@ -64,11 +64,6 @@ spec:
             - name: ZIGBEE2MQTT_CONFIG_LOG_OUTPUT
               value: 'console'
 
-            - name: ZIGBEE2MQTT_CONFIG_DEVICES
-              value: '/app/data/devices.yaml'
-            - name: ZIGBEE2MQTT_CONFIG_GROUPS
-              value: '/app/data/groups.yaml'
-
             # - name: DEBUG
             #   value: zigbee-herdsman*
             - name: ZIGBEE2MQTT_CONFIG_ADVANCED_LOG_LEVEL
