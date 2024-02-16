@@ -33,6 +33,10 @@ spec:
             - name: ZIGBEE2MQTT_CONFIG_SERIAL_PORT
               value: /dev/ttyUSB0
 
+            - name: ZIGBEE2MQTT_CONFIG_ADVANCED_CHANNEL
+              # set zigbee channel
+              value: '25'
+
             - name: ZIGBEE2MQTT_CONFIG_ADVANCED_NETWORK_KEY
               valueFrom:
                 secretKeyRef:
@@ -48,6 +52,22 @@ spec:
                 secretKeyRef:
                   name: zigbee
                   key: ext_pan_id
+
+            - name: ZIGBEE2MQTT_CONFIG_HOMEASSISTANT
+              # enable Home Assistant integration (via MQTT discovery)
+              value: 'true'
+
+            - name: ZIGBEE2MQTT_CONFIG_FRONTEND
+              # enable web GUI
+              value: 'true'
+
+            - name: ZIGBEE2MQTT_CONFIG_LOG_OUTPUT
+              value: 'console'
+
+            - name: ZIGBEE2MQTT_CONFIG_DEVICES
+              value: '/app/data/devices.yaml'
+            - name: ZIGBEE2MQTT_CONFIG_GROUPS
+              value: '/app/data/groups.yaml'
 
             # - name: DEBUG
             #   value: zigbee-herdsman*
@@ -67,9 +87,6 @@ spec:
             #   memory: 1Gi
 
           volumeMounts:
-            - name: configuration
-              mountPath: /app/data/configuration.yaml
-              subPath: configuration.yaml
             - name: data
               mountPath: /app/data
             - name: skyconnect
@@ -87,12 +104,6 @@ spec:
             periodSeconds: 10
 
       volumes:
-        - name: configuration
-          configMap:
-            name: configuration
-            items:
-              - key: configuration.yaml
-                path: configuration.yaml
         - name: data
           persistentVolumeClaim:
             claimName: data
