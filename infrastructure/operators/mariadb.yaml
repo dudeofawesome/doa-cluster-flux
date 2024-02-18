@@ -1,0 +1,10 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: mariadb-operator
+  namespace: operators
+spec:
+  channel: alpha
+  name: mariadb-operator
+  source: operatorhubio-catalog
+  sourceNamespace: olm
