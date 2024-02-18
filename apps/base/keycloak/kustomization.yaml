@@ -9,4 +9,5 @@ resources:
   - database.yaml
   - deployment.yaml
   - ingress.yaml
+  - operator-config.yaml
   - secrets.yaml

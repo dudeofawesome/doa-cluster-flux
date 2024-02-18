@@ -1,0 +1,41 @@
+---
+apiVersion: v1.edp.epam.com/v1
+kind: Keycloak
+metadata:
+  name: keycloak
+spec:
+  secret: admin
+  url: http://keycloak.keycloak.svc.cluster.local
+---
+apiVersion: v1.edp.epam.com/v1
+kind: KeycloakRealm
+metadata:
+  name: sequoia
+spec:
+  id: sequoia
+  realmName: sequoia
+  keycloakRef:
+    kind: Keycloak
+    name: keycloak
+  passwordPolicy:
+    - type: length
+      value: '15'
+    - type: notUsername
+    - type: notEmail
+  realmEventConfig:
+    adminEventsDetailsEnabled: false
+    adminEventsEnabled: true
+    enabledEventTypes:
+      - UPDATE_CONSENT_ERROR
+      - CLIENT_LOGIN
+    eventsEnabled: true
+    eventsExpiration: 15000
+    eventsListeners:
+      - jboss-logging
+  # ssoAutoRedirectEnabled: true
+  # ssoRealmEnabled: true
+  # ssoRealmName: openshift
+---
+# kind: KeycloakAuthFlow
+# kind: KeycloakRealmGroup
+# kind: KeycloakRealmRole
