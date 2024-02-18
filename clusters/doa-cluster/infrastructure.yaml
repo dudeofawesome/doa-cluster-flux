@@ -48,7 +48,7 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    - name: controllers
+    - name: infrastructure-controllers
   interval: 1h
   wait: true
   timeout: 5m0s
