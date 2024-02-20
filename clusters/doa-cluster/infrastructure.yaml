@@ -44,34 +44,11 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
-  name: infrastructure-operators
-  namespace: flux-system
-spec:
-  dependsOn:
-    - name: infrastructure-controllers
-  interval: 1h
-  wait: true
-  timeout: 5m0s
-  retryInterval: 1m0s
-  prune: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-  path: ./infrastructure/operators
-  decryption:
-    provider: sops
-    secretRef:
-      name: sops-age
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
-kind: Kustomization
-metadata:
   name: infrastructure-config
   namespace: flux-system
 spec:
   dependsOn:
     - name: infrastructure-controllers
-    - name: infrastructure-operators
   interval: 1h
   wait: true
   timeout: 5m0s
