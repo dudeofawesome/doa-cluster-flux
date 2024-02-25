@@ -2,7 +2,7 @@ apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: rook-release
-  namespace: flux-system
+  namespace: operators
 spec:
   interval: 1m0s
   url: https://charts.rook.io/release

@@ -2,7 +2,7 @@ apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: epamedp
-  namespace: flux-system
+  namespace: operators
 spec:
   interval: 24h
   url: https://epam.github.io/edp-helm-charts/stable
