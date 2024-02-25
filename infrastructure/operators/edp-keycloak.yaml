@@ -1,0 +1,10 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: edp-keycloak-operator
+  namespace: operators
+spec:
+  channel: stable
+  name: edp-keycloak-operator
+  source: operatorhubio-catalog
+  sourceNamespace: olm
