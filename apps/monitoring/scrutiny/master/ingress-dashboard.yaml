@@ -55,17 +55,3 @@ spec:
           port: 80
   tls:
     secretName: wildcard-orleans-io
----
-apiVersion: v1.edp.epam.com/v1
-kind: KeycloakClient
-metadata:
-  name: client
-spec:
-  clientId: scrutiny
-  consentRequired: false
-  webOrigins:
-    - https://scrutiny.orleans.io
-  webUrl: https://scrutiny.orleans.io
-  redirectUris:
-    - https://scrutiny.orleans.io/_oauth
-  secret: oidcgen
