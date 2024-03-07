@@ -25,6 +25,7 @@ keys:
   # Then add the public key to a new key here:
   clusters:
     - &cluster_doa-cluster 'age1meara2mcpfxz9xzj0q0tur82a09paacevld6vnpfgkht2w8yayyq8y35pc'
+    - &cluster_soto-cluster 'age1lzmul0uc888kk295zf644tz94uhn4cy6ecez5ttfxr4k78q2f44sn7u3tk'
 
   groups:
     all-age-keys: &all-age-keys
@@ -32,6 +33,7 @@ keys:
         - *user_dudeofawesome
         - *user_josh
         - *cluster_doa-cluster
+        - *cluster_soto-cluster
 
   # When adding new keys, make sure to update the encrypted files:
   # `sops updatekeys ENCRYPTED_FILE`
@@ -51,6 +53,7 @@ creation_rules:
           - *user_dudeofawesome
           - *user_josh
           - *cluster_doa-cluster
+          - *cluster_soto-cluster
 
 stores:
   yaml:
