@@ -30,6 +30,7 @@ keys:
     all-age-keys: &all-age-keys
       age:
         - *user_dudeofawesome
+        - *user_josh
         - *cluster_doa-cluster
 
   # When adding new keys, make sure to update the encrypted files:
@@ -48,6 +49,7 @@ creation_rules:
     key_groups:
       - age:
           - *user_dudeofawesome
+          - *user_josh
           - *cluster_doa-cluster
 
 stores:
