@@ -2,13 +2,13 @@
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: 'traefik-dashboard'
+  name: "traefik-dashboard"
 spec:
   entryPoints:
-    - 'websecure'
+    - "websecure"
   routes:
-    - match: 'Host(`traefik.orleans.io`)'
-      kind: 'Rule'
+    - match: "Host(`traefik.gibbs.tk`)"
+      kind: "Rule"
       services:
         - kind: TraefikService
           name: api@internal
@@ -18,7 +18,7 @@ spec:
         - name: forward-auth
           namespace: kube-system
   tls:
-    secretName: wildcard-orleans-io
+    secretName: wildcard-gibbs-tk
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -26,4 +26,4 @@ metadata:
   name: forward-auth
 data:
   config.ini: |
-    logout-redirect = https://traefik.orleans.io
+    logout-redirect = https://traefik.gibbs.tk

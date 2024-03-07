@@ -1,0 +1,75 @@
+# ---
+# apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+# kind: Kustomization
+# metadata:
+#   name: apps-base
+#   namespace: flux-system
+# spec:
+#   dependsOn:
+#     - name: infrastructure-config
+#   interval: 10m0s
+#   wait: true
+#   timeout: 5m0s
+#   retryInterval: 2m0s
+#   prune: true
+#   sourceRef:
+#     kind: GitRepository
+#     name: flux-system
+#   path: ./apps/base
+#   decryption:
+#     provider: sops
+#     secretRef:
+#       name: sops-age
+# ---
+# apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+# kind: Kustomization
+# metadata:
+#   name: apps-monitoring
+#   namespace: flux-system
+# spec:
+#   dependsOn:
+#     - name: apps-base
+#   interval: 10m0s
+#   wait: true
+#   timeout: 5m0s
+#   retryInterval: 2m0s
+#   prune: true
+#   sourceRef:
+#     kind: GitRepository
+#     name: flux-system
+#   path: ./apps/monitoring
+#   decryption:
+#     provider: sops
+#     secretRef:
+#       name: sops-age
+# ---
+# apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+# kind: Kustomization
+# metadata:
+#   name: apps-home
+#   namespace: flux-system
+# spec:
+#   dependsOn:
+#     - name: apps-base
+#   interval: 10m0s
+#   wait: true
+#   timeout: 5m0s
+#   retryInterval: 2m0s
+#   prune: true
+#   sourceRef:
+#     kind: GitRepository
+#     name: flux-system
+#   path: ./apps/home
+#   decryption:
+#     provider: sops
+#     secretRef:
+#       name: sops-age
+#   patches:
+#     - patch: |
+#         - op: replace
+#           path: /data/TZ
+#           value: America/Los_Angeles
+#       target:
+#         kind: ConfigMap
+#         namespace: home-assistant
+#         name: config

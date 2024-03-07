@@ -7,7 +7,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`atuin.orleans.io`)
+    - match: Host(`atuin.gibbs.tk`)
       kind: Rule
       services:
         - name: atuin
@@ -16,7 +16,7 @@ spec:
       #   - name: security-no-frame-deny
       #     namespace: kube-system
   tls:
-    secretName: wildcard-orleans-io
+    secretName: wildcard-gibbs-tk
 ---
 apiVersion: v1
 kind: Service

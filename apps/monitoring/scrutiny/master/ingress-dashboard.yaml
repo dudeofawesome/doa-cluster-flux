@@ -7,7 +7,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: 'Host(`scrutiny.orleans.io`)'
+    - match: "Host(`scrutiny.gibbs.tk`)"
       kind: Rule
       services:
         - name: scrutiny
@@ -16,7 +16,7 @@ spec:
         - name: forward-auth
           namespace: scrutiny
   tls:
-    secretName: wildcard-orleans-io
+    secretName: wildcard-gibbs-tk
 ---
 apiVersion: v1
 kind: Service
@@ -38,7 +38,7 @@ metadata:
   name: forward-auth
 data:
   config.ini: |
-    logout-redirect = https://scrutiny.orleans.io
+    logout-redirect = https://scrutiny.gibbs.tk
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
@@ -48,10 +48,10 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: 'Host(`scrutiny-db.orleans.io`)'
+    - match: "Host(`scrutiny-db.gibbs.tk`)"
       kind: Rule
       services:
         - name: influxdb-influxdb2
           port: 80
   tls:
-    secretName: wildcard-orleans-io
+    secretName: wildcard-gibbs-tk

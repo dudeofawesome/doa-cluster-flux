@@ -2,21 +2,21 @@
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: 'webhook-receiver'
+  name: "webhook-receiver"
 spec:
   entryPoints:
-    - 'websecure'
+    - "websecure"
   routes:
-    - match: 'Host(`flux-webhook.orleans.io`)'
-      kind: 'Rule'
+    - match: "Host(`flux-webhook.gibbs.tk`)"
+      kind: "Rule"
       services:
-        - name: 'webhook-receiver'
+        - name: "webhook-receiver"
           port: 80
       # middlewares:
       #   - name: security-no-frame-deny
       #     namespace: kube-system
   tls:
-    secretName: wildcard-orleans-io
+    secretName: wildcard-gibbs-tk
 ---
 apiVersion: notification.toolkit.fluxcd.io/v1
 kind: Receiver
@@ -26,8 +26,8 @@ metadata:
 spec:
   type: github
   events:
-    - 'ping'
-    - 'push'
+    - "ping"
+    - "push"
   secretRef:
     name: webhook-token
   resources:

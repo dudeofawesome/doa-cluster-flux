@@ -2,24 +2,22 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: wildcard-orleans-io
+  name: wildcard-gibbs-tk
   namespace: kube-system
 spec:
-  secretName: wildcard-orleans-io
+  secretName: wildcard-gibbs-tk
   secretTemplate:
     annotations:
-      reflector.v1.k8s.emberstack.com/reflection-allowed: 'true'
-      reflector.v1.k8s.emberstack.com/reflection-auto-enabled: 'true'
-      reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: 'kube-system'
-      reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: 'kube-system'
+      reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
+      reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
+      reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "kube-system"
+      reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: "kube-system"
   issuerRef:
     name: letsencrypt
     kind: ClusterIssuer
   dnsNames:
-    - 'orleans.io'
-    - '*.orleans.io'
-    - '*.park.orleans.io'
-    - '*.red.orleans.io'
-    - '*.lomita.orleans.io'
+    - "gibbs.tk"
+    - "*.gibbs.tk"
+    - "*.soto.gibbs.tk"
   privateKey:
     rotationPolicy: Always

@@ -17,9 +17,9 @@ spec:
         component: app
     spec:
       containers:
-        - name: 'keycloak'
-          image: 'quay.io/keycloak/keycloak:23.0'
-          args: ['start']
+        - name: "keycloak"
+          image: "quay.io/keycloak/keycloak:23.0"
+          args: ["start"]
           env:
             - name: KEYCLOAK_ADMIN
               valueFrom:
@@ -32,16 +32,16 @@ spec:
                   name: admin
                   key: password
 
-            - name: 'KC_PROXY'
-              value: 'edge'
-            - name: 'KC_HOSTNAME'
-              value: 'auth.orleans.io'
-            - name: 'KC_HEALTH_ENABLED'
-              value: 'true'
-            - name: 'KC_METRICS_ENABLED'
-              value: 'true'
-            - name: 'KC_SPI_ADMIN_REALM'
-              value: 'sequoia'
+            - name: "KC_PROXY"
+              value: "edge"
+            - name: "KC_HOSTNAME"
+              value: "auth.gibbs.tk"
+            - name: "KC_HEALTH_ENABLED"
+              value: "true"
+            - name: "KC_METRICS_ENABLED"
+              value: "true"
+            - name: "KC_SPI_ADMIN_REALM"
+              value: "sequoia"
 
             - name: KC_DB
               value: postgres
@@ -65,7 +65,7 @@ spec:
                 secretKeyRef:
                   name: postgres-app
                   key: password
-            - name: 'KC_DB_URL_DATABASE'
+            - name: "KC_DB_URL_DATABASE"
               valueFrom:
                 secretKeyRef:
                   name: postgres-app

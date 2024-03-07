@@ -6,4 +6,4 @@ metadata:
 
 spec:
   defaultCertificate:
-    secretName: wildcard-orleans-io
+    secretName: wildcard-gibbs-tk

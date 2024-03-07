@@ -7,7 +7,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: 'Host(`scrutiny-api.orleans.io`) && PathPrefix(`/api/`)'
+    - match: "Host(`scrutiny-api.gibbs.tk`) && PathPrefix(`/api/`)"
       kind: Rule
       services:
         - name: scrutiny
@@ -16,7 +16,7 @@ spec:
         - name: basic-auth
           namespace: scrutiny
   tls:
-    secretName: wildcard-orleans-io
+    secretName: wildcard-gibbs-tk
 ---
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
