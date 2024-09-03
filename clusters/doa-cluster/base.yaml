@@ -35,7 +35,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./infrastructure/olm
+  path: ./olm
   decryption:
     provider: sops
     secretRef:
