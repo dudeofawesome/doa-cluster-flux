@@ -80,9 +80,9 @@ spec:
             limits:
               cpu: 300m
               memory: 500Mi
-          readinessProbe:
-            initialDelaySeconds: 30
-            timeoutSeconds: 30
-            httpGet:
-              path: /realms/sequoia
-              port: 8080
+          # readinessProbe:
+          #   initialDelaySeconds: 30
+          #   timeoutSeconds: 30
+          #   httpGet:
+          #     path: /realms/sequoia
+          #     port: 8080
