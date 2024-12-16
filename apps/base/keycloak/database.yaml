@@ -14,7 +14,7 @@ spec:
   storage:
     size: 5Gi
     pvcTemplate:
-      storageClassName: '' # Empty string must be explicitly set otherwise default StorageClass will be set
+      storageClassName: 'local-path'
       volumeName: keycloak-data
       accessModes:
         - ReadWriteOnce
