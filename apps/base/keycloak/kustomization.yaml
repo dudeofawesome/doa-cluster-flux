@@ -10,3 +10,4 @@ resources:
   - deployment.yaml
   - ingress.yaml
   - secrets.yaml
+  - resources.yaml

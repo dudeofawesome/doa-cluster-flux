@@ -14,13 +14,17 @@ spec:
   storage:
     size: 5Gi
     pvcTemplate:
-      storageClassName: 'local-path'
       volumeName: keycloak-data
+      volumeMode: Filesystem
+      storageClassName: 'local-path'
       accessModes:
         - ReadWriteOnce
       resources:
         requests:
           storage: 5Gi
+
+  monitoring:
+    enablePodMonitor: true
 ---
 apiVersion: v1
 kind: PersistentVolume
