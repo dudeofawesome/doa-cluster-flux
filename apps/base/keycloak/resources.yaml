@@ -15,4 +15,4 @@ metadata:
   namespace: keycloak
 spec:
   realmName: sequoia
-  keycloakOwner: main
+  keycloakOwner: keycloak
