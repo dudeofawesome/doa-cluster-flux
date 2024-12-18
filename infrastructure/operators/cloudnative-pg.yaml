@@ -1,10 +1,14 @@
-apiVersion: operators.coreos.com/v1alpha1
-kind: Subscription
+---
+apiVersion: olm.operatorframework.io/v1
+kind: ClusterExtension
 metadata:
   name: cloudnative-pg
-  namespace: operators
 spec:
-  channel: stable-v1
-  name: cloudnative-pg
-  source: operatorhubio-catalog
-  sourceNamespace: olm
+  namespace: operators
+  serviceAccount:
+    name: cloudnative-pg-installer
+  source:
+    sourceType: Catalog
+    catalog:
+      packageName: cloudnative-pg
+      channels: [stable-v1]
