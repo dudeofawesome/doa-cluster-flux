@@ -10,6 +10,7 @@ resources:
   - deployment.yaml
   - ingress.yaml
   - secrets.yaml
+  - oidc-client.yaml
   - ../../../services/forward-auth
 
 patches:

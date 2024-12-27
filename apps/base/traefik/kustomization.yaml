@@ -4,5 +4,6 @@ namespace: kube-system
 
 resources:
   - dashboard.yaml
+  - config.yaml
   - secrets.yaml
   - ../../../services/forward-auth

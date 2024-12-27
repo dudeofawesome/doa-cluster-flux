@@ -30,12 +30,12 @@ spec:
 
             - name: PROVIDERS_OIDC_ISSUER_URL
               valueFrom:
-                secretKeyRef:
+                configMapKeyRef:
                   name: oidc
                   key: issuer_url
             - name: PROVIDERS_OIDC_CLIENT_ID
               valueFrom:
-                secretKeyRef:
+                configMapKeyRef:
                   name: oidc
                   key: client_id
             - name: PROVIDERS_OIDC_CLIENT_SECRET

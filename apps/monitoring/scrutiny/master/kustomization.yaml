@@ -11,6 +11,7 @@ resources:
   - deployment.yaml
   - ingress-dashboard.yaml
   - ingress-collector-api.yaml
+  - config.yaml
   - secrets.yaml
   - ../../../../services/forward-auth
 
