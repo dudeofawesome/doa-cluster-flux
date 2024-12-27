@@ -21,11 +21,9 @@ spec:
   surrogateAuthRequired: false
   clientAuthenticatorType: client-secret
   realmRef:
-    kind: KeycloakRealm
+    kind: ClusterKeycloakRealm
     name: sequoia
   secret: '$oidc:client_secret'
-  # serviceAccount:
-  #   enabled: true
   webUrl: 'https://z2m.park.orleans.io'
   # homeUrl: 'https://z2m.park.orleans.io'
   attributes:
