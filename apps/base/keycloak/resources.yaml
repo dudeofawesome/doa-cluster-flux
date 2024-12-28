@@ -5,8 +5,11 @@ metadata:
   name: keycloak
   namespace: keycloak
 spec:
-  secret: admin
+  secret: keycloak-service-account
+  adminType: user
   url: https://auth.orleans.io
+  # url: http://keycloak.keycloak.svc.cluster.local:8080
+  # insecureSkipVerify: true
 ---
 apiVersion: v1.edp.epam.com/v1alpha1
 kind: ClusterKeycloakRealm
