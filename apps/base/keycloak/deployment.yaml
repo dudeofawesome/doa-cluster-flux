@@ -41,7 +41,7 @@ spec:
             - name: 'KC_METRICS_ENABLED'
               value: 'true'
             - name: 'KC_SPI_ADMIN_REALM'
-              value: 'sequoia'
+              value: 'master'
 
             - name: KC_DB
               value: postgres
@@ -84,5 +84,5 @@ spec:
           #   initialDelaySeconds: 30
           #   timeoutSeconds: 30
           #   httpGet:
-          #     path: /realms/sequoia
+          #     path: /realms/master
           #     port: 8080
