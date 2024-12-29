@@ -4,9 +4,10 @@
   },
 
   "yaml.schemas": {
-    "kubernetes": "*.yaml"
-    // "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.22.4-standalone-strict/_definitions.json": "*.yaml"
-    // "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.24.2-standalone-strict/_definitions.json": "*.yaml"
+    /**
+     * DO NOT add any mappings for kubernetes yaml files.
+     * vscode-kubernetes-tools will automatically manage these mappings for you.
+     */
   },
 
   "markdown.styles": [
