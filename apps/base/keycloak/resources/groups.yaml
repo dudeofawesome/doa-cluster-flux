@@ -24,6 +24,20 @@ spec:
 apiVersion: v1.edp.epam.com/v1
 kind: KeycloakRealmGroup
 metadata:
+  name: locations
+  namespace: keycloak
+spec:
+  name: Locations
+  realmRef:
+    kind: ClusterKeycloakRealm
+    name: sequoia
+  subGroups:
+    - redwood
+    - park-st
+---
+apiVersion: v1.edp.epam.com/v1
+kind: KeycloakRealmGroup
+metadata:
   name: redwood
   namespace: keycloak
 spec:
