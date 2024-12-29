@@ -11,3 +11,4 @@ resources:
   - secrets.yaml
   - resources.yaml
   - resources/groups.yaml
+  - resources/roles.yaml
