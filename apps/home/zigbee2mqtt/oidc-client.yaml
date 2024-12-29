@@ -32,10 +32,3 @@ spec:
     backchannel.logout.session.required: 'true'
     oauth2.device.authorization.grant.enabled: 'false'
     oidc.ciba.grant.enabled: 'false'
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: oidc
-stringData:
-  client_secret: 'this value left intentionally blank'
