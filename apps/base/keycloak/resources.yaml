@@ -20,3 +20,10 @@ spec:
   realmName: sequoia
   displayName: 'Sequoia'
   clusterKeycloakRef: keycloak
+  passwordPolicy:
+    - type: notUsername
+      value: undefined
+    - type: notEmail
+      value: undefined
+    - type: length
+      value: '15'
