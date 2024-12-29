@@ -1,0 +1,44 @@
+---
+apiVersion: v1.edp.epam.com/v1
+kind: KeycloakRealmGroup
+metadata:
+  name: admins
+  namespace: keycloak
+spec:
+  name: Admins
+  realmRef:
+    kind: ClusterKeycloakRealm
+    name: sequoia
+---
+apiVersion: v1.edp.epam.com/v1
+kind: KeycloakRealmGroup
+metadata:
+  name: users
+  namespace: keycloak
+spec:
+  name: Users
+  realmRef:
+    kind: ClusterKeycloakRealm
+    name: sequoia
+---
+apiVersion: v1.edp.epam.com/v1
+kind: KeycloakRealmGroup
+metadata:
+  name: redwood
+  namespace: keycloak
+spec:
+  name: Redwood
+  realmRef:
+    kind: ClusterKeycloakRealm
+    name: sequoia
+---
+apiVersion: v1.edp.epam.com/v1
+kind: KeycloakRealmGroup
+metadata:
+  name: park-st
+  namespace: keycloak
+spec:
+  name: Park Street
+  realmRef:
+    kind: ClusterKeycloakRealm
+    name: sequoia

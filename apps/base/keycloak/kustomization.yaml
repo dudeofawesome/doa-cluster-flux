@@ -10,3 +10,4 @@ resources:
   - ingress.yaml
   - secrets.yaml
   - resources.yaml
+  - resources/groups.yaml
