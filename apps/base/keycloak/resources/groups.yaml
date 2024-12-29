@@ -32,8 +32,8 @@ spec:
     kind: ClusterKeycloakRealm
     name: sequoia
   subGroups:
-    - redwood
-    - park-st
+    - Redwood
+    - Park Street
 ---
 apiVersion: v1.edp.epam.com/v1
 kind: KeycloakRealmGroup
