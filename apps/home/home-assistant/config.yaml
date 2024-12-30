@@ -96,3 +96,11 @@ data:
     }
 
     main
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oidc
+data:
+  issuer_url: https://auth.orleans.io/realms/sequoia
+  client_id: home-assistant

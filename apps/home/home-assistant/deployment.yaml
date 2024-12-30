@@ -36,12 +36,12 @@ spec:
 
             - name: oidc_issuer_url
               valueFrom:
-                secretKeyRef:
+                configMapKeyRef:
                   name: oidc
                   key: issuer_url
             - name: oidc_client_id
               valueFrom:
-                secretKeyRef:
+                configMapKeyRef:
                   name: oidc
                   key: client_id
             - name: oidc_client_secret
