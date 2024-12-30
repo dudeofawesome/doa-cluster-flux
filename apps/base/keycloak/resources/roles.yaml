@@ -26,9 +26,9 @@ spec:
     - name: query-users
     - name: view-users
     - name: impersonation
-    - name: manage-identity
     - name: view-authorization
-    - name: view-identity
+    - name: manage-identity-providers
+    - name: view-identity-providers
 
     - name: manage-events
     - name: view-events
