@@ -13,6 +13,7 @@ resources:
   - ingress-collector-api.yaml
   - config.yaml
   - secrets.yaml
+  - oidc-client.yaml
   - ../../../../services/forward-auth
 
 patches:
