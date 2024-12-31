@@ -8,7 +8,6 @@ spec:
   name: zigbee2mqtt
   description: Zigbee to MQTT bridge for Home Assistant
   protocol: 'openid-connect'
-  authorizationServicesEnabled: false
   # alwaysDisplayInConsole: true
   standardFlowEnabled: true
   implicitFlowEnabled: false
@@ -20,6 +19,14 @@ spec:
   bearerOnly: false
   surrogateAuthRequired: false
   clientAuthenticatorType: client-secret
+  authorizationServicesEnabled: false
+  authorization:
+    policies:
+      - name: admins
+        type: role
+        rolePolicy:
+          roles:
+            - name: admin
   realmRef:
     kind: ClusterKeycloakRealm
     name: sequoia
