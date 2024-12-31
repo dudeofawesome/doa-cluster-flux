@@ -6,4 +6,5 @@ resources:
   - dashboard.yaml
   - config.yaml
   - secrets.yaml
+  - oidc-client.yaml
   - ../../../services/forward-auth
