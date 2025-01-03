@@ -22,3 +22,4 @@ node_modules/
 *passwd*
 *.*key
 *.env
+.decrypted~*
