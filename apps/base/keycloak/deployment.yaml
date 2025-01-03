@@ -32,14 +32,21 @@ spec:
                   name: admin
                   key: password
 
-            - name: 'KC_PROXY'
-              value: 'edge'
+            # https://www.keycloak.org/server/hostname
+            - name: 'KC_PROXY_HEADERS'
+              value: 'xforwarded'
             - name: 'KC_HOSTNAME'
               value: 'auth.orleans.io'
+            # - name: 'KC_HOSTNAME_ADMIN'
+            #   value: 'admin.auth.orleans.io'
+            - name: 'KC_HOSTNAME_BACKCHANNEL_DYNAMIC'
+              value: 'true'
+
             - name: 'KC_HEALTH_ENABLED'
               value: 'true'
             - name: 'KC_METRICS_ENABLED'
               value: 'true'
+
             - name: 'KC_SPI_ADMIN_REALM'
               value: 'master'
 
