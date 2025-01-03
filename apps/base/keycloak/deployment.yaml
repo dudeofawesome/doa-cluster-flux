@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: 'keycloak'
-          image: 'quay.io/keycloak/keycloak:23.0'
+          image: 'quay.io/keycloak/keycloak:26.0'
           args: ['start']
           env:
             - name: KEYCLOAK_ADMIN
@@ -80,9 +80,9 @@ spec:
             limits:
               cpu: 300m
               memory: 500Mi
-          # readinessProbe:
-          #   initialDelaySeconds: 30
-          #   timeoutSeconds: 30
-          #   httpGet:
-          #     path: /realms/master
-          #     port: 8080
+          readinessProbe:
+            initialDelaySeconds: 30
+            timeoutSeconds: 30
+            httpGet:
+              path: /health
+              port: 8080
