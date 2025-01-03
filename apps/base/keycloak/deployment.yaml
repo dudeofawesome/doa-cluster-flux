@@ -73,6 +73,8 @@ spec:
           ports:
             - name: http
               containerPort: 8080
+            - name: health
+              containerPort: 9000
           resources:
             requests:
               cpu: 10m
@@ -84,5 +86,5 @@ spec:
             initialDelaySeconds: 30
             timeoutSeconds: 30
             httpGet:
-              path: /health
-              port: 8080
+              path: /health/ready
+              port: health
