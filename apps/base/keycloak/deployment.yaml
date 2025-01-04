@@ -33,21 +33,21 @@ spec:
                   key: password
 
             # https://www.keycloak.org/server/hostname
-            - name: 'KC_PROXY_HEADERS'
+            - name: KC_PROXY_HEADERS
               value: 'xforwarded'
-            - name: 'KC_HOSTNAME'
+            - name: KC_HOSTNAME
               value: 'auth.orleans.io'
             # - name: 'KC_HOSTNAME_ADMIN'
             #   value: 'admin.auth.orleans.io'
-            - name: 'KC_HOSTNAME_BACKCHANNEL_DYNAMIC'
+            - name: KC_HOSTNAME_BACKCHANNEL_DYNAMIC
               value: 'true'
 
-            - name: 'KC_HEALTH_ENABLED'
+            - name: KC_HEALTH_ENABLED
               value: 'true'
-            - name: 'KC_METRICS_ENABLED'
+            - name: KC_METRICS_ENABLED
               value: 'true'
 
-            - name: 'KC_SPI_ADMIN_REALM'
+            - name: KC_SPI_ADMIN_REALM
               value: 'master'
 
             - name: KC_DB
@@ -72,14 +72,30 @@ spec:
                 secretKeyRef:
                   name: postgres-app
                   key: password
-            - name: 'KC_DB_URL_DATABASE'
+            - name: KC_DB_URL_DATABASE
               valueFrom:
                 secretKeyRef:
                   name: postgres-app
                   key: dbname
+
+            - name: KC_HTTPS_CERTIFICATE_FILE
+              value: /run/secrets/tls.crt
+            - name: KC_HTTPS_CERTIFICATE_KEY_FILE
+              value: /run/secrets/tls.key
+          volumeMounts:
+            - name: https-certificate-file
+              mountPath: /run/secrets/tls.crt
+              subPath: tls.crt
+              readOnly: true
+            - name: https-certificate-key-file
+              mountPath: /run/secrets/tls.key
+              subPath: tls.key
+              readOnly: true
           ports:
             - name: http
               containerPort: 8080
+            - name: https
+              containerPort: 8443
             - name: health
               containerPort: 9000
           resources:
@@ -95,3 +111,21 @@ spec:
             httpGet:
               path: /health/ready
               port: health
+          livenessProbe:
+            timeoutSeconds: 30
+            httpGet:
+              path: /health/live
+              port: health
+      volumes:
+        - name: https-certificate-file
+          secret:
+            secretName: internal-cluster-service-cert
+            items:
+              - key: tls.crt
+                path: tls.crt
+        - name: https-certificate-key-file
+          secret:
+            secretName: internal-cluster-service-cert
+            items:
+              - key: tls.key
+                path: tls.key

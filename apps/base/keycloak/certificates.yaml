@@ -3,7 +3,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: internal-cluster-service
-  namespace: kube-system
+  namespace: keycloak
 spec:
   secretName: internal-cluster-service-cert
   secretTemplate:
@@ -16,13 +16,6 @@ spec:
     name: private-ca
     kind: ClusterIssuer
   dnsNames:
-    - 'svc.cluster.local'
-    - '*.svc.cluster.local'
     - '*.keycloak.svc.cluster.local'
-    - '*.atuin.svc.cluster.local'
-    - '*.home-assistant.svc.cluster.local'
-    - '*.zigbee2mqtt.svc.cluster.local'
-    - '*.mosquitto.svc.cluster.local'
-    - '*.scrutiny.svc.cluster.local'
   privateKey:
     rotationPolicy: Always

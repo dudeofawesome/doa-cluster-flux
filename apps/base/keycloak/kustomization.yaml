@@ -6,6 +6,7 @@ commonLabels:
 resources:
   - namespace.yaml
   - database.yaml
+  - certificates.yaml
   - deployment.yaml
   - ingress.yaml
   - secrets.yaml
