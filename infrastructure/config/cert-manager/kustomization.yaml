@@ -7,3 +7,4 @@ commonLabels:
 resources:
   - issuer.yaml
   - secrets.yaml
+  - certificates.yaml
