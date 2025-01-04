@@ -105,6 +105,10 @@ spec:
             limits:
               cpu: 300m
               memory: 500Mi
+          startupProbe:
+            timeoutSeconds: 300 # 5 minutes
+            tcpSocket:
+              port: health
           readinessProbe:
             initialDelaySeconds: 30
             timeoutSeconds: 30
