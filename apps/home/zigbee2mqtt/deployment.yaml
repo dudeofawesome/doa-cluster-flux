@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: zigbee2mqtt
-          image: docker.io/koenkk/zigbee2mqtt:1.42.0 # updateable version
+          image: docker.io/koenkk/zigbee2mqtt:1.40.1 # updateable version
 
           securityContext:
             privileged: true
