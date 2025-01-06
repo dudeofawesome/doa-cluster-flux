@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: scrutiny
-          image: ghcr.io/analogj/scrutiny:master-web
+          image: ghcr.io/analogj/scrutiny:master-web # updateable version
           env:
             - name: SCRUTINY_WEB_INFLUXDB_HOST
               value: influxdb-influxdb2

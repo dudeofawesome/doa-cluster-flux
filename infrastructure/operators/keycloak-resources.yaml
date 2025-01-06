@@ -288,4 +288,4 @@ spec:
     catalog:
       packageName: edp-keycloak-operator
       channels: [stable]
-      version: '>=1.23.0, <2'
+      version: '>=1.23.0, <2' # updateable version

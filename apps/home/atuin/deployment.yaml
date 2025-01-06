@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: atuin
-          image: ghcr.io/atuinsh/atuin:latest
+          image: ghcr.io/atuinsh/atuin:latest # updateable version
           args:
             - server
             - start

@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: 'forward-auth'
-          image: 'docker.io/thomseddon/traefik-forward-auth:2'
+          image: 'docker.io/thomseddon/traefik-forward-auth:2' # updateable version
           args:
             - --config=/config-base.ini
             - --config=/config.ini

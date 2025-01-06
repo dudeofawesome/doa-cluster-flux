@@ -11,4 +11,4 @@ spec:
     sourceType: Catalog
     catalog:
       packageName: cloudnative-pg
-      channels: [stable-v1]
+      channels: [stable-v1] # updateable version
