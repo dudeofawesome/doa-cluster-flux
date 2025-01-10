@@ -14,6 +14,11 @@ resources:
   - oidc-client.yaml
   - ../../../services/forward-auth
 
+configMapGenerator:
+  - name: z2m-config
+    files:
+      - configuration.yaml=z2m-configuration.yaml
+
 patches:
   - patch: |
       - op: replace

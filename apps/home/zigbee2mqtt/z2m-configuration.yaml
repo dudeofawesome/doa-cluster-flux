@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Koenkk/zigbee2mqtt/refs/tags/1.40.1/lib/util/settings.schema.json
+# updateable version, keep in sync with container
+
+mqtt:
+  server: 'mqtt://mqtt-cleartext.mosquitto.svc.cluster.local:1883'
+
+serial:
+  port: '/dev/ttyUSB0'
+  adapter: 'ezsp'
+
+advanced:
+  # zigbee channel
+  channel: 25
+
+  log_output:
+    - 'console'
+  log_level: 'debug'
+  # https://www.zigbee2mqtt.io/guide/configuration/logging.html#reducing-mqtt-traffic
+  # log_namespaced_levels:
+  #     z2m:mqtt: 'warning'
+
+# enable Home Assistant integration (via MQTT discovery)
+homeassistant: true
+
+frontend:
+  enabled: false
+  port: 8080
