@@ -24,20 +24,8 @@ spec:
           env:
             - name: TZ
               value: America/Los_Angeles
-
-            - name: ZIGBEE2MQTT_CONFIG_MQTT_SERVER
-              value: mqtt://mqtt-cleartext.mosquitto.svc.cluster.local:1883
-            # - name: ZIGBEE2MQTT_CONFIG_MQTT_USER
-            # - name: ZIGBEE2MQTT_CONFIG_MQTT_PASSWORD
-
-            - name: ZIGBEE2MQTT_CONFIG_SERIAL_PORT
-              value: /dev/ttyUSB0
-            - name: ZIGBEE2MQTT_CONFIG_SERIAL_ADAPTER
-              value: ezsp
-
-            - name: ZIGBEE2MQTT_CONFIG_ADVANCED_CHANNEL
-              # set zigbee channel
-              value: '25'
+            # - name: DEBUG
+            #   value: zigbee-herdsman*
 
             - name: ZIGBEE2MQTT_CONFIG_ADVANCED_NETWORK_KEY
               valueFrom:
@@ -55,21 +43,18 @@ spec:
                   name: zigbee
                   key: ext_pan_id
 
-            - name: ZIGBEE2MQTT_CONFIG_HOMEASSISTANT
-              # enable Home Assistant integration (via MQTT discovery)
-              value: 'true'
-
-            - name: ZIGBEE2MQTT_CONFIG_FRONTEND
-              # enable web GUI
-              value: 'true'
-
-            - name: ZIGBEE2MQTT_CONFIG_LOG_OUTPUT
-              value: 'console'
-
-            # - name: DEBUG
-            #   value: zigbee-herdsman*
-            - name: ZIGBEE2MQTT_CONFIG_ADVANCED_LOG_LEVEL
-              value: debug
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+            - name: configuration
+              mountPath: /app/data/configuration.yaml
+              subPath: configuration.yaml
+              readOnly: true
+            - name: skyconnect
+              mountPath: /dev/ttyUSB0
+            - name: udev
+              mountPath: /run/udev
+              readOnly: true
 
           ports:
             - name: http
@@ -83,27 +68,31 @@ spec:
             #   cpu: 250m
             #   memory: 1Gi
 
-          volumeMounts:
-            - name: data
-              mountPath: /app/data
-            - name: skyconnect
-              mountPath: /dev/ttyUSB0
-            - name: udev
-              mountPath: /run/udev
-              readOnly: true
-
+          startupProbe:
+            httpGet:
+              port: http
+              path: /
+            # (12 * 10) seconds = 2 minutes
+            periodSeconds: 10
+            failureThreshold: 12
           livenessProbe:
-            tcpSocket:
-              port: 8080
+            httpGet:
+              port: http
+              path: /
             initialDelaySeconds: 0
             failureThreshold: 3
-            timeoutSeconds: 1
             periodSeconds: 10
 
       volumes:
         - name: data
           persistentVolumeClaim:
             claimName: data
+        - name: configuration
+          configMap:
+            name: z2m-config
+            items:
+              - key: configuration.yaml
+                path: configuration.yaml
         - name: skyconnect
           hostPath:
             path: /dev/serial/by-id/usb-Nabu_Casa_SkyConnect_v1.0_065b344abf18ec11a1baeb9a47486eb0-if00-port0
