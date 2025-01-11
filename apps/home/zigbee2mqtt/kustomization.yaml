@@ -14,6 +14,9 @@ resources:
   - oidc-client.yaml
   - ../../../services/forward-auth
 
+generatorOptions:
+  disableNameSuffixHash: true
+
 configMapGenerator:
   - name: z2m-config
     files:
