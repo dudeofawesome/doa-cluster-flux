@@ -53,7 +53,7 @@ spec:
             - name: configuration
               mountPath: /app/data/configuration.yaml
               subPath: configuration.yaml
-              readOnly: true
+              readOnly: false
             - name: skyconnect
               mountPath: /dev/ttyUSB0
             - name: udev
