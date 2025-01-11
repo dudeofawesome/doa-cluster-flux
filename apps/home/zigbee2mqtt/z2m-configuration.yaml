@@ -1,6 +1,11 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Koenkk/zigbee2mqtt/refs/tags/1.40.1/lib/util/settings.schema.json
 # updateable version, keep in sync with container
 
+# k8s config maps are read only, so we need to extract dynamic config to
+#   external files
+devices: 'devices.yaml'
+groups: 'groups.yaml'
+
 mqtt:
   server: 'mqtt://mqtt-cleartext.mosquitto.svc.cluster.local:1883'
 
