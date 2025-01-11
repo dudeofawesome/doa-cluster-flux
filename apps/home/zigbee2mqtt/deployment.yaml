@@ -8,6 +8,10 @@ spec:
   selector:
     matchLabels:
       component: app
+  strategy:
+    # Only a single container can be running at a time because a lock is
+    #   required on the Zigbee bridge.
+    type: Recreate
   template:
     metadata:
       labels:
