@@ -13,3 +13,14 @@ resources:
   - ingress.yaml
   - secrets.yaml
   - oidc-client.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+configMapGenerator:
+  - name: configuration
+    files:
+      - configuration.yaml=hass-configuration.yaml
+  - name: authentication-scripts
+    files:
+      - auth-oidc.sh=auth-oidc.sh
