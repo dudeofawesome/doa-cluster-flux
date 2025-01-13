@@ -11,7 +11,7 @@ mqtt:
 
 serial:
   port: '/dev/ttyUSB0'
-  adapter: 'ezsp'
+  adapter: 'ember'
 
 advanced:
   # zigbee channel
