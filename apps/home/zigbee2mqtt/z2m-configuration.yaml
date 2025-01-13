@@ -10,8 +10,10 @@ mqtt:
   server: 'mqtt://mqtt-cleartext.mosquitto.svc.cluster.local:1883'
 
 serial:
-  port: '/dev/ttyUSB0'
   adapter: 'ember'
+  port: '/dev/ttyUSB0'
+  baudrate: 115200
+  rtscts: true # enable hardware flow control
 
 advanced:
   # zigbee channel
@@ -23,6 +25,9 @@ advanced:
   # https://www.zigbee2mqtt.io/guide/configuration/logging.html#reducing-mqtt-traffic
   # log_namespaced_levels:
   #     z2m:mqtt: 'warning'
+
+availability:
+  enabled: true
 
 # enable Home Assistant integration (via MQTT discovery)
 homeassistant:
