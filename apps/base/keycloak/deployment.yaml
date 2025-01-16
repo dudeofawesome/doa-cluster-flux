@@ -36,10 +36,12 @@ spec:
               value: 'edge'
             - name: 'KC_HOSTNAME'
               value: 'auth.orleans.io'
-            - name: 'KC_HEALTH_ENABLED'
+
+            - name: KC_HEALTH_ENABLED
               value: 'true'
-            - name: 'KC_METRICS_ENABLED'
+            - name: KC_METRICS_ENABLED
               value: 'true'
+
             - name: 'KC_SPI_ADMIN_REALM'
               value: 'master'
 
@@ -89,6 +91,8 @@ spec:
               containerPort: 8080
             - name: https
               containerPort: 8443
+            - name: health
+              containerPort: 9000
           resources:
             requests:
               cpu: 10m
