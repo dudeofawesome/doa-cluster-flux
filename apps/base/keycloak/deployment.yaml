@@ -70,9 +70,25 @@ spec:
                 secretKeyRef:
                   name: postgres-app
                   key: dbname
+
+            - name: KC_HTTPS_CERTIFICATE_FILE
+              value: /run/secrets/tls.crt
+            - name: KC_HTTPS_CERTIFICATE_KEY_FILE
+              value: /run/secrets/tls.key
+          volumeMounts:
+            - name: https-certificate-file
+              mountPath: /run/secrets/tls.crt
+              subPath: tls.crt
+              readOnly: true
+            - name: https-certificate-key-file
+              mountPath: /run/secrets/tls.key
+              subPath: tls.key
+              readOnly: true
           ports:
             - name: http
               containerPort: 8080
+            - name: https
+              containerPort: 8443
           resources:
             requests:
               cpu: 10m
@@ -86,3 +102,16 @@ spec:
           #   httpGet:
           #     path: /realms/master
           #     port: 8080
+      volumes:
+        - name: https-certificate-file
+          secret:
+            secretName: internal-cluster-service-cert
+            items:
+              - key: tls.crt
+                path: tls.crt
+        - name: https-certificate-key-file
+          secret:
+            secretName: internal-cluster-service-cert
+            items:
+              - key: tls.key
+                path: tls.key
