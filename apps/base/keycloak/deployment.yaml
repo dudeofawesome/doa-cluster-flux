@@ -100,12 +100,22 @@ spec:
             limits:
               cpu: 1000m
               memory: 500Mi
-          # readinessProbe:
-          #   initialDelaySeconds: 30
-          #   timeoutSeconds: 30
-          #   httpGet:
-          #     path: /realms/master
-          #     port: 8080
+          startupProbe:
+            timeoutSeconds: 300 # 5 minutes
+            periodSeconds: 30
+            httpGet:
+              path: /health/ready
+              port: health
+          readinessProbe:
+            timeoutSeconds: 30
+            httpGet:
+              path: /health/ready
+              port: health
+          livenessProbe:
+            timeoutSeconds: 30
+            httpGet:
+              path: /health/live
+              port: health
       volumes:
         - name: https-certificate-file
           secret:
