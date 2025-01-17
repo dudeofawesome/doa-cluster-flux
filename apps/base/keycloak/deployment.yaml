@@ -100,12 +100,12 @@ spec:
             limits:
               cpu: 1000m
               memory: 500Mi
-          startupProbe:
-            timeoutSeconds: 420 # 7 minutes
-            periodSeconds: 30
-            exec:
-              # look for generated build dir
-              command: [test, -d, /opt/keycloak/data/tmp]
+          # startupProbe:
+          #   timeoutSeconds: 420 # 7 minutes
+          #   periodSeconds: 30
+          #   exec:
+          #     # look for generated build dir
+          #     command: [test, -d, /opt/keycloak/data/tmp]
           # readinessProbe:
           #   timeoutSeconds: 30
           #   httpGet:
