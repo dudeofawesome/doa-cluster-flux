@@ -104,7 +104,7 @@ spec:
               memory: 400Mi
             limits:
               cpu: 1000m
-              memory: 500Mi
+              memory: 1500Mi
           # startupProbe:
           #   timeoutSeconds: 420 # 7 minutes
           #   periodSeconds: 30
