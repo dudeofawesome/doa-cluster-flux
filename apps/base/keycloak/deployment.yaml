@@ -36,7 +36,8 @@ spec:
             - name: KC_PROXY_HEADERS
               value: 'xforwarded'
             - name: KC_HOSTNAME
-              value: 'auth.orleans.io'
+              # hostname is actually origin…
+              value: 'https://auth.orleans.io'
             # - name: 'KC_HOSTNAME_ADMIN'
             #   value: 'admin.auth.orleans.io'
             - name: KC_HOSTNAME_BACKCHANNEL_DYNAMIC
