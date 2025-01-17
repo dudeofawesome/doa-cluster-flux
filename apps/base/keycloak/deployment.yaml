@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: 'keycloak'
-          image: 'quay.io/keycloak/keycloak:23.0' # updateable version
+          image: 'quay.io/keycloak/keycloak:26.0' # updateable version
           args: ['start']
           env:
             - name: KEYCLOAK_ADMIN
@@ -32,17 +32,22 @@ spec:
                   name: admin
                   key: password
 
-            - name: 'KC_PROXY'
-              value: 'edge'
-            - name: 'KC_HOSTNAME'
+            # https://www.keycloak.org/server/hostname
+            - name: KC_PROXY_HEADERS
+              value: 'xforwarded'
+            - name: KC_HOSTNAME
               value: 'auth.orleans.io'
+            # - name: 'KC_HOSTNAME_ADMIN'
+            #   value: 'admin.auth.orleans.io'
+            - name: KC_HOSTNAME_BACKCHANNEL_DYNAMIC
+              value: 'true'
 
             - name: KC_HEALTH_ENABLED
               value: 'true'
             - name: KC_METRICS_ENABLED
               value: 'true'
 
-            - name: 'KC_SPI_ADMIN_REALM'
+            - name: KC_SPI_ADMIN_REALM
               value: 'master'
 
             - name: KC_DB
@@ -67,7 +72,7 @@ spec:
                 secretKeyRef:
                   name: postgres-app
                   key: password
-            - name: 'KC_DB_URL_DATABASE'
+            - name: KC_DB_URL_DATABASE
               valueFrom:
                 secretKeyRef:
                   name: postgres-app
