@@ -101,11 +101,11 @@ spec:
               cpu: 1000m
               memory: 500Mi
           startupProbe:
-            timeoutSeconds: 300 # 5 minutes
+            timeoutSeconds: 420 # 7 minutes
             periodSeconds: 30
-            httpGet:
-              path: /health/ready
-              port: health
+            exec:
+              # look for generated build dir
+              command: [test, -d, /opt/keycloak/data/tmp]
           # readinessProbe:
           #   timeoutSeconds: 30
           #   httpGet:
