@@ -106,16 +106,16 @@ spec:
             httpGet:
               path: /health/ready
               port: health
-          readinessProbe:
-            timeoutSeconds: 30
-            httpGet:
-              path: /health/ready
-              port: health
-          livenessProbe:
-            timeoutSeconds: 30
-            httpGet:
-              path: /health/live
-              port: health
+          # readinessProbe:
+          #   timeoutSeconds: 30
+          #   httpGet:
+          #     path: /health/ready
+          #     port: health
+          # livenessProbe:
+          #   timeoutSeconds: 30
+          #   httpGet:
+          #     path: /health/live
+          #     port: health
       volumes:
         - name: https-certificate-file
           secret:
