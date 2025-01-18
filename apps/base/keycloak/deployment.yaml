@@ -107,26 +107,24 @@ spec:
               cpu: 1000m
               memory: 1500Mi
           startupProbe:
-            timeoutSeconds: 420 # 7 minutes
+            timeoutSeconds: 180 # 3 minutes
             periodSeconds: 30
-            failureThreshold: 100
             httpGet:
-              scheme: HTTPS
               path: /health/ready
               port: health
-            # exec:
-            #   # look for generated build dir
-            #   command: [test, -d, /opt/keycloak/data/tmp]
-          # readinessProbe:
-          #   timeoutSeconds: 30
-          #   httpGet:
-          #     path: /health/ready
-          #     port: health
-          # livenessProbe:
-          #   timeoutSeconds: 30
-          #   httpGet:
-          #     path: /health/live
-          #     port: health
+              scheme: HTTPS
+          readinessProbe:
+            timeoutSeconds: 30
+            httpGet:
+              path: /health/ready
+              port: health
+              scheme: HTTPS
+          livenessProbe:
+            timeoutSeconds: 30
+            httpGet:
+              path: /health/live
+              port: health
+              scheme: HTTPS
       volumes:
         - name: https-certificate-file
           secret:
