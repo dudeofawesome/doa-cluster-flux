@@ -1,3 +1,3 @@
 #!/usr/bin/env python3
 
-print("name = Louis Orleans")
+exit(1)
