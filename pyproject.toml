@@ -1,0 +1,15 @@
+[project]
+name = "doa-cluster-flux"
+version = "0.0.1"
+
+requires-python = ">=3.8"
+dependencies = [
+  "httpx",
+]
+
+[tool.poetry]
+package-mode = false
+
+[tool.yapf]
+COLUMN_LIMIT=80
+INDENT_WIDTH=2
