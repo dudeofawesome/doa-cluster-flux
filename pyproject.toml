@@ -13,3 +13,4 @@ package-mode = false
 [tool.yapf]
 COLUMN_LIMIT=80
 INDENT_WIDTH=2
+DEDENT_CLOSING_BRACKETS=true
