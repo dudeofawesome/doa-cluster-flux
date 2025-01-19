@@ -22,7 +22,7 @@ homeassistant:
     - name: Sequoia
       type: command_line
       meta: true
-      command: /usr/bin/auth-oidc.sh
+      command: /usr/bin/auth-oidc.py
       args:
         - !env_var oidc_issuer_url
         - !env_var oidc_client_id
