@@ -17,6 +17,8 @@ spec:
   consentRequired: false
   frontChannelLogout: true
   fullScopeAllowed: true
+  clientRoles:
+    - 'home-assistant_admin'
   bearerOnly: false
   surrogateAuthRequired: false
   clientAuthenticatorType: client-secret
