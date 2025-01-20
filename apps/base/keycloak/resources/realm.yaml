@@ -1,0 +1,19 @@
+---
+apiVersion: v1.edp.epam.com/v1alpha1
+kind: ClusterKeycloakRealm
+metadata:
+  name: sequoia
+  namespace: keycloak
+spec:
+  realmName: sequoia
+  displayName: 'Sequoia'
+  clusterKeycloakRef: keycloak
+  passwordPolicy:
+    - type: notUsername
+      value: 'true'
+    - type: notContainsUsername
+      value: 'true'
+    - type: notEmail
+      value: 'true'
+    - type: length
+      value: '15'

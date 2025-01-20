@@ -10,20 +10,3 @@ spec:
   # url: https://auth.orleans.io
   url: https://keycloak.keycloak.svc.cluster.local:8443
   insecureSkipVerify: true
----
-apiVersion: v1.edp.epam.com/v1alpha1
-kind: ClusterKeycloakRealm
-metadata:
-  name: sequoia
-  namespace: keycloak
-spec:
-  realmName: sequoia
-  displayName: 'Sequoia'
-  clusterKeycloakRef: keycloak
-  passwordPolicy:
-    - type: notUsername
-      value: undefined
-    - type: notEmail
-      value: undefined
-    - type: length
-      value: '15'
