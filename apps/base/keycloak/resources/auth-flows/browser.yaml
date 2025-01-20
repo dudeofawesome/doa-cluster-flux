@@ -26,12 +26,23 @@ spec:
       authenticator: webauthn-authenticator-passwordless
       requirement: ALTERNATIVE
       priority: 35
-    - alias: Forms
-      # description: Username, password, otp and other auth forms.
-      authenticatorFlow: true
-      authenticator: traditional-login-forms
-      requirement: ALTERNATIVE
-      priority: 30
+---
+apiVersion: v1.edp.epam.com/v1
+kind: KeycloakAuthFlow
+metadata:
+  name: traditional-login
+  namespace: keycloak
+spec:
+  alias: traditional-login
+  description: Traditional MFA login forms
+  realmRef:
+    kind: ClusterKeycloakRealm
+    name: sequoia
+  builtIn: false
+  topLevel: false
+  parentName: browser - Sequoia
+  childType: basic-flow
+  providerId: basic-flow
 ---
 apiVersion: v1.edp.epam.com/v1
 kind: KeycloakAuthFlow
@@ -46,6 +57,8 @@ spec:
     name: sequoia
   builtIn: false
   topLevel: false
+  parentName: traditional-login
+  childType: basic-flow
   providerId: basic-flow
   authenticationExecutions:
     - alias: Username Password Form
