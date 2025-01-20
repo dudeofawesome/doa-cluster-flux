@@ -34,3 +34,5 @@ spec:
     backchannel.logout.session.required: 'true'
     oauth2.device.authorization.grant.enabled: 'false'
     oidc.ciba.grant.enabled: 'false'
+  authenticationFlowBindingOverrides:
+    directGrant: direct-grant-single-factor

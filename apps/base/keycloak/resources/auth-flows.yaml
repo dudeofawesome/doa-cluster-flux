@@ -1,0 +1,24 @@
+---
+apiVersion: v1.edp.epam.com/v1
+kind: KeycloakAuthFlow
+metadata:
+  name: direct-grant-single-factor
+  namespace: keycloak
+spec:
+  alias: direct-grant-single-factor
+  description: OpenID Connect Resource Owner Grant, bypassing any multifactor authentication
+  realmRef:
+    kind: ClusterKeycloakRealm
+    name: sequoia
+  builtIn: false
+  topLevel: true
+  providerId: basic-flow
+  authenticationExecutions:
+    - alias: Username
+      authenticator: direct-grant-validate-username
+      requirement: REQUIRED
+      priority: 0
+    - alias: Password
+      authenticator: direct-grant-validate-password
+      requirement: REQUIRED
+      priority: 1

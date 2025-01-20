@@ -10,6 +10,7 @@ resources:
   - deployment.yaml
   - ingress.yaml
   - secrets.yaml
+  - resources/auth-flows.yaml
   - resources/base.yaml
   - resources/groups.yaml
   - resources/roles.yaml
