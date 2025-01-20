@@ -5,7 +5,7 @@ metadata:
   name: direct-grant-single-factor
   namespace: keycloak
 spec:
-  alias: direct-grant-single-factor
+  alias: direct grant single-factor
   description: OpenID Connect Resource Owner Grant, bypassing any multifactor authentication
   realmRef:
     kind: ClusterKeycloakRealm

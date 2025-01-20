@@ -1,0 +1,58 @@
+---
+apiVersion: v1.edp.epam.com/v1
+kind: KeycloakAuthFlow
+metadata:
+  name: browser-sequoia
+  namespace: keycloak
+spec:
+  alias: browser - Sequoia
+  description: A customized browser flow for the Sequoia realm
+  realmRef:
+    kind: ClusterKeycloakRealm
+    name: sequoia
+  builtIn: false
+  topLevel: true
+  providerId: basic-flow
+  authenticationExecutions:
+    - alias: Cookie
+      authenticator: auth-cookie
+      requirement: ALTERNATIVE
+      priority: 10
+    - alias: Identity Provider Redirector
+      authenticator: identity-provider-redirector
+      requirement: ALTERNATIVE
+      priority: 20
+    - alias: Passkey
+      authenticator: webauthn-authenticator-passwordless
+      requirement: ALTERNATIVE
+      priority: 35
+    - alias: Forms
+      # description: Username, password, otp and other auth forms.
+      authenticatorFlow: true
+      authenticator: traditional-login-forms
+      requirement: ALTERNATIVE
+      priority: 30
+---
+apiVersion: v1.edp.epam.com/v1
+kind: KeycloakAuthFlow
+metadata:
+  name: traditional-login-forms
+  namespace: keycloak
+spec:
+  alias: traditional-login-forms
+  description: Traditional MFA login forms
+  realmRef:
+    kind: ClusterKeycloakRealm
+    name: sequoia
+  builtIn: false
+  topLevel: false
+  providerId: basic-flow
+  authenticationExecutions:
+    - alias: Username Password Form
+      authenticator: auth-username-password-form
+      requirement: REQUIRED
+      priority: 10
+    - alias: Browser - Conditional OTP Form
+      authenticator: auth-conditional-otp-form
+      requirement: CONDITIONAL
+      priority: 20
