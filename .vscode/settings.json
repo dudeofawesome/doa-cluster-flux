@@ -2,6 +2,9 @@
   "[helm]": {
     "editor.defaultFormatter": "ms-kubernetes-tools.vscode-kubernetes-tools"
   },
+  "[python]": {
+    "editor.formatOnType": false
+  },
 
   "yaml.schemas": {
     /**

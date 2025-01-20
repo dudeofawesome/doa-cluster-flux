@@ -23,5 +23,4 @@ configMapGenerator:
       - configuration.yaml=hass-configuration.yaml
   - name: authentication-scripts
     files:
-      - auth-oidc.sh=auth-oidc.sh
       - auth-oidc.py=auth-oidc.py
