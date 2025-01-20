@@ -29,11 +29,9 @@ def login(
   try:
     res = post(
         token_endpoint,
-        headers=Headers(
-            {
-                'content-type': 'application/x-www-form-urlencoded',
-            }
-        ),
+        headers=Headers({
+            'content-type': 'application/x-www-form-urlencoded',
+        }),
         data={
             'client_id': oidc_client_id,
             'client_secret': oidc_client_secret,
