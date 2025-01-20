@@ -12,6 +12,7 @@
      * vscode-kubernetes-tools will automatically manage these mappings for you.
      */
   },
+  "yaml.customTags": ["!env_var", "!include_dir_merge_named"],
 
   "markdown.styles": [
     "https://use.fontawesome.com/releases/v6.1.2/css/all.css"

@@ -25,6 +25,7 @@ homeassistant:
       command: /usr/bin/auth-oidc.py
       args:
         - !env_var oidc_issuer_url
+        - 'false' # oidc_issuer_validate_cert
         - !env_var oidc_client_id
         - !env_var oidc_client_secret
     - type: homeassistant
