@@ -2,35 +2,36 @@
 apiVersion: v1.edp.epam.com/v1
 kind: KeycloakRealmRole
 metadata:
-  name: admin
+  name: realm-admin
   namespace: keycloak
 spec:
-  name: admin
+  name: realm-admin
   realmRef:
     kind: ClusterKeycloakRealm
     name: sequoia
   description: allowed to do everything
   composite: true
-  composites:
-    - name: manage-authorization
-    - name: manage-realm
-    - name: query-realms
-    - name: view-realm
+  compositesClientRoles:
+    realm-management:
+      - name: manage-authorization
+      - name: manage-realm
+      - name: query-realms
+      - name: view-realm
 
-    - name: create-client
-    - name: manage-clients
-    - name: query-clients
-    - name: view-clients
+      - name: create-client
+      - name: manage-clients
+      - name: query-clients
+      - name: view-clients
 
-    - name: manage-users
-    - name: query-users
-    - name: view-users
-    - name: impersonation
-    - name: view-authorization
-    - name: manage-identity-providers
-    - name: view-identity-providers
+      - name: manage-users
+      - name: query-users
+      - name: view-users
+      - name: impersonation
+      - name: view-authorization
+      - name: manage-identity-providers
+      - name: view-identity-providers
 
-    - name: manage-events
-    - name: view-events
+      - name: manage-events
+      - name: view-events
 
-    - name: query-groups
+      - name: query-groups
