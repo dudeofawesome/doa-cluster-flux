@@ -34,5 +34,5 @@ spec:
     backchannel.logout.session.required: 'true'
     oauth2.device.authorization.grant.enabled: 'false'
     oidc.ciba.grant.enabled: 'false'
-  authenticationFlowBindingOverrides:
-    directGrant: direct-grant-single-factor
+  # authenticationFlowBindingOverrides: # TODO: waiting for EDP operator ~v1.24
+  #   directGrant: direct-grant-single-factor
