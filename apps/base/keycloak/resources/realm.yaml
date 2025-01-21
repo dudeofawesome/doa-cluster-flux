@@ -17,3 +17,5 @@ spec:
       value: 'true'
     - type: length
       value: '15'
+  authenticationFlows:
+    browserFlow: browser - Sequoia
