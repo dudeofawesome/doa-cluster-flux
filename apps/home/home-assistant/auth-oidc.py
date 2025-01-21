@@ -56,7 +56,7 @@ def login(
   roles = jwt_payload['resource_access']['realm-management']['roles']
 
   group = 'admin' if (
-      'realm-admin' in roles or 'home-assistant-admin' in roles
+      'realm-admin' in roles or 'home-assistant_admin' in roles
   ) else 'users'
 
   log(f"User '{username}' successfully authenticated, with group {group}")
