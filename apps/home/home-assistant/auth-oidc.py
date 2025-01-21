@@ -17,10 +17,8 @@ def login(
 ):
   log(f"User '{username}' attempting to log in")
 
-  openid_config = f"{oidc_issuer_url}/.well-known/openid-configuration"
-
   config_data = get(
-      openid_config,
+      f"{oidc_issuer_url}/.well-known/openid-configuration",
       follow_redirects=True,
   ).raise_for_status().json()
 
@@ -45,6 +43,7 @@ def login(
   except HTTPStatusError as err:
     if err.response.status_code == 401:
       log(f"Failed login attempt for user '{username}'")
+      log(err.response.text)
       exit(77)
     else:
       log(f"Unknown error with HTTP status {err.response.status_code}")
