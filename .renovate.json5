@@ -1,0 +1,18 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+
+  extends: ['config:best-practices'],
+
+  kubernetes: {
+    fileMatch: [
+      '^apps/.+\\.ya?ml$',
+      '^infrastructure/.+\\.ya?ml$',
+      '^olm/.+\\.ya?ml$',
+      '^services/.+\\.ya?ml$',
+      '^sources/.+\\.ya?ml$',
+    ],
+  },
+  flux: {
+    fileMatch: ['^clusters/.+/gotk-components\\.ya?ml$'],
+  },
+}
