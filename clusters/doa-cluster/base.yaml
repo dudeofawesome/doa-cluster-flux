@@ -27,6 +27,7 @@ metadata:
 spec:
   dependsOn:
     - name: sources
+    - name: roles
   interval: 1h
   wait: true
   timeout: 5m0s

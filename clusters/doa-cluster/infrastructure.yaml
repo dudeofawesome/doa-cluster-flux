@@ -50,6 +50,7 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
+    - name: roles
     - name: infrastructure-controllers
     - name: infrastructure-operators
   interval: 1h

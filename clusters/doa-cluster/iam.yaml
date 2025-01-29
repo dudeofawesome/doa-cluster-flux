@@ -1,0 +1,20 @@
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: roles
+  namespace: flux-system
+spec:
+  interval: 1h
+  wait: true
+  timeout: 5m0s
+  retryInterval: 1m0s
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./iam/roles
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
