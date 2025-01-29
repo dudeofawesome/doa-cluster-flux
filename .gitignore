@@ -21,6 +21,8 @@ node_modules/
 # Secrets
 *.bin
 *.key
+*.csr
+*.crt
 *passwd*
 *.*key
 *.env
