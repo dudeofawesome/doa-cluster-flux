@@ -5,6 +5,10 @@ metadata:
   namespace: kube-system
 spec:
   valuesContent: |-
+    providers:
+      kubernetesCRD:
+        allowCrossNamespace: true # Use Middlewares across namespaces
+
     ports:
       web:
         redirectTo:
@@ -12,10 +16,6 @@ spec:
       websecure:
         tls:
           # options: default
-
-    providers:
-      kubernetesCRD:
-        allowCrossNamespace: true # Use Middlewares across namespaces
 
     ingressRoute:
       healthcheck:
@@ -30,5 +30,6 @@ spec:
           headers:
             defaultmode: keep
 
-    globalArguments:
+    additionalArguments:
+      # allow self-signed certs for intra-cluster networking
       - "--serversTransport.insecureSkipVerify=true"
