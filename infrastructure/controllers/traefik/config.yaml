@@ -5,6 +5,23 @@ metadata:
   namespace: kube-system
 spec:
   valuesContent: |-
+    providers:
+      kubernetesCRD:
+        allowCrossNamespace: true # Use Middlewares across namespaces
+
+    entryPoints:
+      web:
+        address: ":8000"
+      websecure:
+        address: ":8443"
+      tailsecure:
+        address: "100.64.0.100:8443"
+
+      traefik:
+        address: ":9000"
+      metrics:
+        address: ":9100"
+
     ports:
       web:
         redirectTo:
@@ -12,10 +29,6 @@ spec:
       websecure:
         tls:
           # options: default
-
-    providers:
-      kubernetesCRD:
-        allowCrossNamespace: true # Use Middlewares across namespaces
 
     ingressRoute:
       healthcheck:
@@ -31,4 +44,5 @@ spec:
             defaultmode: keep
 
     globalArguments:
+      # allow self-signed certs for intra-cluster networking
       - "--serversTransport.insecureSkipVerify=true"
