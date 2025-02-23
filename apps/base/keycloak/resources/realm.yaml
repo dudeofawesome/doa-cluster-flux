@@ -19,3 +19,16 @@ spec:
       value: '15'
   authenticationFlows:
     browserFlow: browser - Sequoia
+  # userProfileConfig:
+  #   attributes:
+  #     - name: picture
+  #       displayName: profile picture
+  #       validations:
+  #         uri:
+  #           mapVal:
+  #             allowedSchemes: ['https']
+  #             allowFragment: true
+  #             requireValidUrl: true
+  #       permissions:
+  #         view: ['admin', 'user']
+  #         edit: ['admin', 'user']
