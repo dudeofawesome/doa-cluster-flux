@@ -22,13 +22,15 @@ spec:
   # userProfileConfig:
   #   attributes:
   #     - name: picture
-  #       displayName: profile picture
+  #       displayName: Profile Picture
   #       validations:
   #         uri:
-  #           mapVal:
-  #             allowedSchemes: ['https']
-  #             allowFragment: true
-  #             requireValidUrl: true
+  #           allowedSchemes: ['https']
+  #           allowFragment: true
+  #           requireValidUrl: true
   #       permissions:
   #         view: ['admin', 'user']
   #         edit: ['admin', 'user']
+  #       annotations:
+  #         inputType: html5-url
+  #         inputTypePlaceholder: image URL
