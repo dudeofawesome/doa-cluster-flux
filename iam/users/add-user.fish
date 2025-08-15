@@ -55,18 +55,19 @@ roleRef:
 
     # ask user to verify staged changes
     git diff --cached
-    read -l -P 'Does the above diff look correct? Can we commit and push? [y/N] ' confirm
+    read -l -P 'Does the above diff look correct? Can we commit and push? [y/s/N] ' confirm
     switch $confirm
         case Y y yes
             echo continuing
+            # commit & push changes
+            git commit -m "🛂 add user $username to cluster $cluster as $role"
+            git push
+        case S s skip
+            echo skipping
         case '*'
             echo aborting
             exit
     end
-
-    # commit & push changes
-    git commit -m "🛂 add user $username to cluster $cluster as $role"
-    git push
 
     echo "Now transfer '$private_key' & '$cert' to your client computer, and run the following to configure kubectl:"
     echo "kubectl config set-credentials '$username' \\
