@@ -37,7 +37,7 @@ flux bootstrap github \
 1. Add the key to the cluster
 
    ```sh
-   op read op://orleans-brian-edgar-josh/doa-cluster/age.agekey
+   op read op://orleans-brian-edgar-josh/doa-cluster/age.agekey \
    | kubectl create secret generic sops-age \
       --namespace=flux-system \
       --from-file=age.agekey=/dev/stdin
