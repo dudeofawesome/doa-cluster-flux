@@ -1658,6 +1658,7 @@ spec:
             - --health-probe-bind-address=:8081
             - --metrics-bind-address=:8443
             - --leader-elect
+            - --feature-gates=WebhookProviderCertManager=true
             - --catalogd-cas-dir=/var/certs
             - --pull-cas-dir=/var/certs
             - --tls-cert=/var/certs/tls.cert
