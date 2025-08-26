@@ -1,8 +1,8 @@
-#!/usr/bin/env bash
+#!/usr/bin/env nix
+#! nix shell nixpkgs#bash nixpkgs#yq-go nixpkgs#coreutils --command bash
 set -e
 
-# this might break in the future (which is probably good)
-# https://github.com/operator-framework/operator-controller/issues/1341
+repo='https://github.com/operator-framework/operator-controller'
 
 version="latest/download"
 if [ -n "$1" ]; then
@@ -24,19 +24,13 @@ duplicate_filter='
 curl \
   --silent \
   --fail \
-  -L https://github.com/operator-framework/catalogd/releases/$version/catalogd.yaml \
-| yq eval ". | select(($duplicate_filter) | not)" \
-> "$(dirname $0)/catalogd.yaml"
-curl \
-  --silent \
-  --fail \
-  -L https://github.com/operator-framework/catalogd/releases/$version/default-catalogs.yaml \
+  -L "$repo/releases/$version/default-catalogs.yaml" \
 > "$(dirname $0)/catalogs.yaml"
 
 curl \
   --silent \
   --fail \
-  -L https://github.com/operator-framework/operator-controller/releases/$version/operator-controller.yaml \
+  -L "$repo/releases/$version/operator-controller.yaml" \
 | yq eval ". | select(($duplicate_filter) | not)" \
 > "$(dirname $0)/operator-controller.yaml"
 
