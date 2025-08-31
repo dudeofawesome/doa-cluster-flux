@@ -45,6 +45,30 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
+  name: cloudnaive-pg-installer-other-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cloudnaive-pg-installer-other
+subjects:
+  - kind: ServiceAccount
+    name: cloudnaive-pg-installer
+    namespace: operators
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cloudnaive-pg-installer-other
+rules:
+  - apiGroups: [rbac.authorization.k8s.io]
+    resources: [clusterroles]
+    verbs: [create, get, list, watch]
+    resourceNames:
+      - cnpg-subscription-viewer-role
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
   name: cloudnaive-pg-installer-binding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
