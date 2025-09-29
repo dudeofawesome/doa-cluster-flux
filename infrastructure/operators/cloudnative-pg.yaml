@@ -2,26 +2,26 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: cloudnaive-pg-installer
+  name: cloudnative-pg-installer
   namespace: operators
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: cloudnaive-pg-installer-crd-binding
+  name: cloudnative-pg-installer-crd-binding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: cloudnaive-pg-installer-crds
+  name: cloudnative-pg-installer-crds
 subjects:
   - kind: ServiceAccount
-    name: cloudnaive-pg-installer
+    name: cloudnative-pg-installer
     namespace: operators
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: cloudnaive-pg-installer-crds
+  name: cloudnative-pg-installer-crds
 rules:
   # Manage cnpg CRDs
   - apiGroups: [apiextensions.k8s.io]
@@ -45,20 +45,20 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: cloudnaive-pg-installer-other-binding
+  name: cloudnative-pg-installer-other-binding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: cloudnaive-pg-installer-other
+  name: cloudnative-pg-installer-other
 subjects:
   - kind: ServiceAccount
-    name: cloudnaive-pg-installer
+    name: cloudnative-pg-installer
     namespace: operators
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: cloudnaive-pg-installer-other
+  name: cloudnative-pg-installer-other
 rules:
   - apiGroups: [rbac.authorization.k8s.io]
     resources: [clusterroles]
@@ -69,21 +69,21 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: cloudnaive-pg-installer-binding
+  name: cloudnative-pg-installer-binding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: cloudnaive-pg-installer-clusterrole
+  name: cloudnative-pg-installer-clusterrole
 subjects:
   - kind: ServiceAccount
-    name: cloudnaive-pg-installer
+    name: cloudnative-pg-installer
     namespace: operators
 ---
 # https://github.com/cloudnative-pg/cloudnative-pg/blob/release-1.27/config/rbac/role.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: cloudnaive-pg-installer-clusterrole
+  name: cloudnative-pg-installer-clusterrole
 rules:
   - apiGroups:
       - ''
@@ -312,7 +312,7 @@ metadata:
 spec:
   namespace: operators
   serviceAccount:
-    name: cloudnaive-pg-installer
+    name: cloudnative-pg-installer
   source:
     sourceType: Catalog
     catalog:
