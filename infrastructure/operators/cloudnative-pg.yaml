@@ -65,6 +65,9 @@ rules:
     verbs: [create, get, list, watch]
     resourceNames:
       - cnpg-subscription-viewer-role
+  - apiGroups: [rbac.authorization.k8s.io]
+    resources: [clusterroles, clusterrolebindings]
+    verbs: [get]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
