@@ -307,6 +307,14 @@ rules:
       - list
       - patch
       - watch
+  - apiGroups:
+      - cert-manager.io
+    resources:
+      - certificates
+    verbs:
+      - get
+      - list
+      - watch
 ---
 apiVersion: olm.operatorframework.io/v1
 kind: ClusterExtension
