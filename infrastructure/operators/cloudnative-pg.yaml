@@ -311,6 +311,7 @@ rules:
       - cert-manager.io
     resources:
       - certificates
+      - issuers
     verbs:
       - get
       - list
