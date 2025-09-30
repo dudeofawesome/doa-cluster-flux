@@ -78,6 +78,24 @@ rules:
       - create
       - get
       - list
+  - apiGroups: [admissionregistration.k8s.io]
+    resources:
+      - validatingwebhookconfigurations
+      - mutatingwebhookconfigurations
+    verbs:
+      - create
+      - get
+      - list
+  - apiGroups:
+      - cert-manager.io
+    resources:
+      - certificates
+      - issuers
+    verbs:
+      - create
+      - get
+      - list
+      - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -316,15 +334,6 @@ rules:
       - get
       - list
       - patch
-      - watch
-  - apiGroups:
-      - cert-manager.io
-    resources:
-      - certificates
-      - issuers
-    verbs:
-      - get
-      - list
       - watch
 ---
 apiVersion: olm.operatorframework.io/v1
