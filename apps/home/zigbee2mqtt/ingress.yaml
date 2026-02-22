@@ -7,7 +7,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`z2m.park.orleans.io`)
+    - match: Host(`z2m.red.orleans.io`)
       kind: Rule
       services:
         - name: zigbee2mqtt
