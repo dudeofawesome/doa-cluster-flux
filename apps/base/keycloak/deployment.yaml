@@ -18,8 +18,8 @@ spec:
     spec:
       containers:
         - name: 'keycloak'
-          image: 'quay.io/keycloak/keycloak:26.1' # updateable version
-          args: ['start']
+          image: 'ghcr.io/dudeofawesome/keycloak:26.1'
+          args: ['start', '--optimized']
           env:
             - name: KEYCLOAK_ADMIN
               valueFrom:
@@ -43,16 +43,15 @@ spec:
             - name: KC_HOSTNAME_BACKCHANNEL_DYNAMIC
               value: 'true'
 
-            - name: KC_HEALTH_ENABLED
-              value: 'true'
-            - name: KC_METRICS_ENABLED
-              value: 'true'
+            # KC_HEALTH_ENABLED and KC_METRICS_ENABLED are baked into the
+            # optimized image (see images/keycloak/Containerfile)
+            - name: KC_HTTP_MANAGEMENT_PORT
+              value: '9000'
 
             - name: KC_SPI_ADMIN_REALM
               value: 'master'
 
-            - name: KC_DB
-              value: postgres
+            # KC_DB=postgres is baked into the optimized image
             - name: KC_DB_URL_HOST
               valueFrom:
                 secretKeyRef:

@@ -2,6 +2,10 @@
 {
   name = "doa-cluster-flux";
 
+  packages = with pkgs; [
+    actionlint
+  ];
+
   languages = {
     python = {
       enable = true;
