@@ -43,6 +43,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: local-path
   local:
+    # TODO: find a better place for this
     path: /mnt/keycloak
   nodeAffinity:
     required:

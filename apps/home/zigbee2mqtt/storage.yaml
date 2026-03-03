@@ -29,6 +29,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: local-path
   local:
+    # TODO: find a better place for this
     path: /mnt/zigbee2mqtt
   nodeAffinity:
     required:
