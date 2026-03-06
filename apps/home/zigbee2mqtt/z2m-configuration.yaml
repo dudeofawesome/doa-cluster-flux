@@ -36,4 +36,4 @@ homeassistant:
 frontend:
   enabled: true
   port: 8080
-  url: 'https://z2m.park.orleans.io'
+  url: 'https://z2m.red.orleans.io'
