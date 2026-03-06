@@ -50,10 +50,6 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /app/data
-            - name: configuration
-              mountPath: /app/data/configuration.yaml
-              subPath: configuration.yaml
-              readOnly: false
             - name: zigbee-gateway
               mountPath: /dev/ttyUSB0
             - name: udev
@@ -86,6 +82,21 @@ spec:
             initialDelaySeconds: 0
             failureThreshold: 3
             periodSeconds: 10
+
+      initContainers:
+        # z2m requires a writable configuration.yaml
+        - name: copy-configuration
+          image: busybox:stable
+          command: ['/bin/sh']
+          args:
+            - -c
+            - cp /configuration.yaml /app/data/configuration.yaml
+          volumeMounts:
+            - name: configuration
+              mountPath: /configuration.yaml
+              subPath: configuration.yaml
+            - name: data
+              mountPath: /app/data
 
       volumes:
         - name: data
