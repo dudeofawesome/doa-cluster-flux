@@ -1,5 +1,7 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/Koenkk/zigbee2mqtt/refs/tags/1.40.1/lib/util/settings.schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Koenkk/zigbee2mqtt/refs/tags/1.42.0/lib/util/settings.schema.json
 # updateable version, keep in sync with container
+
+version: 5
 
 # k8s config maps are read only, so we need to extract dynamic config to
 #   external files
@@ -8,12 +10,12 @@ groups: 'groups.yaml'
 
 mqtt:
   server: 'mqtt://mqtt-cleartext.mosquitto.svc.cluster.local:1883'
+  base_topic: zigbee2mqtt
 
 serial:
-  adapter: 'ember'
+  adapter: 'zstack' # for SONOFF Zigbee 3.0 gateway
   port: '/dev/ttyUSB0'
-  baudrate: 115200
-  rtscts: true # enable hardware flow control
+  rtscts: true # enable hardware flow control, improving stability
 
 advanced:
   # zigbee channel
