@@ -54,7 +54,7 @@ spec:
               mountPath: /app/data/configuration.yaml
               subPath: configuration.yaml
               readOnly: false
-            - name: skyconnect
+            - name: zigbee-gateway
               mountPath: /dev/ttyUSB0
             - name: udev
               mountPath: /run/udev
@@ -97,9 +97,12 @@ spec:
             items:
               - key: configuration.yaml
                 path: configuration.yaml
-        - name: skyconnect
+        - name: thread-router
           hostPath:
             path: /dev/serial/by-id/usb-Nabu_Casa_SkyConnect_v1.0_065b344abf18ec11a1baeb9a47486eb0-if00-port0
+        - name: zigbee-gateway
+          hostPath:
+            path: /dev/serial/by-id/usb-ITead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_9ef13de3ab45ed119701c58f0a86e0b4-if00-port0
         - name: udev
           hostPath:
             path: /run/udev
