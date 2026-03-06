@@ -1,0 +1,53 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  interval: 30m
+  install:
+    crds: CreateReplace
+  upgrade:
+    crds: CreateReplace
+  chart:
+    spec:
+      chart: traefik
+      version: "34.x" # updateable version
+      sourceRef:
+        kind: HelmRepository
+        name: traefik
+        namespace: flux-system
+      interval: 12h
+
+  values:
+    providers:
+      kubernetesCRD:
+        allowCrossNamespace: true # Use Middlewares across namespaces
+
+    ports:
+      web:
+        redirections:
+          entryPoint:
+            to: websecure
+            scheme: https
+      websecure:
+        tls:
+          enabled: true
+
+    ingressRoute:
+      healthcheck:
+        enabled: true
+
+    logs:
+      access:
+        enabled: true
+        fields:
+          headers:
+            defaultmode: keep
+
+    additionalArguments:
+      # allow self-signed certs for intra-cluster networking
+      - --serversTransport.insecureSkipVerify=true
+
+    global:
+      sendAnonymousUsage: false
