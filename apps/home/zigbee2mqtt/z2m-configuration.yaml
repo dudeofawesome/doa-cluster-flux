@@ -15,7 +15,6 @@ mqtt:
 serial:
   adapter: 'zstack' # for SONOFF Zigbee 3.0 gateway
   port: '/dev/ttyUSB0'
-  rtscts: true # enable hardware flow control, improving stability
 
 advanced:
   # zigbee channel
