@@ -15,6 +15,16 @@ spec:
       labels:
         component: app
     spec:
+      initContainers:
+        - name: initialize-config
+          image: busybox:stable
+          command:
+            - sh
+            - -c
+            - cd /config && mkdir -p themes && touch automations.yaml scripts.yaml scenes.yaml
+          volumeMounts:
+            - name: ha-config-root
+              mountPath: /config
       # securityContext:
       #   fsGroup: 33
       #   fsGroupChangePolicy: "OnRootMismatch"
