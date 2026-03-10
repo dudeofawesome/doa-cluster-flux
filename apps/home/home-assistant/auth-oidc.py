@@ -58,9 +58,9 @@ def login(
   except:
     roles = []
 
-  group = 'admin' if (
+  group = 'system-admin' if (
       'realm-admin' in roles or 'home-assistant_admin' in roles
-  ) else 'users'
+  ) else 'system-users'
 
   log(f"User '{username}' successfully authenticated, with group {group}")
 
