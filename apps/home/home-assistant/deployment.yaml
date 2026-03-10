@@ -30,7 +30,7 @@ spec:
       #   fsGroupChangePolicy: "OnRootMismatch"
       containers:
         - name: home-assistant-app
-          image: 'ghcr.io/home-assistant/home-assistant:2025.3' # updateable version
+          image: 'ghcr.io/home-assistant/home-assistant:2026.3' # updateable version
           imagePullPolicy: IfNotPresent
           securityContext:
             privileged: true
