@@ -53,8 +53,18 @@ def login(
   jwt_payload = decode(res['access_token'], options={'verify_signature': False})
 
   name = jwt_payload['name']
+
+  group = 'system-users'
   try:
-    roles = jwt_payload['resource_access']['realm-management']['roles']
+    roles = jwt_payload['realm_access']['roles']
+    if 'realm-admin' in roles:
+      group = 'system-admin'
+  except:
+    roles = []
+  try:
+    roles = jwt_payload['resource_access']['home-assistant']['roles']
+    if 'home-assistant_admin' in roles:
+      group = 'system-admin'
   except:
     roles = []
 
