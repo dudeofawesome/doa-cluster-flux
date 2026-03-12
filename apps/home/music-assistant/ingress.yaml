@@ -1,0 +1,40 @@
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: 'music-assistant'
+spec:
+  entryPoints:
+    - 'websecure'
+  routes:
+    - match: 'Host(`mass.red.orleans.io`)'
+      kind: 'Rule'
+      services:
+        - name: 'music-assistant'
+          port: 8095
+      middlewares:
+        - name: forward-auth
+          namespace: music-assistant
+  tls:
+    secretName: wildcard-orleans-io
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: music-assistant
+  labels:
+    monitor: music-assistant
+spec:
+  selector:
+    component: app
+  ports:
+    - name: http
+      port: 8095
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: forward-auth
+data:
+  config.ini: |
+    logout-redirect = https://mass.red.orleans.io

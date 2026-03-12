@@ -1,0 +1,27 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: music-assistant
+commonLabels:
+  app: music-assistant
+
+resources:
+  - namespace.yaml
+  - config.yaml
+  - deployment.yaml
+  - ingress.yaml
+  - secrets.yaml
+  - storage.yaml
+  - oidc-client.yaml
+  - ../../../services/forward-auth
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+patches:
+  - patch: |
+      - op: replace
+        path: /spec/forwardAuth/address
+        value: http://forward-auth.music-assistant.svc.cluster.local:4181
+    target:
+      kind: Middleware
+      name: forward-auth

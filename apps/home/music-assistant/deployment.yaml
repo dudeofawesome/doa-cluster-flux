@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: music-assistant
+spec:
+  revisionHistoryLimit: 3
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      component: app
+  template:
+    metadata:
+      labels:
+        component: app
+    spec:
+      containers:
+        - name: music-assistant-app
+          image: 'ghcr.io/music-assistant/server:2.7' # updateable version
+          imagePullPolicy: IfNotPresent
+          # securityContext:
+          #   privileged: true
+          ports:
+            - name: http
+              containerPort: 8095
+              protocol: TCP
+          resources: {}
+          livenessProbe:
+            tcpSocket:
+              port: 8095
+            initialDelaySeconds: 0
+            failureThreshold: 3
+            timeoutSeconds: 1
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: 8095
+            initialDelaySeconds: 0
+            failureThreshold: 3
+            timeoutSeconds: 1
+            periodSeconds: 10
+          startupProbe:
+            tcpSocket:
+              port: 8095
+            initialDelaySeconds: 0
+            failureThreshold: 30
+            timeoutSeconds: 1
+            periodSeconds: 5
+          volumeMounts:
+            - name: ha-config-root
+              mountPath: /data/
+      restartPolicy: Always
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      volumes:
+        - name: ha-config-root
+          persistentVolumeClaim:
+            claimName: config-root
