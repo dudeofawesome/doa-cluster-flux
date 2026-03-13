@@ -2,11 +2,11 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: influxdb-data
+  name: scrutiny-influxdb-data
   labels:
     type: local
 spec:
-  volumeName: influxdb-data
+  volumeName: scrutiny-influxdb-data
   storageClassName: local-path
   accessModes:
     - ReadWriteOnce
@@ -17,7 +17,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: influxdb-data
+  name: scrutiny-influxdb-data
 spec:
   capacity:
     storage: 5Gi
