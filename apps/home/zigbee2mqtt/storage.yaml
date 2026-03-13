@@ -6,7 +6,7 @@ metadata:
   labels:
     type: local
 spec:
-  volumeName: data
+  volumeName: zigbee2mqtt-data
   storageClassName: local-path
   accessModes:
     - ReadWriteOnce
@@ -17,7 +17,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: data
+  name: zigbee2mqtt-data
   labels:
     type: local
 spec:
