@@ -1,0 +1,16 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: saldivar-wildcard
+  namespace: saldivar-ingress
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`saldivar.io`) || HostRegexp(`{subdomain:[a-z0-9-]+}.saldivar.io`)
+      kind: Rule
+      services:
+        - name: saldivar-external
+          port: 80
+  tls:
+    secretName: default-cert
