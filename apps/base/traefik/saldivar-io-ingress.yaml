@@ -1,0 +1,51 @@
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: saldivar-io-https
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: 'Host(`saldivar.io`) || HostRegexp(`{subdomain:[a-zA-Z0-9-]+}.saldivar.io`)'
+      kind: Rule
+      services:
+        - name: saldivar-io
+          port: https
+          scheme: https
+  tls:
+    secretName: wildcard-saldivar-io
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: saldivar-io
+spec:
+  # No selector: this service is backed by the manual Endpoints object below,
+  # which forwards traffic to a host on the local network instead of cluster pods.
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 80
+    - name: https
+      port: 443
+      protocol: TCP
+      targetPort: 443
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: saldivar-io
+# Endpoints must match the Service name/namespace so Kubernetes can use this
+# external IP as the backend for the selector-less Service above.
+subsets:
+  - addresses:
+      - ip: 10.0.1.6
+    ports:
+      - name: http
+        port: 80
+        protocol: TCP
+      - name: https
+        port: 443
+        protocol: TCP

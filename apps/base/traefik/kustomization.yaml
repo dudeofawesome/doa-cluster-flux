@@ -4,6 +4,7 @@ namespace: kube-system
 
 resources:
   - dashboard.yaml
+  - saldivar-io-ingress.yaml
   - config.yaml
   - secrets.yaml
   - oidc-client.yaml
