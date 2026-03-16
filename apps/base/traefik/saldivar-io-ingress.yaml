@@ -41,7 +41,7 @@ metadata:
 # external IP as the backend for the selector-less Service above.
 subsets:
   - addresses:
-      - ip: 10.0.1.8
+      - ip: 10.0.1.6
     ports:
       - name: http
         port: 80
