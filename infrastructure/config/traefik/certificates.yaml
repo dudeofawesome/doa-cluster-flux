@@ -21,23 +21,3 @@ spec:
     - '*.lomita.orleans.io'
   privateKey:
     rotationPolicy: Always
----
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: wildcard-saldivar-io
-  namespace: kube-system
-spec:
-  secretName: wildcard-saldivar-io
-  secretTemplate:
-    annotations:
-      reflector.v1.k8s.emberstack.com/reflection-allowed: 'true'
-      reflector.v1.k8s.emberstack.com/reflection-auto-enabled: 'true'
-  issuerRef:
-    name: letsencrypt
-    kind: ClusterIssuer
-  dnsNames:
-    - 'saldivar.io'
-    - '*.saldivar.io'
-  privateKey:
-    rotationPolicy: Always
