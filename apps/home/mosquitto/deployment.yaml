@@ -22,6 +22,9 @@ spec:
           ports:
             - name: mqtt-cleartext
               containerPort: 1883
+            - name: mqtts
+              containerPort: 8883
+              hostPort: 8883
             - name: websocket
               containerPort: 9001
           resources:
@@ -36,6 +39,9 @@ spec:
               mountPath: /mosquitto/config/mosquitto.conf
               subPath: mosquitto.conf
               readOnly: true
+            - name: tls-certificate
+              mountPath: /mosquitto/certs
+              readOnly: true
       volumes:
         - name: configuration
           configMap:
@@ -43,3 +49,6 @@ spec:
             items:
               - key: mosquitto.conf
                 path: mosquitto.conf
+        - name: tls-certificate
+          secret:
+            secretName: mosquitto-tls

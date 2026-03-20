@@ -5,8 +5,13 @@ metadata:
 data:
   mosquitto.conf: |
 
-    # enable listener
+    # Internal cleartext listener for in-cluster clients.
     listener 1883
+
+    # TLS listener exposed directly on the node for LAN clients.
+    listener 8883
+    certfile /mosquitto/certs/tls.crt
+    keyfile /mosquitto/certs/tls.key
 
     # TODO: require auth
     # Disable authentication
