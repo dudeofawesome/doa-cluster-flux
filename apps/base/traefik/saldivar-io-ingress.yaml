@@ -11,6 +11,7 @@ spec:
       kind: Rule
       services:
         - name: saldivar-io
+          passHostHeader: true
           port: https
           scheme: https
   tls:
