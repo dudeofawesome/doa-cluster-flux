@@ -8,15 +8,26 @@ spec:
     # The ACME server URL
     server: https://acme-staging-v02.api.letsencrypt.org/directory
     # Email address used for ACME registration
-    email: louis@orleans.io
+    email: tourist-04.iced@icloud.com
     # Name of a secret used to store the ACME account private key
     privateKeySecretRef:
       name: letsencrypt-key
     solvers:
-      - dns01:
+      - selector:
+          dnsZones:
+            - orleans.io
+        dns01:
           cloudflare:
             apiTokenSecretRef:
-              name: cloudflare
+              name: cloudflare-orleans
+              key: api-token
+      - selector:
+          dnsZones:
+            - saldivar.io
+        dns01:
+          cloudflare:
+            apiTokenSecretRef:
+              name: cloudflare-saldivar
               key: api-token
 ---
 apiVersion: cert-manager.io/v1
