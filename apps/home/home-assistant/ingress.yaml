@@ -7,6 +7,11 @@ spec:
   entryPoints:
     - 'websecure'
   routes:
+    - match: 'Host(`hass.red.orleans.io`) && Path(`/.well-known/appspecific/com.tesla.3p.public-key.pem`)'
+      kind: 'Rule'
+      services:
+        - name: 'tesla-fleet-api-public-key'
+          port: 8080
     - match: 'Host(`hass.red.orleans.io`)'
       kind: 'Rule'
       services:
