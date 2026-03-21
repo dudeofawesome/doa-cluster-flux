@@ -42,6 +42,27 @@ spec:
             - name: tls-certificate
               mountPath: /mosquitto/certs
               readOnly: true
+          livenessProbe:
+            tcpSocket:
+              port: mqtt-cleartext
+            initialDelaySeconds: 0
+            failureThreshold: 3
+            timeoutSeconds: 1
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: mqtt-cleartext
+            initialDelaySeconds: 0
+            failureThreshold: 3
+            timeoutSeconds: 1
+            periodSeconds: 10
+          startupProbe:
+            tcpSocket:
+              port: mqtt-cleartext
+            initialDelaySeconds: 0
+            failureThreshold: 30
+            timeoutSeconds: 1
+            periodSeconds: 5
       volumes:
         - name: configuration
           configMap:
