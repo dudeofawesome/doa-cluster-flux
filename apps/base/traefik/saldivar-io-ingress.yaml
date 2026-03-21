@@ -7,7 +7,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: 'HostSNI(`saldivar.io`) || HostSNIRegexp(`{subdomain:[a-zA-Z0-9-]+}.saldivar.io`)'
+    - match: HostSNI(`saldivar.io`) || HostSNIRegexp(`^.+\.saldivar\.io$`)
       services:
         - name: saldivar-io
           port: https
@@ -20,12 +20,8 @@ metadata:
   name: saldivar-io
 spec:
   # No selector: this service is backed by the manual Endpoints object below,
-  # which forwards traffic to a host on the local network instead of cluster pods.
+  # which forwards traffic to a host outside the cluster.
   ports:
-    - name: http
-      port: 80
-      protocol: TCP
-      targetPort: 80
     - name: https
       port: 443
       protocol: TCP
@@ -41,9 +37,6 @@ subsets:
   - addresses:
       - ip: 10.0.1.6
     ports:
-      - name: http
-        port: 80
-        protocol: TCP
       - name: https
         port: 443
         protocol: TCP
