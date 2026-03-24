@@ -16,7 +16,6 @@ spec:
   dnsNames:
     - 'orleans.io'
     - '*.orleans.io'
-    - '*.park.orleans.io'
     - '*.red.orleans.io'
     - '*.lomita.orleans.io'
   privateKey:

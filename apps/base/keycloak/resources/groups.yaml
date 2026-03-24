@@ -35,7 +35,6 @@ spec:
     name: sequoia
   subGroups:
     - Redwood
-    - Park Street
 ---
 apiVersion: v1.edp.epam.com/v1
 kind: KeycloakRealmGroup
@@ -44,17 +43,6 @@ metadata:
   namespace: keycloak
 spec:
   name: Redwood
-  realmRef:
-    kind: ClusterKeycloakRealm
-    name: sequoia
----
-apiVersion: v1.edp.epam.com/v1
-kind: KeycloakRealmGroup
-metadata:
-  name: park-st
-  namespace: keycloak
-spec:
-  name: Park Street
   realmRef:
     kind: ClusterKeycloakRealm
     name: sequoia
