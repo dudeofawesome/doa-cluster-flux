@@ -21,7 +21,7 @@ spec:
           command:
             - sh
             - -c
-            - cd /config && mkdir -p themes && touch automations.yaml scripts.yaml scenes.yaml
+            - cd /config && mkdir -p themes blueprints/automation/dudeofawesome && touch automations.yaml scripts.yaml scenes.yaml
           volumeMounts:
             - name: ha-config-root
               mountPath: /config
@@ -92,6 +92,10 @@ spec:
               mountPath: /config/configuration.yaml
               subPath: configuration.yaml
               readOnly: true
+            - name: automation-blueprints
+              mountPath: /config/blueprints/automation/dudeofawesome/switch-light-link.yaml
+              subPath: switch-light-link.yaml
+              readOnly: true
             - name: authentication-scripts
               mountPath: /usr/bin/auth-oidc.py
               subPath: auth-oidc.py
@@ -109,6 +113,12 @@ spec:
             items:
               - key: configuration.yaml
                 path: configuration.yaml
+        - name: automation-blueprints
+          configMap:
+            name: automation-blueprints
+            items:
+              - key: switch-light-link.yaml
+                path: switch-light-link.yaml
         - name: authentication-scripts
           configMap:
             name: authentication-scripts

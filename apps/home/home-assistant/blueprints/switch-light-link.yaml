@@ -1,0 +1,203 @@
+blueprint:
+  name: Smart Switch Light Control
+  description: >
+    Link one or more button or switch triggers to a set of lights selected by
+    area and/or entity, with an entity blacklist for exclusions.
+
+    The trigger inputs use Home Assistant's trigger selector, so they can be
+    backed by Zigbee2MQTT MQTT triggers, ZHA device triggers, Z-Wave JS device
+    triggers, or any other trigger type Home Assistant supports.
+  domain: automation
+  input:
+    light_areas:
+      name: Light areas
+      description: Areas whose light entities should be included.
+      default: []
+      selector:
+        area:
+          multiple: true
+          entity:
+            domain: light
+    light_entities:
+      name: Extra light entities
+      description: Individual lights to include in addition to area selection.
+      default: []
+      selector:
+        entity:
+          multiple: true
+          filter:
+            domain: light
+    excluded_light_entities:
+      name: Excluded light entities
+      description: Lights to remove from the final target set.
+      default: []
+      selector:
+        entity:
+          multiple: true
+          filter:
+            domain: light
+    toggle_behavior:
+      name: Toggle behavior
+      description: >
+        Smart toggle turns everything off only when all selected lights are
+        already on; otherwise it turns them all on.
+      default: smart
+      selector:
+        select:
+          options:
+            - label: Smart group toggle
+              value: smart
+            - label: Native light.toggle
+              value: native
+    transition_seconds:
+      name: Transition
+      description: Fade time for turn on, turn off, and dimming actions.
+      default: 0.25
+      selector:
+        number:
+          min: 0
+          max: 10
+          step: 0.05
+          unit_of_measurement: s
+          mode: slider
+    brightness_step_pct:
+      name: Brightness step
+      description: Percentage used for brighten and dim actions.
+      default: 20
+      selector:
+        number:
+          min: 1
+          max: 100
+          step: 1
+          unit_of_measurement: "%"
+          mode: slider
+    toggle_triggers:
+      name: Toggle triggers
+      description: >
+        One or more triggers that should toggle the selected lights. For
+        Zigbee2MQTT, use MQTT triggers here.
+      default: []
+      selector:
+        trigger:
+    turn_on_triggers:
+      name: Turn on triggers
+      default: []
+      selector:
+        trigger:
+    turn_off_triggers:
+      name: Turn off triggers
+      default: []
+      selector:
+        trigger:
+    brighten_triggers:
+      name: Brighten triggers
+      default: []
+      selector:
+        trigger:
+    dim_triggers:
+      name: Dim triggers
+      default: []
+      selector:
+        trigger:
+
+mode: restart
+max_exceeded: silent
+
+variables:
+  light_areas: !input light_areas
+  light_entities: !input light_entities
+  excluded_light_entities: !input excluded_light_entities
+  toggle_behavior: !input toggle_behavior
+  transition_seconds: !input transition_seconds
+  brightness_step_pct: !input brightness_step_pct
+  area_light_entities: >-
+    {% set ns = namespace(items=[]) %}
+    {% for area_id in light_areas | default([], true) %}
+      {% for entity_id in area_entities(area_id) %}
+        {% if entity_id.startswith('light.') and entity_id not in ns.items %}
+          {% set ns.items = ns.items + [entity_id] %}
+        {% endif %}
+      {% endfor %}
+    {% endfor %}
+    {{ ns.items }}
+  target_light_entities: >-
+    {% set combined = (area_light_entities + (light_entities | default([], true))) | unique | list %}
+    {{ combined | reject('in', excluded_light_entities | default([], true)) | list }}
+  target_light_entity_ids: >-
+    {{ target_light_entities | join(', ') }}
+  all_target_lights_are_on: >-
+    {% set lights = expand(target_light_entities) | list %}
+    {{ lights | count > 0 and (lights | selectattr('state', 'eq', 'on') | list | count) == (lights | count) }}
+
+triggers:
+  - id: toggle
+    triggers: !input toggle_triggers
+  - id: turn_on
+    triggers: !input turn_on_triggers
+  - id: turn_off
+    triggers: !input turn_off_triggers
+  - id: brighten
+    triggers: !input brighten_triggers
+  - id: dim
+    triggers: !input dim_triggers
+
+conditions:
+  - condition: template
+    value_template: "{{ target_light_entities | count > 0 }}"
+
+actions:
+  - choose:
+      - conditions: "{{ trigger.id == 'toggle' and toggle_behavior == 'smart' }}"
+        sequence:
+          - if:
+              - condition: template
+                value_template: "{{ all_target_lights_are_on }}"
+            then:
+              - action: light.turn_off
+                target:
+                  entity_id: "{{ target_light_entity_ids }}"
+                data:
+                  transition: "{{ transition_seconds }}"
+            else:
+              - action: light.turn_on
+                target:
+                  entity_id: "{{ target_light_entity_ids }}"
+                data:
+                  transition: "{{ transition_seconds }}"
+      - conditions: "{{ trigger.id == 'toggle' and toggle_behavior == 'native' }}"
+        sequence:
+          - action: light.toggle
+            target:
+              entity_id: "{{ target_light_entity_ids }}"
+            data:
+              transition: "{{ transition_seconds }}"
+      - conditions: "{{ trigger.id == 'turn_on' }}"
+        sequence:
+          - action: light.turn_on
+            target:
+              entity_id: "{{ target_light_entity_ids }}"
+            data:
+              transition: "{{ transition_seconds }}"
+      - conditions: "{{ trigger.id == 'turn_off' }}"
+        sequence:
+          - action: light.turn_off
+            target:
+              entity_id: "{{ target_light_entity_ids }}"
+            data:
+              transition: "{{ transition_seconds }}"
+      - conditions: "{{ trigger.id == 'brighten' }}"
+        sequence:
+          - action: light.turn_on
+            target:
+              entity_id: "{{ target_light_entity_ids }}"
+            data:
+              brightness_step_pct: "{{ brightness_step_pct }}"
+              transition: "{{ transition_seconds }}"
+      - conditions: "{{ trigger.id == 'dim' }}"
+        sequence:
+          - action: light.turn_on
+            target:
+              entity_id: "{{ target_light_entity_ids }}"
+            data:
+              brightness_step_pct: "{{ 0 - brightness_step_pct }}"
+              transition: "{{ transition_seconds }}"
