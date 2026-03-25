@@ -5,6 +5,11 @@ metadata:
   name: mosquitto
 spec:
   replicas: 1
+  # This pod binds a fixed hostPort, so a second replica cannot be scheduled
+  # during rollout on the single-node cluster.
+  strategy:
+    type: Recreate
+    rollingUpdate: null
   selector:
     matchLabels:
       component: app
