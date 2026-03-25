@@ -15,9 +15,6 @@ resources:
   - secrets.yaml
   - oidc-client.yaml
 
-generatorOptions:
-  disableNameSuffixHash: true
-
 configMapGenerator:
   - name: configuration
     files:
