@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: matter-server
+spec:
+  revisionHistoryLimit: 3
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      component: app
+  template:
+    metadata:
+      labels:
+        component: app
+    spec:
+      containers:
+        - name: matter-server
+          image: ghcr.io/matter-js/python-matter-server:8 # updateable version
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            # Bluetooth commissioning is exposed through the host D-Bus socket.
+            privileged: true
+          args:
+            - --storage-path
+            - /data
+            - --paa-root-cert-dir
+            - /data/credentials
+            - --bluetooth-adapter
+            - '0'
+          ports:
+            - name: websocket
+              containerPort: 5580
+              protocol: TCP
+          resources: {}
+          livenessProbe:
+            tcpSocket:
+              port: websocket
+            initialDelaySeconds: 0
+            failureThreshold: 3
+            timeoutSeconds: 1
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: websocket
+            initialDelaySeconds: 0
+            failureThreshold: 3
+            timeoutSeconds: 1
+            periodSeconds: 10
+          startupProbe:
+            tcpSocket:
+              port: websocket
+            initialDelaySeconds: 0
+            failureThreshold: 30
+            timeoutSeconds: 1
+            periodSeconds: 5
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: dbus
+              mountPath: /run/dbus
+              readOnly: true
+      restartPolicy: Always
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: data
+        - name: dbus
+          hostPath:
+            path: /run/dbus
+            type: Directory
