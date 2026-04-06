@@ -12,7 +12,7 @@ spec:
   chart:
     spec:
       chart: traefik
-      version: "34.x" # updateable version
+      version: '34.5.0'
       sourceRef:
         kind: HelmRepository
         name: traefik

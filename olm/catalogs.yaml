@@ -7,5 +7,6 @@ spec:
   source:
     type: Image
     image:
-      ref: quay.io/operatorhubio/catalog:latest
+      # renovate: datasource=docker depName=quay.io/operatorhubio/catalog
+      ref: quay.io/operatorhubio/catalog:latest@sha256:9e2819f057ad0899402ffe93d48ba4c2d3f7bcd75b8c0ec8b2490c03b4054e62
       pollIntervalMinutes: 10

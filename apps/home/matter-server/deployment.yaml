@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: matter-server
-          image: ghcr.io/matter-js/python-matter-server:8 # updateable version
+          image: ghcr.io/matter-js/python-matter-server:8
           imagePullPolicy: IfNotPresent
           securityContext:
             # Bluetooth commissioning is exposed through the host D-Bus socket.

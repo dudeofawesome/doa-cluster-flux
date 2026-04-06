@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
         - name: static-file-server
-          image: busybox:stable
+          image: busybox:stable@sha256:b9598f8c98e24d0ad42c1742c32516772c3aa2151011ebaf639089bd18c605b8
           args:
             - httpd
             - -f
