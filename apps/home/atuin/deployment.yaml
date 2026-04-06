@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: atuin
-          image: ghcr.io/atuinsh/atuin:latest # updateable version
+          image: ghcr.io/atuinsh/atuin:latest@sha256:9a3bf220acd36873004fe18a9abb2bcd2d74a8c3522e52d309ba7c53d971c01f
           args:
             - server
             - start

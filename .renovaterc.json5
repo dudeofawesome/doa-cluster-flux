@@ -1,0 +1,54 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+
+  extends: ['config:best-practices'],
+
+  customManagers: [
+    {
+      customType: 'regex',
+      managerFilePatterns: [
+        '^apps/home/zigbee2mqtt/z2m-configuration\\.ya?ml$',
+      ],
+      matchStrings: [
+        '# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)(?: versioning=(?<versioning>\\S+))?\\n# yaml-language-server: \\$schema=https://raw\\.githubusercontent\\.com/[^/]+/[^/]+/refs/tags/(?<currentValue>[^/\\s]+)/lib/util/settings\\.schema\\.json',
+      ],
+      versioningTemplate: '{{#if versioning}}{{{versioning}}}{{else}}semver-coerced{{/if}}',
+    },
+    {
+      customType: 'regex',
+      managerFilePatterns: ['^infrastructure/operators/.+\\.ya?ml$'],
+      matchStrings: [
+        '# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)(?: extractVersion=(?<extractVersion>\\S+))?(?: versioning=(?<versioning>\\S+))?\\n\\s*version: [\'"](?<currentValue>[^\'"]+)[\'"]',
+      ],
+      versioningTemplate: '{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}',
+    },
+    {
+      customType: 'regex',
+      managerFilePatterns: ['^olm/catalogs\\.ya?ml$'],
+      matchStrings: [
+        '# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)(?: versioning=(?<versioning>\\S+))?\\n\\s*ref: \\S+:(?<currentValue>[^@\\s]+)@(?<currentDigest>sha256:[a-f0-9]+)',
+      ],
+      versioningTemplate: '{{#if versioning}}{{{versioning}}}{{else}}docker{{/if}}',
+    },
+  ],
+
+  kubernetes: {
+    fileMatch: [
+      '^apps/.+\\.ya?ml$',
+      '^infrastructure/.+\\.ya?ml$',
+      '^olm/.+\\.ya?ml$',
+      '^services/.+\\.ya?ml$',
+      '^sources/.+\\.ya?ml$',
+    ],
+  },
+  flux: {
+    fileMatch: [
+      '^apps/.+\\.ya?ml$',
+      '^clusters/.+/gotk-components\\.ya?ml$',
+      '^infrastructure/.+\\.ya?ml$',
+      '^olm/.+\\.ya?ml$',
+      '^services/.+\\.ya?ml$',
+      '^sources/.+\\.ya?ml$',
+    ],
+  },
+}

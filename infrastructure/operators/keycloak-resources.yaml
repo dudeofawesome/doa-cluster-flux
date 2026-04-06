@@ -288,4 +288,5 @@ spec:
     catalog:
       packageName: edp-keycloak-operator
       channels: [stable]
-      version: '>=1.23.0, <2' # updateable version
+      # renovate: datasource=github-releases depName=epam/edp-keycloak-operator extractVersion=^v(?<version>.+)$
+      version: '1.28.0'

@@ -364,4 +364,6 @@ spec:
     sourceType: Catalog
     catalog:
       packageName: cloudnative-pg
-      channels: [stable-v1] # updateable version
+      channels: [stable-v1]
+      # renovate: datasource=github-releases depName=cloudnative-pg/cloudnative-pg extractVersion=^v(?<version>\\d+\\.\\d+\\.\\d+)$
+      version: '1.27.0'

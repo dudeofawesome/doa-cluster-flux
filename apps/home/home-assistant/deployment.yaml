@@ -17,7 +17,7 @@ spec:
     spec:
       initContainers:
         - name: initialize-config
-          image: busybox:stable
+          image: busybox:stable@sha256:b9598f8c98e24d0ad42c1742c32516772c3aa2151011ebaf639089bd18c605b8
           command:
             - sh
             - -c
@@ -30,7 +30,7 @@ spec:
       #   fsGroupChangePolicy: "OnRootMismatch"
       containers:
         - name: home-assistant-app
-          image: 'ghcr.io/home-assistant/home-assistant:2026.3' # updateable version
+          image: 'ghcr.io/home-assistant/home-assistant:2026.3'
           imagePullPolicy: IfNotPresent
           securityContext:
             privileged: true

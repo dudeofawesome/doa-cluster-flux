@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: music-assistant-app
-          image: 'ghcr.io/music-assistant/server:2.7' # updateable version
+          image: 'ghcr.io/music-assistant/server:2.7'
           imagePullPolicy: IfNotPresent
           # securityContext:
           #   privileged: true
