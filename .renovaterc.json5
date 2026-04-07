@@ -33,7 +33,7 @@
   ],
 
   kubernetes: {
-    fileMatch: [
+    managerFilePatterns: [
       '^apps/.+\\.ya?ml$',
       '^infrastructure/.+\\.ya?ml$',
       '^olm/.+\\.ya?ml$',
@@ -42,7 +42,7 @@
     ],
   },
   flux: {
-    fileMatch: [
+    managerFilePatterns: [
       '^apps/.+\\.ya?ml$',
       '^clusters/.+/gotk-components\\.ya?ml$',
       '^infrastructure/.+\\.ya?ml$',
