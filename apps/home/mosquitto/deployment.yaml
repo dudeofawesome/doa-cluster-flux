@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: mosquitto
-          image: docker.io/library/eclipse-mosquitto:2 # updateable version
+          image: docker.io/library/eclipse-mosquitto:2@sha256:9cfdd46ad59f3e3e5f592f6baf57ab23e1ad00605509d0f5c1e9b179c5314d87 # updateable version
           env:
             - name: TZ
               value: 'America/Los_Angeles'
