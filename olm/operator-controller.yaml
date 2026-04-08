@@ -1556,7 +1556,7 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
-          image: quay.io/operator-framework/catalogd:v1.4.0
+          image: quay.io/operator-framework/catalogd:v1.4.0@sha256:99ed09fee91874849d0f03015bfb7f79c3c5a29d219ba47d3ce19af5f2d46696
           imagePullPolicy: IfNotPresent
           livenessProbe:
             httpGet:
@@ -1665,7 +1665,7 @@ spec:
             - --tls-key=/var/certs/tls.key
           command:
             - /operator-controller
-          image: quay.io/operator-framework/operator-controller:v1.4.0
+          image: quay.io/operator-framework/operator-controller:v1.4.0@sha256:f1096c15acac98bbda692fedce99e50c4737e56fe5f3899e182dc384779c361f
           imagePullPolicy: IfNotPresent
           livenessProbe:
             httpGet:
