@@ -36,11 +36,16 @@ jobs:
         id: version
         run: |
           if [ -n "${{ inputs.kc_version }}" ]; then
-            echo "kc_version=${{ inputs.kc_version }}" >> "$GITHUB_OUTPUT"
+            kc_ref="${{ inputs.kc_version }}"
           else
-            version=$(grep -oP '^ARG KC_VERSION=\K.*' images/keycloak/Containerfile)
-            echo "kc_version=${version}" >> "$GITHUB_OUTPUT"
+            kc_ref=$(grep -oP '^ARG KC_VERSION=\K.*' images/keycloak/Containerfile)
           fi
+
+          # Docker tags cannot include a digest, so publish using the version part only.
+          kc_tag="${kc_ref%%@*}"
+
+          echo "kc_ref=${kc_ref}" >> "$GITHUB_OUTPUT"
+          echo "kc_tag=${kc_tag}" >> "$GITHUB_OUTPUT"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
@@ -60,16 +65,16 @@ jobs:
           push: false
           load: true
           build-args: |
-            KC_VERSION=${{ steps.version.outputs.kc_version }}
+            KC_VERSION=${{ steps.version.outputs.kc_ref }}
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.kc_version }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.kc_version }}-${{ github.run_id }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.kc_tag }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.kc_tag }}-${{ github.run_id }}
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
       - name: Push image
         run: |
-          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.kc_version }}
-          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.kc_version }}-${{ github.run_id }}
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.kc_tag }}
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.kc_tag }}-${{ github.run_id }}
           docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
