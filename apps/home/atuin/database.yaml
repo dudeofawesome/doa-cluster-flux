@@ -13,3 +13,41 @@ spec:
 
   storage:
     size: 5Gi
+    pvcTemplate:
+      volumeName: atuin-data
+      volumeMode: Filesystem
+      storageClassName: 'local-path'
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+
+  monitoring:
+    enablePodMonitor: true
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: atuin-data
+  labels:
+    type: local
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-path
+  local:
+    # TODO: find a better place for this
+    path: /mnt/atuin
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - haleakala
