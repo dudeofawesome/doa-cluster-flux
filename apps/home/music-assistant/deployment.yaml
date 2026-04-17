@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: music-assistant-app
-          image: 'ghcr.io/music-assistant/server:2.8@sha256:4940a9a2602d895b4e9d4b877d7e4fa6161efe77098347072eef88d633fbe85f'
+          image: 'ghcr.io/music-assistant/server:2.8@sha256:fb0ea93078c747d327f86a832d6e11aa2e47dafa6009cf0d4aee5bab60db19c4'
           imagePullPolicy: IfNotPresent
           # securityContext:
           #   privileged: true
