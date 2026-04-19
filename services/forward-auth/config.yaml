@@ -5,4 +5,4 @@ metadata:
 data:
   config-base.ini: |
     default-provider = oidc
-    lifetime = 604800
+    lifetime = 2592000
