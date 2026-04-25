@@ -29,6 +29,9 @@ homeassistant:
         - !env_var oidc_client_id
         - !env_var oidc_client_secret
     - type: homeassistant
+  allowlist_external_urls:
+    - 'http://localhost:8123'
+    - 'http://home-assistant.home-assistant.svc.cluster.local:8123'
 
 recorder:
   db_url: !env_var DB_URI
