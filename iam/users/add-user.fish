@@ -1,15 +1,19 @@
 #!/usr/bin/env nix
-#! nix shell nixpkgs#fish nixpkgs#kubectl nixpkgs#libressl nixpkgs#coreutils --command fish
+#! nix shell nixpkgs#fish nixpkgs#kubectl nixpkgs#openssl nixpkgs#coreutils --command fish
 
 function main -a username -a cluster -a role
-    set private_key "$username.key"
-    set csr "$username.csr"
-    set cert "$username.crt"
-    set role_bind "$username.yaml"
+    set script_dir "$(dirname (status --current-filename))"
+    set private_key "$script_dir/$username.key"
+    set csr "$script_dir/$username.csr"
+    set cert "$script_dir/$username.crt"
+    set role_bind "$script_dir/../roles/$username.yaml"
+    set openssl_config "$script_dir/openssl.cnf"
 
     # create private key & CSR
     openssl genpkey -out "$private_key" -algorithm Ed25519
+    or exit 1
     openssl req -new -key "$private_key" -out "$csr" -subj "/CN=$username/O=$cluster"
+    or exit 1
 
     # send CSR to cluster
     echo "
@@ -62,6 +66,7 @@ roleRef:
             # commit & push changes
             git commit -m "🛂 add user $username to cluster $cluster as $role"
             git push
+            echo ""
         case S s skip
             echo skipping
         case '*'
@@ -77,8 +82,17 @@ roleRef:
 end
 
 set username "$argv[1]"
+if string match -q -- '-*' "$username"
+    echo "error: username must not start with '-'"
+    exit 1
+end
 if test -z "$username"
     read -gP 'username: ' username
 end
 
-main "$username" doa-cluster owner
+set role "$argv[2]"
+if test -z "$role"
+    set role owner
+end
+
+main "$username" doa-cluster "$role"
