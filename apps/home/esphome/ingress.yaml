@@ -1,0 +1,40 @@
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: esphome
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`esp.red.orleans.io`)
+      kind: Rule
+      services:
+        - name: esphome
+          port: 6052
+      middlewares:
+        - name: forward-auth
+          namespace: esphome
+  tls:
+    secretName: wildcard-orleans-io
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: esphome
+  labels:
+    monitor: esphome
+spec:
+  selector:
+    component: app
+  ports:
+    - name: http
+      port: 6052
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: forward-auth
+data:
+  config.ini: |
+    logout-redirect = https://esp.red.orleans.io
