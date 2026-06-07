@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: esphome
+spec:
+  revisionHistoryLimit: 3
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      component: app
+  template:
+    metadata:
+      labels:
+        component: app
+    spec:
+      containers:
+        - name: esphome
+          image: ghcr.io/esphome/esphome:2026.5.3@sha256:c1a2a042e351ed07d7e8e703f3b51dec9f836921cdfc867a5fd5472bad36b9fb
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 6052
+              protocol: TCP
+          resources: {}
+          volumeMounts:
+            - name: config
+              mountPath: /config
+      restartPolicy: Always
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: config

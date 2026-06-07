@@ -1,0 +1,41 @@
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: config
+  labels:
+    type: local
+spec:
+  volumeName: esphome-config
+  storageClassName: local-path
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: esphome-config
+  labels:
+    type: local
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-path
+  local:
+    # TODO: find a better place for this
+    path: /mnt/esphome
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - haleakala
