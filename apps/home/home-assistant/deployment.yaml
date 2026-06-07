@@ -100,24 +100,6 @@ spec:
               mountPath: /usr/bin/auth-oidc.py
               subPath: auth-oidc.py
               readOnly: true
-        - name: everything-presence-zone-configurator
-          image: everythingsmarthome/everything-presence-mmwave-configurator:latest
-          imagePullPolicy: IfNotPresent
-          env:
-            - name: HA_BASE_URL
-              value: http://localhost:8123
-            - name: HA_LONG_LIVED_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: everything-presence-zone-configurator
-                  key: ha_long_lived_token
-          ports:
-            - name: configurator-http
-              containerPort: 42069
-              protocol: TCP
-          volumeMounts:
-            - name: ha-config-root
-              mountPath: /config
       restartPolicy: Always
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
