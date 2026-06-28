@@ -1665,7 +1665,7 @@ spec:
             - --tls-key=/var/certs/tls.key
           command:
             - /operator-controller
-          image: quay.io/operator-framework/operator-controller:v1.4.0@sha256:f1096c15acac98bbda692fedce99e50c4737e56fe5f3899e182dc384779c361f
+          image: quay.io/operator-framework/operator-controller:v1.10.0@sha256:f31759056c7238d71d08479d5980a0273f468e964e6e9803507a4f576b03a0c6
           imagePullPolicy: IfNotPresent
           livenessProbe:
             httpGet:
