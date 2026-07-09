@@ -14,6 +14,11 @@ resources:
   - oidc-client.yaml
   - ../../../services/forward-auth
 
+configMapGenerator:
+  - name: config-git-sync
+    files:
+      - git-sync.sh=git-sync.sh
+
 patches:
   - patch: |
       - op: replace

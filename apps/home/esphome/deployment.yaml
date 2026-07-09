@@ -27,6 +27,32 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /config
+        - name: config-git-sync
+          image: alpine/git:2.49.1
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - /usr/local/bin/git-sync.sh
+          env:
+            - name: GIT_REPO_DIR
+              value: /config
+            - name: GIT_REMOTE
+              value: ssh://git@github.com/dudeofawesome/esphome-devices
+            - name: GIT_BRANCH
+              value: main
+            - name: GIT_SYNC_INTERVAL
+              value: '300'
+          resources: {}
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: config-git-sync
+              mountPath: /usr/local/bin/git-sync.sh
+              subPath: git-sync.sh
+              readOnly: true
+            - name: config-git-ssh
+              mountPath: /etc/git-secret
+              readOnly: true
       restartPolicy: Always
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
@@ -34,3 +60,11 @@ spec:
         - name: config
           persistentVolumeClaim:
             claimName: config
+        - name: config-git-sync
+          configMap:
+            name: config-git-sync
+            defaultMode: 0555
+        - name: config-git-ssh
+          secret:
+            secretName: esphome-config-git
+            defaultMode: 0400
