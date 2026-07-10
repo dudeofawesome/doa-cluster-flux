@@ -5,6 +5,7 @@
   packages = with pkgs; [
     actionlint
     kustomize
+    fluxcd
   ];
 
   languages = {
@@ -13,7 +14,7 @@
       version = "3.13";
       poetry = {
         enable = true;
-        package = pkgs.unstable.poetry;
+        package = pkgs.poetry;
         install.enable = true;
         activate.enable = true;
       };
