@@ -6,6 +6,7 @@
     actionlint
     kustomize
     fluxcd
+    kubectl
   ];
 
   languages = {
