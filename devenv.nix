@@ -7,6 +7,7 @@
     kustomize
     fluxcd
     kubectl
+    kubectx
   ];
 
   languages = {
@@ -19,6 +20,13 @@
         install.enable = true;
         activate.enable = true;
       };
+    };
+  };
+
+  tasks = {
+    "k8s:switch-kube-context" = {
+      exec = "kubectx doa-admin";
+      before = [ "devenv:enterShell" ];
     };
   };
 }
