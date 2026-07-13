@@ -1,9 +1,140 @@
+# Source: olmv1/templates/networkpolicy/networkpolicy-olmv1-system-catalogd-controller-manager.yml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  annotations:
+    olm.operatorframework.io/feature-set: standard
+  labels:
+    app.kubernetes.io/name: catalogd
+    app.kubernetes.io/part-of: olm
+  name: catalogd-controller-manager
+  namespace: olmv1-system
+spec:
+  egress:
+    - {}
+  ingress:
+    - ports:
+        - port: 7443
+          protocol: TCP
+        - port: 8443
+          protocol: TCP
+        - port: 9443
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      control-plane: catalogd-controller-manager
+  policyTypes:
+    - Ingress
+    - Egress
+---
+# Source: olmv1/templates/networkpolicy/networkpolicy-olmv1-system-default-deny-all-traffic.yml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  annotations:
+    olm.operatorframework.io/feature-set: standard
+  labels:
+    app.kubernetes.io/name: olmv1
+    app.kubernetes.io/part-of: olm
+  name: default-deny-all-traffic
+  namespace: olmv1-system
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+---
+# Source: olmv1/templates/networkpolicy/networkpolicy-olmv1-system-operator-controller-controller-manager.yml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  annotations:
+    olm.operatorframework.io/feature-set: standard
+  labels:
+    app.kubernetes.io/name: operator-controller
+    app.kubernetes.io/part-of: olm
+  name: operator-controller-controller-manager
+  namespace: olmv1-system
+spec:
+  egress:
+    - {}
+  ingress:
+    - ports:
+        - port: 8443
+          protocol: TCP
+  podSelector:
+    matchLabels:
+      control-plane: operator-controller-controller-manager
+  policyTypes:
+    - Ingress
+    - Egress
+---
+# Source: olmv1/templates/poddisruptionbudget-olmv1-system-catalogd.yml
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: catalogd-controller-manager
+  namespace: olmv1-system
+  labels:
+    app.kubernetes.io/name: catalogd
+    app.kubernetes.io/part-of: olm
+  annotations:
+    olm.operatorframework.io/feature-set: standard
+spec:
+  minAvailable: 1
+  unhealthyPodEvictionPolicy: AlwaysAllow
+  selector:
+    matchLabels:
+      control-plane: catalogd-controller-manager
+---
+# Source: olmv1/templates/poddisruptionbudget-olmv1-system-operator-controller.yml
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: operator-controller-controller-manager
+  namespace: olmv1-system
+  labels:
+    app.kubernetes.io/name: operator-controller
+    app.kubernetes.io/part-of: olm
+  annotations:
+    olm.operatorframework.io/feature-set: standard
+spec:
+  minAvailable: 1
+  unhealthyPodEvictionPolicy: AlwaysAllow
+  selector:
+    matchLabels:
+      control-plane: operator-controller-controller-manager
+---
+# Source: olmv1/templates/serviceaccount-olmv1-system-common-controller-manager.yml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations:
+    olm.operatorframework.io/feature-set: standard
+  labels:
+    app.kubernetes.io/name: catalogd
+    app.kubernetes.io/part-of: olm
+  name: catalogd-controller-manager
+  namespace: olmv1-system
+---
+# Source: olmv1/templates/serviceaccount-olmv1-system-common-controller-manager.yml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations:
+    olm.operatorframework.io/feature-set: standard
+  labels:
+    app.kubernetes.io/name: operator-controller
+    app.kubernetes.io/part-of: olm
+  name: operator-controller-controller-manager
+  namespace: olmv1-system
+---
+# Source: olmv1/templates/crds/customresourcedefinition-clustercatalogs.olm.operatorframework.io.yml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.18.0
-    olm.operatorframework.io/feature-set: standard
+    controller-gen.kubebuilder.io/version: v0.20.1
     olm.operatorframework.io/generator: standard
   name: clustercatalogs.olm.operatorframework.io
 spec:
@@ -29,7 +160,7 @@ spec:
       schema:
         openAPIV3Schema:
           description: |-
-            ClusterCatalog enables users to make File-Based Catalog (FBC) catalog data available to the cluster.
+            ClusterCatalog makes File-Based Catalog (FBC) data available to your cluster.
             For more information on FBC, see https://olm.operatorframework.io/docs/reference/file-based-catalogs/#docs
           properties:
             apiVersion:
@@ -51,29 +182,24 @@ spec:
               type: object
             spec:
               description: |-
-                spec is the desired state of the ClusterCatalog.
-                spec is required.
-                The controller will work to ensure that the desired
-                catalog is unpacked and served over the catalog content HTTP server.
+                spec is a required field that defines the desired state of the ClusterCatalog.
+                The controller ensures that the catalog is unpacked and served over the catalog content HTTP server.
               properties:
                 availabilityMode:
                   default: Available
                   description: |-
-                    availabilityMode allows users to define how the ClusterCatalog is made available to clients on the cluster.
-                    availabilityMode is optional.
+                    availabilityMode is an optional field that defines how the ClusterCatalog is made available to clients on the cluster.
 
-                    Allowed values are "Available" and "Unavailable" and omitted.
+                    Allowed values are "Available", "Unavailable", or omitted.
 
                     When omitted, the default value is "Available".
 
-                    When set to "Available", the catalog contents will be unpacked and served over the catalog content HTTP server.
-                    Setting the availabilityMode to "Available" tells clients that they should consider this ClusterCatalog
-                    and its contents as usable.
+                    When set to "Available", the catalog contents are unpacked and served over the catalog content HTTP server.
+                    Clients should consider this ClusterCatalog and its contents as usable.
 
-                    When set to "Unavailable", the catalog contents will no longer be served over the catalog content HTTP server.
-                    When set to this availabilityMode it should be interpreted the same as the ClusterCatalog not existing.
-                    Setting the availabilityMode to "Unavailable" can be useful in scenarios where a user may not want
-                    to delete the ClusterCatalog all together, but would still like it to be treated as if it doesn't exist.
+                    When set to "Unavailable", the catalog contents are no longer served over the catalog content HTTP server.
+                    Treat this the same as if the ClusterCatalog does not exist.
+                    Use "Unavailable" when you want to keep the ClusterCatalog but treat it as if it doesn't exist.
                   enum:
                     - Unavailable
                     - Available
@@ -81,35 +207,33 @@ spec:
                 priority:
                   default: 0
                   description: |-
-                    priority allows the user to define a priority for a ClusterCatalog.
-                    priority is optional.
+                    priority is an optional field that defines a priority for this ClusterCatalog.
 
-                    A ClusterCatalog's priority is used by clients as a tie-breaker between ClusterCatalogs that meet the client's requirements.
-                    A higher number means higher priority.
+                    Clients use the ClusterCatalog priority as a tie-breaker between ClusterCatalogs that meet their requirements.
+                    Higher numbers mean higher priority.
 
-                    It is up to clients to decide how to handle scenarios where multiple ClusterCatalogs with the same priority meet their requirements.
-                    When deciding how to break the tie in this scenario, it is recommended that clients prompt their users for additional input.
+                    Clients decide how to handle scenarios where multiple ClusterCatalogs with the same priority meet their requirements.
+                    Clients should prompt users for additional input to break the tie.
 
-                    When omitted, the default priority is 0 because that is the zero value of integers.
+                    When omitted, the default priority is 0.
 
-                    Negative numbers can be used to specify a priority lower than the default.
-                    Positive numbers can be used to specify a priority higher than the default.
+                    Use negative numbers to specify a priority lower than the default.
+                    Use positive numbers to specify a priority higher than the default.
 
                     The lowest possible value is -2147483648.
                     The highest possible value is 2147483647.
                   format: int32
+                  maximum: 2147483647
+                  minimum: -2147483648
                   type: integer
                 source:
                   description: |-
-                    source allows a user to define the source of a catalog.
-                    A "catalog" contains information on content that can be installed on a cluster.
-                    Providing a catalog source makes the contents of the catalog discoverable and usable by
-                    other on-cluster components.
-                    These on-cluster components may do a variety of things with this information, such as
-                    presenting the content in a GUI dashboard or installing content from the catalog on the cluster.
+                    source is a required field that defines the source of a catalog.
+                    A catalog contains information on content that can be installed on a cluster.
+                    The catalog source makes catalog contents discoverable and usable by other on-cluster components.
+                    These components can present the content in a GUI dashboard or install content from the catalog on the cluster.
                     The catalog source must contain catalog metadata in the File-Based Catalog (FBC) format.
                     For more information on FBC, see https://olm.operatorframework.io/docs/reference/file-based-catalogs/#docs.
-                    source is a required field.
 
                     Below is a minimal example of a ClusterCatalogSpec that sources a catalog from an image:
 
@@ -120,25 +244,23 @@ spec:
                   properties:
                     image:
                       description: |-
-                        image is used to configure how catalog contents are sourced from an OCI image.
-                        This field is required when type is Image, and forbidden otherwise.
+                        image configures how catalog contents are sourced from an OCI image.
+                        It is required when type is Image, and forbidden otherwise.
                       properties:
                         pollIntervalMinutes:
                           description: |-
-                            pollIntervalMinutes allows the user to set the interval, in minutes, at which the image source should be polled for new content.
-                            pollIntervalMinutes is optional.
-                            pollIntervalMinutes can not be specified when ref is a digest-based reference.
+                            pollIntervalMinutes is an optional field that sets the interval, in minutes, at which the image source is polled for new content.
+                            You cannot specify pollIntervalMinutes when ref is a digest-based reference.
 
-                            When omitted, the image will not be polled for new content.
+                            When omitted, the image is not polled for new content.
                           minimum: 1
                           type: integer
                         ref:
                           description: |-
-                            ref allows users to define the reference to a container image containing Catalog contents.
-                            ref is required.
-                            ref can not be more than 1000 characters.
+                            ref is a required field that defines the reference to a container image containing catalog contents.
+                            It cannot be more than 1000 characters.
 
-                            A reference can be broken down into 3 parts - the domain, name, and identifier.
+                            A reference has 3 parts: the domain, name, and identifier.
 
                             The domain is typically the registry where an image is located.
                             It must be alphanumeric characters (lowercase and uppercase) separated by the "." character.
@@ -198,12 +320,11 @@ spec:
                           rule: 'self.ref.find(''(@.*:)'') != "" ? !has(self.pollIntervalMinutes) : true'
                     type:
                       description: |-
-                        type is a reference to the type of source the catalog is sourced from.
-                        type is required.
+                        type is a required field that specifies the type of source for the catalog.
 
                         The only allowed value is "Image".
 
-                        When set to "Image", the ClusterCatalog content will be sourced from an OCI image.
+                        When set to "Image", the ClusterCatalog content is sourced from an OCI image.
                         When using an image source, the image field must be set and must be the only field defined for this type.
                       enum:
                         - Image
@@ -219,31 +340,30 @@ spec:
               type: object
             status:
               description: |-
-                status contains information about the state of the ClusterCatalog such as:
-                  - Whether or not the catalog contents are being served via the catalog content HTTP server
-                  - Whether or not the ClusterCatalog is progressing to a new state
+                status contains the following information about the state of the ClusterCatalog:
+                  - Whether the catalog contents are being served via the catalog content HTTP server
+                  - Whether the ClusterCatalog is progressing to a new state
                   - A reference to the source from which the catalog contents were retrieved
               properties:
                 conditions:
                   description: |-
-                    conditions is a representation of the current state for this ClusterCatalog.
+                    conditions represents the current state of this ClusterCatalog.
 
                     The current condition types are Serving and Progressing.
 
-                    The Serving condition is used to represent whether or not the contents of the catalog is being served via the HTTP(S) web server.
-                    When it has a status of True and a reason of Available, the contents of the catalog are being served.
-                    When it has a status of False and a reason of Unavailable, the contents of the catalog are not being served because the contents are not yet available.
-                    When it has a status of False and a reason of UserSpecifiedUnavailable, the contents of the catalog are not being served because the catalog has been intentionally marked as unavailable.
+                    The Serving condition represents whether the catalog contents are being served via the HTTP(S) web server:
+                      - When status is True and reason is Available, the catalog contents are being served.
+                      - When status is False and reason is Unavailable, the catalog contents are not being served because the contents are not yet available.
+                      - When status is False and reason is UserSpecifiedUnavailable, the catalog contents are not being served because the catalog has been intentionally marked as unavailable.
 
-                    The Progressing condition is used to represent whether or not the ClusterCatalog is progressing or is ready to progress towards a new state.
-                    When it has a status of True and a reason of Retrying, there was an error in the progression of the ClusterCatalog that may be resolved on subsequent reconciliation attempts.
-                    When it has a status of True and a reason of Succeeded, the ClusterCatalog has successfully progressed to a new state and is ready to continue progressing.
-                    When it has a status of False and a reason of Blocked, there was an error in the progression of the ClusterCatalog that requires manual intervention for recovery.
+                    The Progressing condition represents whether the ClusterCatalog is progressing or is ready to progress towards a new state:
+                      - When status is True and reason is Retrying, an error occurred that may be resolved on subsequent reconciliation attempts.
+                      - When status is True and reason is Succeeded, the ClusterCatalog has successfully progressed to a new state and is ready to continue progressing.
+                      - When status is False and reason is Blocked, an error occurred that requires manual intervention for recovery.
 
-                    In the case that the Serving condition is True with reason Available and Progressing is True with reason Retrying, the previously fetched
-                    catalog contents are still being served via the HTTP(S) web server while we are progressing towards serving a new version of the catalog
-                    contents. This could occur when we've initially fetched the latest contents from the source for this catalog and when polling for changes
-                    to the contents we identify that there are updates to the contents.
+                    If the system initially fetched contents and polling identifies updates, both conditions can be active simultaneously:
+                      - The Serving condition remains True with reason Available because the previous contents are still served via the HTTP(S) web server.
+                      - The Progressing condition is True with reason Retrying because the system is working to serve the new version.
                   items:
                     description: Condition contains details for one aspect of the current state of this API Resource.
                     properties:
@@ -303,11 +423,9 @@ spec:
                   x-kubernetes-list-type: map
                 lastUnpacked:
                   description: |-
-                    lastUnpacked represents the last time the contents of the
-                    catalog were extracted from their source format. As an example,
-                    when using an Image source, the OCI image will be pulled and the
-                    image layers written to a file-system backed cache. We refer to the
-                    act of this extraction from the source format as "unpacking".
+                    lastUnpacked represents the last time the catalog contents were extracted from their source format.
+                    For example, when using an Image source, the OCI image is pulled and image layers are written to a file-system backed cache.
+                    This extraction from the source format is called "unpacking".
                   format: date-time
                   type: string
                 resolvedSource:
@@ -315,14 +433,14 @@ spec:
                   properties:
                     image:
                       description: |-
-                        image is a field containing resolution information for a catalog sourced from an image.
-                        This field must be set when type is Image, and forbidden otherwise.
+                        image contains resolution information for a catalog sourced from an image.
+                        It must be set when type is Image, and forbidden otherwise.
                       properties:
                         ref:
                           description: |-
                             ref contains the resolved image digest-based reference.
-                            The digest format is used so users can use other tooling to fetch the exact
-                            OCI manifests that were used to extract the catalog contents.
+                            The digest format allows you to use other tooling to fetch the exact OCI manifests
+                            that were used to extract the catalog contents.
                           maxLength: 1000
                           type: string
                           x-kubernetes-validations:
@@ -343,12 +461,11 @@ spec:
                       type: object
                     type:
                       description: |-
-                        type is a reference to the type of source the catalog is sourced from.
-                        type is required.
+                        type is a required field that specifies the type of source for the catalog.
 
                         The only allowed value is "Image".
 
-                        When set to "Image", information about the resolved image source will be set in the 'image' field.
+                        When set to "Image", information about the resolved image source is set in the image field.
                       enum:
                         - Image
                       type: string
@@ -364,19 +481,16 @@ spec:
                   properties:
                     base:
                       description: |-
-                        base is a cluster-internal URL that provides endpoints for
-                        accessing the content of the catalog.
+                        base is a cluster-internal URL that provides endpoints for accessing the catalog content.
 
-                        It is expected that clients append the path for the endpoint they wish
-                        to access.
+                        Clients should append the path for the endpoint they want to access.
 
-                        Currently, only a single endpoint is served and is accessible at the path
-                        /api/v1.
+                        Currently, only a single endpoint is served and is accessible at the path /api/v1.
 
                         The endpoints served for the v1 API are:
-                          - /all - this endpoint returns the entirety of the catalog contents in the FBC format
+                          - /all - this endpoint returns the entire catalog contents in the FBC format
 
-                        As the needs of users and clients of the evolve, new endpoints may be added.
+                        New endpoints may be added as needs evolve.
                       maxLength: 525
                       type: string
                       x-kubernetes-validations:
@@ -397,12 +511,12 @@ spec:
       subresources:
         status: {}
 ---
+# Source: olmv1/templates/crds/customresourcedefinition-clusterextensions.olm.operatorframework.io.yml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.18.0
-    olm.operatorframework.io/feature-set: standard
+    controller-gen.kubebuilder.io/version: v0.20.1
     olm.operatorframework.io/generator: standard
   name: clusterextensions.olm.operatorframework.io
 spec:
@@ -457,37 +571,35 @@ spec:
               properties:
                 install:
                   description: |-
-                    install is an optional field used to configure the installation options
-                    for the ClusterExtension such as the pre-flight check configuration.
+                    install is optional and configures installation options for the ClusterExtension,
+                    such as the pre-flight check configuration.
                   properties:
                     preflight:
                       description: |-
-                        preflight is an optional field that can be used to configure the checks that are
-                        run before installation or upgrade of the content for the package specified in the packageName field.
+                        preflight is optional and configures the checks that run before installation or upgrade
+                        of the content for the package specified in the packageName field.
 
                         When specified, it replaces the default preflight configuration for install/upgrade actions.
-                        When not specified, the default configuration will be used.
+                        When not specified, the default configuration is used.
                       properties:
                         crdUpgradeSafety:
                           description: |-
-                            crdUpgradeSafety is used to configure the CRD Upgrade Safety pre-flight
-                            checks that run prior to upgrades of installed content.
+                            crdUpgradeSafety configures the CRD Upgrade Safety pre-flight checks that run
+                            before upgrades of installed content.
 
-                            The CRD Upgrade Safety pre-flight check safeguards from unintended
-                            consequences of upgrading a CRD, such as data loss.
+                            The CRD Upgrade Safety pre-flight check safeguards from unintended consequences of upgrading a CRD,
+                            such as data loss.
                           properties:
                             enforcement:
                               description: |-
-                                enforcement is a required field, used to configure the state of the CRD Upgrade Safety pre-flight check.
+                                enforcement is required and configures the state of the CRD Upgrade Safety pre-flight check.
 
                                 Allowed values are "None" or "Strict". The default value is "Strict".
 
-                                When set to "None", the CRD Upgrade Safety pre-flight check will be skipped
-                                when performing an upgrade operation. This should be used with caution as
-                                unintended consequences such as data loss can occur.
+                                When set to "None", the CRD Upgrade Safety pre-flight check is skipped during an upgrade operation.
+                                Use this option with caution as unintended consequences such as data loss can occur.
 
-                                When set to "Strict", the CRD Upgrade Safety pre-flight check will be run when
-                                performing an upgrade operation.
+                                When set to "Strict", the CRD Upgrade Safety pre-flight check runs during an upgrade operation.
                               enum:
                                 - None
                                 - Strict
@@ -507,16 +619,15 @@ spec:
                       rule: has(self.preflight)
                 namespace:
                   description: |-
-                    namespace is a reference to a Kubernetes namespace.
-                    This is the namespace in which the provided ServiceAccount must exist.
-                    It also designates the default namespace where namespace-scoped resources
-                    for the extension are applied to the cluster.
+                    namespace specifies a Kubernetes namespace.
+                    This is the namespace where the provided ServiceAccount must exist.
+                    It also designates the default namespace where namespace-scoped resources for the extension are applied to the cluster.
                     Some extensions may contain namespace-scoped resources to be applied in other namespaces.
                     This namespace must exist.
 
-                    namespace is required, immutable, and follows the DNS label standard
-                    as defined in [RFC 1123]. It must contain only lowercase alphanumeric characters or hyphens (-),
-                    start and end with an alphanumeric character, and be no longer than 63 characters
+                    The namespace field is required, immutable, and follows the DNS label standard as defined in [RFC 1123].
+                    It must contain only lowercase alphanumeric characters or hyphens (-), start and end with an alphanumeric character,
+                    and be no longer than 63 characters.
 
                     [RFC 1123]: https://tools.ietf.org/html/rfc1123
                   maxLength: 63
@@ -528,24 +639,22 @@ spec:
                       rule: self.matches("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")
                 serviceAccount:
                   description: |-
-                    serviceAccount is a reference to a ServiceAccount used to perform all interactions
-                    with the cluster that are required to manage the extension.
+                    serviceAccount specifies a ServiceAccount used to perform all interactions with the cluster
+                    that are required to manage the extension.
                     The ServiceAccount must be configured with the necessary permissions to perform these interactions.
                     The ServiceAccount must exist in the namespace referenced in the spec.
-                    serviceAccount is required.
+                    The serviceAccount field is required.
                   properties:
                     name:
                       description: |-
-                        name is a required, immutable reference to the name of the ServiceAccount
-                        to be used for installation and management of the content for the package
-                        specified in the packageName field.
+                        name is a required, immutable reference to the name of the ServiceAccount used for installation
+                        and management of the content for the package specified in the packageName field.
 
                         This ServiceAccount must exist in the installNamespace.
 
-                        name follows the DNS subdomain standard as defined in [RFC 1123].
-                        It must contain only lowercase alphanumeric characters,
-                        hyphens (-) or periods (.), start and end with an alphanumeric character,
-                        and be no longer than 253 characters.
+                        The name field follows the DNS subdomain standard as defined in [RFC 1123].
+                        It must contain only lowercase alphanumeric characters, hyphens (-) or periods (.),
+                        start and end with an alphanumeric character, and be no longer than 253 characters.
 
                         Some examples of valid values are:
                           - some-serviceaccount
@@ -571,11 +680,11 @@ spec:
                   type: object
                 source:
                   description: |-
-                    source is a required field which selects the installation source of content
-                    for this ClusterExtension. Selection is performed by setting the sourceType.
+                    source is required and selects the installation source of content for this ClusterExtension.
+                    Set the sourceType field to perform the selection.
 
-                    Catalog is currently the only implemented sourceType, and setting the
-                    sourcetype to "Catalog" requires the catalog field to also be defined.
+                    Catalog is currently the only implemented sourceType.
+                    Setting sourceType to "Catalog" requires the catalog field to also be defined.
 
                     Below is a minimal example of a source definition (in yaml):
 
@@ -586,30 +695,29 @@ spec:
                   properties:
                     catalog:
                       description: |-
-                        catalog is used to configure how information is sourced from a catalog.
-                        This field is required when sourceType is "Catalog", and forbidden otherwise.
+                        catalog configures how information is sourced from a catalog.
+                        It is required when sourceType is "Catalog", and forbidden otherwise.
                       properties:
                         channels:
                           description: |-
-                            channels is an optional reference to a set of channels belonging to
-                            the package specified in the packageName field.
+                            channels is optional and specifies a set of channels belonging to the package
+                            specified in the packageName field.
 
-                            A "channel" is a package-author-defined stream of updates for an extension.
+                            A channel is a package-author-defined stream of updates for an extension.
 
-                            Each channel in the list must follow the DNS subdomain standard
-                            as defined in [RFC 1123]. It must contain only lowercase alphanumeric characters,
-                            hyphens (-) or periods (.), start and end with an alphanumeric character,
-                            and be no longer than 253 characters. No more than 256 channels can be specified.
+                            Each channel in the list must follow the DNS subdomain standard as defined in [RFC 1123].
+                            It must contain only lowercase alphanumeric characters, hyphens (-) or periods (.),
+                            start and end with an alphanumeric character, and be no longer than 253 characters.
+                            You can specify no more than 256 channels.
 
-                            When specified, it is used to constrain the set of installable bundles and
-                            the automated upgrade path. This constraint is an AND operation with the
-                            version field. For example:
+                            When specified, it constrains the set of installable bundles and the automated upgrade path.
+                            This constraint is an AND operation with the version field. For example:
                               - Given channel is set to "foo"
                               - Given version is set to ">=1.0.0, <1.5.0"
-                              - Only bundles that exist in channel "foo" AND satisfy the version range comparison will be considered installable
-                              - Automatic upgrades will be constrained to upgrade edges defined by the selected channel
+                              - Only bundles that exist in channel "foo" AND satisfy the version range comparison are considered installable
+                              - Automatic upgrades are constrained to upgrade edges defined by the selected channel
 
-                            When unspecified, upgrade edges across all channels will be used to identify valid automatic upgrade paths.
+                            When unspecified, upgrade edges across all channels are used to identify valid automatic upgrade paths.
 
                             Some examples of valid values are:
                               - 1.1.x
@@ -639,13 +747,12 @@ spec:
                           type: array
                         packageName:
                           description: |-
-                            packageName is a reference to the name of the package to be installed
-                            and is used to filter the content from catalogs.
+                            packageName specifies the name of the package to be installed and is used to filter
+                            the content from catalogs.
 
-                            packageName is required, immutable, and follows the DNS subdomain standard
-                            as defined in [RFC 1123]. It must contain only lowercase alphanumeric characters,
-                            hyphens (-) or periods (.), start and end with an alphanumeric character,
-                            and be no longer than 253 characters.
+                            It is required, immutable, and follows the DNS subdomain standard as defined in [RFC 1123].
+                            It must contain only lowercase alphanumeric characters, hyphens (-) or periods (.),
+                            start and end with an alphanumeric character, and be no longer than 253 characters.
 
                             Some examples of valid values are:
                               - some-package
@@ -669,12 +776,9 @@ spec:
                               rule: self.matches("^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$")
                         selector:
                           description: |-
-                            selector is an optional field that can be used
-                            to filter the set of ClusterCatalogs used in the bundle
-                            selection process.
+                            selector is optional and filters the set of ClusterCatalogs used in the bundle selection process.
 
-                            When unspecified, all ClusterCatalogs will be used in
-                            the bundle selection process.
+                            When unspecified, all ClusterCatalogs are used in the bundle selection process.
                           properties:
                             matchExpressions:
                               description: matchExpressions is a list of label selector requirements. The requirements are ANDed.
@@ -720,35 +824,34 @@ spec:
                         upgradeConstraintPolicy:
                           default: CatalogProvided
                           description: |-
-                            upgradeConstraintPolicy is an optional field that controls whether
-                            the upgrade path(s) defined in the catalog are enforced for the package
-                            referenced in the packageName field.
+                            upgradeConstraintPolicy is optional and controls whether the upgrade paths defined in the catalog
+                            are enforced for the package referenced in the packageName field.
 
-                            Allowed values are: "CatalogProvided" or "SelfCertified", or omitted.
+                            Allowed values are "CatalogProvided", "SelfCertified", or omitted.
 
-                            When this field is set to "CatalogProvided", automatic upgrades will only occur
-                            when upgrade constraints specified by the package author are met.
+                            When set to "CatalogProvided", automatic upgrades only occur when upgrade constraints specified by the package
+                            author are met.
 
-                            When this field is set to "SelfCertified", the upgrade constraints specified by
-                            the package author are ignored. This allows for upgrades and downgrades to
-                            any version of the package. This is considered a dangerous operation as it
-                            can lead to unknown and potentially disastrous outcomes, such as data
-                            loss. It is assumed that users have independently verified changes when
-                            using this option.
+                            When set to "SelfCertified", the upgrade constraints specified by the package author are ignored.
+                            This allows upgrades and downgrades to any version of the package.
+                            This is considered a dangerous operation as it can lead to unknown and potentially disastrous outcomes,
+                            such as data loss.
+                            Use this option only if you have independently verified the changes.
 
-                            When this field is omitted, the default value is "CatalogProvided".
+                            When omitted, the default value is "CatalogProvided".
                           enum:
                             - CatalogProvided
                             - SelfCertified
                           type: string
                         version:
                           description: |-
-                            version is an optional semver constraint (a specific version or range of versions). When unspecified, the latest version available will be installed.
+                            version is an optional semver constraint (a specific version or range of versions).
+                            When unspecified, the latest version available is installed.
 
                             Acceptable version ranges are no longer than 64 characters.
-                            Version ranges are composed of comma- or space-delimited values and one or
-                            more comparison operators, known as comparison strings. Additional
-                            comparison strings can be added using the OR operator (||).
+                            Version ranges are composed of comma- or space-delimited values and one or more comparison operators,
+                            known as comparison strings.
+                            You can add additional comparison strings using the OR operator (||).
 
                             # Range Comparisons
 
@@ -826,13 +929,12 @@ spec:
                       type: object
                     sourceType:
                       description: |-
-                        sourceType is a required reference to the type of install source.
+                        sourceType is required and specifies the type of install source.
 
-                        Allowed values are "Catalog"
+                        The only allowed value is "Catalog".
 
-                        When this field is set to "Catalog", information for determining the
-                        appropriate bundle of content to install will be fetched from
-                        ClusterCatalog resources existing on the cluster.
+                        When set to "Catalog", information for determining the appropriate bundle of content to install
+                        is fetched from ClusterCatalog resources on the cluster.
                         When using the Catalog sourceType, the catalog field must also be set.
                       enum:
                         - Catalog
@@ -853,23 +955,25 @@ spec:
               properties:
                 conditions:
                   description: |-
+                    conditions represents the current state of the ClusterExtension.
+
                     The set of condition types which apply to all spec.source variations are Installed and Progressing.
 
-                    The Installed condition represents whether or not the bundle has been installed for this ClusterExtension.
-                    When Installed is True and the Reason is Succeeded, the bundle has been successfully installed.
-                    When Installed is False and the Reason is Failed, the bundle has failed to install.
+                    The Installed condition represents whether the bundle has been installed for this ClusterExtension:
+                      - When Installed is True and the Reason is Succeeded, the bundle has been successfully installed.
+                      - When Installed is False and the Reason is Failed, the bundle has failed to install.
 
                     The Progressing condition represents whether or not the ClusterExtension is advancing towards a new state.
                     When Progressing is True and the Reason is Succeeded, the ClusterExtension is making progress towards a new state.
                     When Progressing is True and the Reason is Retrying, the ClusterExtension has encountered an error that could be resolved on subsequent reconciliation attempts.
                     When Progressing is False and the Reason is Blocked, the ClusterExtension has encountered an error that requires manual intervention for recovery.
 
-                    When the ClusterExtension is sourced from a catalog, if may also communicate a deprecation condition.
-                    These are indications from a package owner to guide users away from a particular package, channel, or bundle.
-                    BundleDeprecated is set if the requested bundle version is marked deprecated in the catalog.
-                    ChannelDeprecated is set if the requested channel is marked deprecated in the catalog.
-                    PackageDeprecated is set if the requested package is marked deprecated in the catalog.
-                    Deprecated is a rollup condition that is present when any of the deprecated conditions are present.
+                    When the ClusterExtension is sourced from a catalog, it surfaces deprecation conditions based on catalog metadata.
+                    These are indications from a package owner to guide users away from a particular package, channel, or bundle:
+                      - BundleDeprecated is True if the installed bundle is marked deprecated, False if not deprecated, or Unknown if no bundle is installed yet or if catalog data is unavailable.
+                      - ChannelDeprecated is True if any requested channel is marked deprecated, False if not deprecated, or Unknown if catalog data is unavailable.
+                      - PackageDeprecated is True if the requested package is marked deprecated, False if not deprecated, or Unknown if catalog data is unavailable.
+                      - Deprecated is a rollup condition that is True when any deprecation exists, False when none exist, or Unknown when catalog data is unavailable.
                   items:
                     description: Condition contains details for one aspect of the current state of this API Resource.
                     properties:
@@ -932,25 +1036,24 @@ spec:
                   properties:
                     bundle:
                       description: |-
-                        bundle is a required field which represents the identifying attributes of a bundle.
+                        bundle is required and represents the identifying attributes of a bundle.
 
-                        A "bundle" is a versioned set of content that represents the resources that
-                        need to be applied to a cluster to install a package.
+                        A "bundle" is a versioned set of content that represents the resources that need to be applied
+                        to a cluster to install a package.
                       properties:
                         name:
                           description: |-
-                            name is required and follows the DNS subdomain standard
-                            as defined in [RFC 1123]. It must contain only lowercase alphanumeric characters,
-                            hyphens (-) or periods (.), start and end with an alphanumeric character,
-                            and be no longer than 253 characters.
+                            name is required and follows the DNS subdomain standard as defined in [RFC 1123].
+                            It must contain only lowercase alphanumeric characters, hyphens (-) or periods (.),
+                            start and end with an alphanumeric character, and be no longer than 253 characters.
                           type: string
                           x-kubernetes-validations:
                             - message: packageName must be a valid DNS1123 subdomain. It must contain only lowercase alphanumeric characters, hyphens (-) or periods (.), start and end with an alphanumeric character, and be no longer than 253 characters
                               rule: self.matches("^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$")
                         version:
                           description: |-
-                            version is a required field and is a reference to the version that this bundle represents
-                            version follows the semantic versioning standard as defined in https://semver.org/.
+                            version is required and references the version that this bundle represents.
+                            It follows the semantic versioning standard as defined in https://semver.org/.
                           type: string
                           x-kubernetes-validations:
                             - message: version must be well-formed semver
@@ -969,162 +1072,16 @@ spec:
       subresources:
         status: {}
 ---
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  annotations:
-    olm.operatorframework.io/feature-set: standard
-  labels:
-    app.kubernetes.io/name: catalogd
-    app.kubernetes.io/part-of: olm
-  name: catalogd-controller-manager
-  namespace: olmv1-system
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  annotations:
-    olm.operatorframework.io/feature-set: standard
-  name: operator-controller-controller-manager
-  namespace: olmv1-system
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  annotations:
-    olm.operatorframework.io/feature-set: standard
-  labels:
-    app.kubernetes.io/name: catalogd
-    app.kubernetes.io/part-of: olm
-  name: catalogd-leader-election-role
-  namespace: olmv1-system
-rules:
-  - apiGroups:
-      - ""
-    resources:
-      - configmaps
-    verbs:
-      - get
-      - list
-      - watch
-      - create
-      - update
-      - patch
-      - delete
-  - apiGroups:
-      - coordination.k8s.io
-    resources:
-      - leases
-    verbs:
-      - get
-      - list
-      - watch
-      - create
-      - update
-      - patch
-      - delete
-  - apiGroups:
-      - ""
-    resources:
-      - events
-    verbs:
-      - create
-      - patch
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  annotations:
-    olm.operatorframework.io/feature-set: standard
-  name: catalogd-manager-role
-  namespace: olmv1-system
-rules:
-  - apiGroups:
-      - ""
-    resources:
-      - secrets
-      - serviceaccounts
-    verbs:
-      - get
-      - list
-      - watch
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  annotations:
-    olm.operatorframework.io/feature-set: standard
-  name: operator-controller-leader-election-role
-  namespace: olmv1-system
-rules:
-  - apiGroups:
-      - ""
-    resources:
-      - configmaps
-    verbs:
-      - get
-      - list
-      - watch
-      - create
-      - update
-      - patch
-      - delete
-  - apiGroups:
-      - coordination.k8s.io
-    resources:
-      - leases
-    verbs:
-      - get
-      - list
-      - watch
-      - create
-      - update
-      - patch
-      - delete
-  - apiGroups:
-      - ""
-    resources:
-      - events
-    verbs:
-      - create
-      - patch
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  annotations:
-    olm.operatorframework.io/feature-set: standard
-  name: operator-controller-manager-role
-  namespace: olmv1-system
-rules:
-  - apiGroups:
-      - ""
-    resources:
-      - secrets
-    verbs:
-      - create
-      - delete
-      - deletecollection
-      - get
-      - list
-      - patch
-      - update
-      - watch
-  - apiGroups:
-      - ""
-    resources:
-      - serviceaccounts
-    verbs:
-      - get
-      - list
-      - watch
----
+# Source: olmv1/templates/rbac/clusterrole-catalogd-manager-role.yml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
+  name: catalogd-manager-role
+  labels:
+    app.kubernetes.io/name: catalogd
+    app.kubernetes.io/part-of: olm
   annotations:
     olm.operatorframework.io/feature-set: standard
-  name: catalogd-manager-role
 rules:
   - apiGroups:
       - olm.operatorframework.io
@@ -1153,6 +1110,7 @@ rules:
       - patch
       - update
 ---
+# Source: olmv1/templates/rbac/clusterrole-common-metrics-reader.yml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -1168,6 +1126,23 @@ rules:
     verbs:
       - get
 ---
+# Source: olmv1/templates/rbac/clusterrole-common-metrics-reader.yml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  annotations:
+    olm.operatorframework.io/feature-set: standard
+  labels:
+    app.kubernetes.io/name: operator-controller
+    app.kubernetes.io/part-of: olm
+  name: operator-controller-metrics-reader
+rules:
+  - nonResourceURLs:
+      - /metrics
+    verbs:
+      - get
+---
+# Source: olmv1/templates/rbac/clusterrole-common-proxy-role.yml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -1191,31 +1166,39 @@ rules:
     verbs:
       - create
 ---
+# Source: olmv1/templates/rbac/clusterrole-common-proxy-role.yml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   annotations:
     olm.operatorframework.io/feature-set: standard
-  name: operator-controller-clusterextension-editor-role
+  labels:
+    app.kubernetes.io/name: operator-controller
+    app.kubernetes.io/part-of: olm
+  name: operator-controller-proxy-role
 rules:
   - apiGroups:
-      - olm.operatorframework.io
+      - authentication.k8s.io
     resources:
-      - clusterextensions
+      - tokenreviews
     verbs:
       - create
-      - delete
-      - get
-      - list
-      - patch
-      - update
-      - watch
+  - apiGroups:
+      - authorization.k8s.io
+    resources:
+      - subjectaccessreviews
+    verbs:
+      - create
 ---
+# Source: olmv1/templates/rbac/clusterrole-operator-controller-clusterextension-viewer-role.yml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   annotations:
     olm.operatorframework.io/feature-set: standard
+  labels:
+    app.kubernetes.io/name: operator-controller
+    app.kubernetes.io/part-of: olm
   name: operator-controller-clusterextension-viewer-role
 rules:
   - apiGroups:
@@ -1227,12 +1210,16 @@ rules:
       - list
       - watch
 ---
+# Source: olmv1/templates/rbac/clusterrole-operator-controller-manager-role.yml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
+  name: operator-controller-manager-role
+  labels:
+    app.kubernetes.io/name: operator-controller
+    app.kubernetes.io/part-of: olm
   annotations:
     olm.operatorframework.io/feature-set: standard
-  name: operator-controller-manager-role
 rules:
   - apiGroups:
       - ""
@@ -1240,6 +1227,12 @@ rules:
       - serviceaccounts/token
     verbs:
       - create
+  - apiGroups:
+      - ""
+    resources:
+      - serviceaccounts
+    verbs:
+      - get
   - apiGroups:
       - apiextensions.k8s.io
     resources:
@@ -1288,38 +1281,203 @@ rules:
       - list
       - watch
 ---
+# Source: olmv1/templates/rbac/clusterrolebinding-catalogd-manager-rolebinding.yml
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
+kind: ClusterRoleBinding
 metadata:
   annotations:
     olm.operatorframework.io/feature-set: standard
-  name: operator-controller-metrics-reader
+  labels:
+    app.kubernetes.io/name: catalogd
+    app.kubernetes.io/part-of: olm
+  name: catalogd-manager-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: catalogd-manager-role
+subjects:
+  - kind: ServiceAccount
+    name: catalogd-controller-manager
+    namespace: olmv1-system
+---
+# Source: olmv1/templates/rbac/clusterrolebinding-common-proxy-rolebinding.yml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  annotations:
+    olm.operatorframework.io/feature-set: standard
+  labels:
+    app.kubernetes.io/name: catalogd
+    app.kubernetes.io/part-of: olm
+  name: catalogd-proxy-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: catalogd-proxy-role
+subjects:
+  - kind: ServiceAccount
+    name: catalogd-controller-manager
+    namespace: olmv1-system
+---
+# Source: olmv1/templates/rbac/clusterrolebinding-common-proxy-rolebinding.yml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  annotations:
+    olm.operatorframework.io/feature-set: standard
+  labels:
+    app.kubernetes.io/name: operator-controller
+    app.kubernetes.io/part-of: olm
+  name: operator-controller-proxy-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: operator-controller-proxy-role
+subjects:
+  - kind: ServiceAccount
+    name: operator-controller-controller-manager
+    namespace: olmv1-system
+---
+# Source: olmv1/templates/rbac/clusterrolebinding-operator-controller-manager-rolebinding.yml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  annotations:
+    olm.operatorframework.io/feature-set: standard
+  labels:
+    app.kubernetes.io/name: operator-controller
+    app.kubernetes.io/part-of: olm
+  name: operator-controller-manager-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: operator-controller-manager-role
+subjects:
+  - kind: ServiceAccount
+    name: operator-controller-controller-manager
+    namespace: olmv1-system
+---
+# Source: olmv1/templates/rbac/role-olmv1-system-catalogd-manager-role.yml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: catalogd-manager-role
+  namespace: olmv1-system
+  labels:
+    app.kubernetes.io/name: catalogd
+    app.kubernetes.io/part-of: olm
+  annotations:
+    olm.operatorframework.io/feature-set: standard
 rules:
-  - nonResourceURLs:
-      - /metrics
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+      - serviceaccounts
     verbs:
       - get
+      - list
+      - watch
 ---
+# Source: olmv1/templates/rbac/role-olmv1-system-common-leader-election-role.yml
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
+kind: Role
 metadata:
   annotations:
     olm.operatorframework.io/feature-set: standard
-  name: operator-controller-proxy-role
+  labels:
+    app.kubernetes.io/name: catalogd
+    app.kubernetes.io/part-of: olm
+  name: catalogd-leader-election-role
+  namespace: olmv1-system
 rules:
   - apiGroups:
-      - authentication.k8s.io
+      - coordination.k8s.io
     resources:
-      - tokenreviews
+      - leases
     verbs:
+      - get
+      - list
+      - watch
       - create
+      - update
+      - patch
+      - delete
   - apiGroups:
-      - authorization.k8s.io
+      - ""
     resources:
-      - subjectaccessreviews
+      - events
     verbs:
       - create
+      - patch
 ---
+# Source: olmv1/templates/rbac/role-olmv1-system-common-leader-election-role.yml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  annotations:
+    olm.operatorframework.io/feature-set: standard
+  labels:
+    app.kubernetes.io/name: operator-controller
+    app.kubernetes.io/part-of: olm
+  name: operator-controller-leader-election-role
+  namespace: olmv1-system
+rules:
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
+---
+# Source: olmv1/templates/rbac/role-olmv1-system-operator-controller-manager-role.yml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: operator-controller-manager-role
+  namespace: olmv1-system
+  labels:
+    app.kubernetes.io/name: operator-controller
+    app.kubernetes.io/part-of: olm
+  annotations:
+    olm.operatorframework.io/feature-set: standard
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - create
+      - delete
+      - deletecollection
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - serviceaccounts
+    verbs:
+      - get
+      - list
+      - watch
+---
+# Source: olmv1/templates/rbac/rolebinding-olmv1-system-common-leader-election-rolebinding.yml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -1339,30 +1497,15 @@ subjects:
     name: catalogd-controller-manager
     namespace: olmv1-system
 ---
+# Source: olmv1/templates/rbac/rolebinding-olmv1-system-common-leader-election-rolebinding.yml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   annotations:
     olm.operatorframework.io/feature-set: standard
   labels:
-    app.kubernetes.io/name: catalogd
+    app.kubernetes.io/name: operator-controller
     app.kubernetes.io/part-of: olm
-  name: catalogd-manager-rolebinding
-  namespace: olmv1-system
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: catalogd-manager-role
-subjects:
-  - kind: ServiceAccount
-    name: catalogd-controller-manager
-    namespace: olmv1-system
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  annotations:
-    olm.operatorframework.io/feature-set: standard
   name: operator-controller-leader-election-rolebinding
   namespace: olmv1-system
 roleRef:
@@ -1374,11 +1517,35 @@ subjects:
     name: operator-controller-controller-manager
     namespace: olmv1-system
 ---
+# Source: olmv1/templates/rbac/rolebinding-olmv1-system-common-manager-rolebinding.yml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   annotations:
     olm.operatorframework.io/feature-set: standard
+  labels:
+    app.kubernetes.io/name: catalogd
+    app.kubernetes.io/part-of: olm
+  name: catalogd-manager-rolebinding
+  namespace: olmv1-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: catalogd-manager-role
+subjects:
+  - kind: ServiceAccount
+    name: catalogd-controller-manager
+    namespace: olmv1-system
+---
+# Source: olmv1/templates/rbac/rolebinding-olmv1-system-common-manager-rolebinding.yml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  annotations:
+    olm.operatorframework.io/feature-set: standard
+  labels:
+    app.kubernetes.io/name: operator-controller
+    app.kubernetes.io/part-of: olm
   name: operator-controller-manager-rolebinding
   namespace: olmv1-system
 roleRef:
@@ -1390,72 +1557,7 @@ subjects:
     name: operator-controller-controller-manager
     namespace: olmv1-system
 ---
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  annotations:
-    olm.operatorframework.io/feature-set: standard
-  labels:
-    app.kubernetes.io/name: catalogd
-    app.kubernetes.io/part-of: olm
-  name: catalogd-manager-rolebinding
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: catalogd-manager-role
-subjects:
-  - kind: ServiceAccount
-    name: catalogd-controller-manager
-    namespace: olmv1-system
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  annotations:
-    olm.operatorframework.io/feature-set: standard
-  labels:
-    app.kubernetes.io/name: catalogd
-    app.kubernetes.io/part-of: olm
-  name: catalogd-proxy-rolebinding
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: catalogd-proxy-role
-subjects:
-  - kind: ServiceAccount
-    name: catalogd-controller-manager
-    namespace: olmv1-system
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  annotations:
-    olm.operatorframework.io/feature-set: standard
-  name: operator-controller-manager-rolebinding
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: operator-controller-manager-role
-subjects:
-  - kind: ServiceAccount
-    name: operator-controller-controller-manager
-    namespace: olmv1-system
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  annotations:
-    olm.operatorframework.io/feature-set: standard
-  name: operator-controller-proxy-rolebinding
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: operator-controller-proxy-role
-subjects:
-  - kind: ServiceAccount
-    name: operator-controller-controller-manager
-    namespace: olmv1-system
----
+# Source: olmv1/templates/service-olmv1-system-catalogd-service.yml
 apiVersion: v1
 kind: Service
 metadata:
@@ -1481,26 +1583,29 @@ spec:
       protocol: TCP
       targetPort: 7443
   selector:
-    control-plane: catalogd-controller-manager
+    app.kubernetes.io/name: catalogd
 ---
+# Source: olmv1/templates/service-olmv1-system-operator-controller-service.yml
 apiVersion: v1
 kind: Service
 metadata:
   annotations:
     olm.operatorframework.io/feature-set: standard
   labels:
-    control-plane: operator-controller-controller-manager
+    app.kubernetes.io/name: operator-controller
+    app.kubernetes.io/part-of: olm
   name: operator-controller-service
   namespace: olmv1-system
 spec:
   ports:
-    - name: https
+    - name: metrics
       port: 8443
       protocol: TCP
       targetPort: 8443
   selector:
-    control-plane: operator-controller-controller-manager
+    app.kubernetes.io/name: operator-controller
 ---
+# Source: olmv1/templates/deployment-olmv1-system-catalogd-controller-manager.yml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -1508,12 +1613,18 @@ metadata:
     kubectl.kubernetes.io/default-logs-container: manager
     olm.operatorframework.io/feature-set: standard
   labels:
-    control-plane: catalogd-controller-manager
+    app.kubernetes.io/name: catalogd
+    app.kubernetes.io/part-of: olm
   name: catalogd-controller-manager
   namespace: olmv1-system
 spec:
   minReadySeconds: 5
   replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1 # Allow temporary extra pod for zero-downtime updates
+      maxUnavailable: 0 # Never allow pods to be unavailable during updates
   selector:
     matchLabels:
       control-plane: catalogd-controller-manager
@@ -1523,48 +1634,29 @@ spec:
         kubectl.kubernetes.io/default-container: manager
         olm.operatorframework.io/feature-set: standard
       labels:
+        app.kubernetes.io/name: catalogd
         control-plane: catalogd-controller-manager
+        app.kubernetes.io/part-of: olm
     spec:
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: kubernetes.io/arch
-                    operator: In
-                    values:
-                      - amd64
-                      - arm64
-                      - ppc64le
-                      - s390x
-                  - key: kubernetes.io/os
-                    operator: In
-                    values:
-                      - linux
       containers:
         - args:
             - --leader-elect
             - --metrics-bind-address=:7443
-            - --external-address=catalogd-service.$(POD_NAMESPACE).svc
+            - --external-address=catalogd-service.olmv1-system.svc
+            - --feature-gates=APIV1MetasHandler=false
             - --tls-cert=/var/certs/tls.crt
             - --tls-key=/var/certs/tls.key
             - --pull-cas-dir=/var/ca-certs
           command:
             - ./catalogd
-          env:
-            - name: POD_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
-          image: quay.io/operator-framework/catalogd:v1.4.0@sha256:99ed09fee91874849d0f03015bfb7f79c3c5a29d219ba47d3ce19af5f2d46696
-          imagePullPolicy: IfNotPresent
+          image: "quay.io/operator-framework/catalogd:v1.10.0"
+          name: manager
           livenessProbe:
             httpGet:
               path: /healthz
               port: 8081
             initialDelaySeconds: 15
             periodSeconds: 20
-          name: manager
           readinessProbe:
             httpGet:
               path: /readyz
@@ -1575,13 +1667,6 @@ spec:
             requests:
               cpu: 100m
               memory: 200Mi
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - ALL
-            readOnlyRootFilesystem: true
-          terminationMessagePolicy: FallbackToLogsOnError
           volumeMounts:
             - mountPath: /var/cache/
               name: cache
@@ -1589,15 +1674,18 @@ spec:
               name: tmp
             - mountPath: /var/certs
               name: catalogserver-certs
-            - mountPath: /var/ca-certs/
-              name: olmv1-certificate
+            - mountPath: /var/ca-certs
+              name: ca-certs
               readOnly: true
-      securityContext:
-        runAsNonRoot: true
-        seccompProfile:
-          type: RuntimeDefault
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+          terminationMessagePolicy: FallbackToLogsOnError
       serviceAccountName: catalogd-controller-manager
-      terminationGracePeriodSeconds: 10
       volumes:
         - emptyDir: {}
           name: cache
@@ -1605,38 +1693,20 @@ spec:
           name: tmp
         - name: catalogserver-certs
           secret:
-            secretName: catalogd-service-cert-v1.4.0
-        - name: olmv1-certificate
+            items:
+              - key: tls.crt
+                path: tls.crt
+              - key: tls.key
+                path: tls.key
+            optional: false
+            secretName: catalogd-service-cert-v1.10.0
+        - name: ca-certs
           secret:
             items:
               - key: ca.crt
                 path: olm-ca.crt
             optional: false
-            secretName: catalogd-service-cert-v1.4.0
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  annotations:
-    kubectl.kubernetes.io/default-logs-container: manager
-    olm.operatorframework.io/feature-set: standard
-  labels:
-    control-plane: operator-controller-controller-manager
-  name: operator-controller-controller-manager
-  namespace: olmv1-system
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      control-plane: operator-controller-controller-manager
-  template:
-    metadata:
-      annotations:
-        kubectl.kubernetes.io/default-container: manager
-        olm.operatorframework.io/feature-set: standard
-      labels:
-        control-plane: operator-controller-controller-manager
-    spec:
+            secretName: catalogd-service-cert-v1.10.0
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -1653,27 +1723,87 @@ spec:
                     operator: In
                     values:
                       - linux
+      nodeSelector:
+        kubernetes.io/os: linux
+        node-role.kubernetes.io/control-plane: ""
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      terminationGracePeriodSeconds: 10
+      tolerations:
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/control-plane
+          operator: Exists
+        - effect: NoExecute
+          key: node.kubernetes.io/unreachable
+          operator: Exists
+          tolerationSeconds: 120
+        - effect: NoExecute
+          key: node.kubernetes.io/not-ready
+          operator: Exists
+          tolerationSeconds: 120
+---
+# Source: olmv1/templates/deployment-olmv1-system-operator-controller-controller-manager.yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kubectl.kubernetes.io/default-logs-container: manager
+    olm.operatorframework.io/feature-set: standard
+  labels:
+    app.kubernetes.io/name: operator-controller
+    app.kubernetes.io/part-of: olm
+  name: operator-controller-controller-manager
+  namespace: olmv1-system
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1 # Allow temporary extra pod for zero-downtime updates
+      maxUnavailable: 0 # Never allow pods to be unavailable during updates
+  selector:
+    matchLabels:
+      control-plane: operator-controller-controller-manager
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/default-container: manager
+        olm.operatorframework.io/feature-set: standard
+      labels:
+        app.kubernetes.io/name: operator-controller
+        control-plane: operator-controller-controller-manager
+        app.kubernetes.io/part-of: olm
+    spec:
       containers:
         - args:
             - --health-probe-bind-address=:8081
             - --metrics-bind-address=:8443
             - --leader-elect
             - --feature-gates=WebhookProviderCertManager=true
-            - --catalogd-cas-dir=/var/certs
-            - --pull-cas-dir=/var/certs
-            - --tls-cert=/var/certs/tls.cert
+            - --feature-gates=BoxcutterRuntime=false
+            - --feature-gates=BundleReleaseSupport=false
+            - --feature-gates=DeploymentConfig=false
+            - --feature-gates=HelmChartSupport=false
+            - --feature-gates=PreflightPermissions=false
+            - --feature-gates=SingleOwnNamespaceInstallSupport=false
+            - --feature-gates=SyntheticPermissions=false
+            - --feature-gates=WebhookProviderOpenshiftServiceCA=false
+            - --tls-cert=/var/certs/tls.crt
             - --tls-key=/var/certs/tls.key
+            - --catalogd-cas-dir=/var/ca-certs
+            - --pull-cas-dir=/var/ca-certs
           command:
             - /operator-controller
-          image: quay.io/operator-framework/operator-controller:v1.4.0@sha256:f1096c15acac98bbda692fedce99e50c4737e56fe5f3899e182dc384779c361f
-          imagePullPolicy: IfNotPresent
+          image: "quay.io/operator-framework/operator-controller:v1.10.0"
+          name: manager
           livenessProbe:
             httpGet:
               path: /healthz
               port: 8081
             initialDelaySeconds: 15
             periodSeconds: 20
-          name: manager
           readinessProbe:
             httpGet:
               path: /readyz
@@ -1684,6 +1814,18 @@ spec:
             requests:
               cpu: 10m
               memory: 64Mi
+          volumeMounts:
+            - mountPath: /var/cache
+              name: cache
+            - mountPath: /tmp
+              name: tmp
+            - mountPath: /var/certs
+              name: operator-controller-certs
+              readOnly: true
+            - mountPath: /var/ca-certs
+              name: ca-certs
+              readOnly: true
+          imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -1691,42 +1833,74 @@ spec:
                 - ALL
             readOnlyRootFilesystem: true
           terminationMessagePolicy: FallbackToLogsOnError
-          volumeMounts:
-            - mountPath: /var/cache
-              name: cache
-            - mountPath: /tmp
-              name: tmp
-            - mountPath: /var/certs/
-              name: olmv1-certificate
-              readOnly: true
-      securityContext:
-        runAsNonRoot: true
-        seccompProfile:
-          type: RuntimeDefault
       serviceAccountName: operator-controller-controller-manager
-      terminationGracePeriodSeconds: 10
       volumes:
         - emptyDir: {}
           name: cache
         - emptyDir: {}
           name: tmp
-        - name: olmv1-certificate
+        - name: operator-controller-certs
+          secret:
+            items:
+              - key: tls.crt
+                path: tls.crt
+              - key: tls.key
+                path: tls.key
+            optional: false
+            secretName: operator-controller-cert
+        - name: ca-certs
           secret:
             items:
               - key: ca.crt
                 path: olm-ca.crt
-              - key: tls.crt
-                path: tls.cert
-              - key: tls.key
-                path: tls.key
             optional: false
-            secretName: olmv1-cert
+            secretName: operator-controller-cert
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/arch
+                    operator: In
+                    values:
+                      - amd64
+                      - arm64
+                      - ppc64le
+                      - s390x
+                  - key: kubernetes.io/os
+                    operator: In
+                    values:
+                      - linux
+      nodeSelector:
+        kubernetes.io/os: linux
+        node-role.kubernetes.io/control-plane: ""
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      terminationGracePeriodSeconds: 10
+      tolerations:
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/control-plane
+          operator: Exists
+        - effect: NoExecute
+          key: node.kubernetes.io/unreachable
+          operator: Exists
+          tolerationSeconds: 120
+        - effect: NoExecute
+          key: node.kubernetes.io/not-ready
+          operator: Exists
+          tolerationSeconds: 120
 ---
+# Source: olmv1/templates/cert-manager/certificate-olmv1-system-catalogd-service-cert.yml
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   annotations:
     olm.operatorframework.io/feature-set: standard
+  labels:
+    app.kubernetes.io/name: catalogd
+    app.kubernetes.io/part-of: olm
   name: catalogd-service-cert
   namespace: olmv1-system
 spec:
@@ -1742,14 +1916,18 @@ spec:
     algorithm: ECDSA
     rotationPolicy: Always
     size: 256
-  secretName: catalogd-service-cert-v1.4.0
+  secretName: catalogd-service-cert-v1.10.0
 ---
+# Source: olmv1/templates/cert-manager/certificate-olmv1-system-operator-controller-cert.yml
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   annotations:
     olm.operatorframework.io/feature-set: standard
-  name: olmv1-cert
+  labels:
+    app.kubernetes.io/name: olmv1
+    app.kubernetes.io/part-of: olm
+  name: operator-controller-cert
   namespace: olmv1-system
 spec:
   dnsNames:
@@ -1763,74 +1941,19 @@ spec:
     algorithm: ECDSA
     rotationPolicy: Always
     size: 256
-  secretName: olmv1-cert
+  secretName: operator-controller-cert
 ---
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  annotations:
-    olm.operatorframework.io/feature-set: standard
-  name: catalogd-controller-manager
-  namespace: olmv1-system
-spec:
-  egress:
-    - {}
-  ingress:
-    - ports:
-        - port: 7443
-          protocol: TCP
-        - port: 8443
-          protocol: TCP
-        - port: 9443
-          protocol: TCP
-  podSelector:
-    matchLabels:
-      control-plane: catalogd-controller-manager
-  policyTypes:
-    - Ingress
-    - Egress
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  annotations:
-    olm.operatorframework.io/feature-set: standard
-  name: default-deny-all-traffic
-  namespace: olmv1-system
-spec:
-  podSelector: {}
-  policyTypes:
-    - Ingress
-    - Egress
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  annotations:
-    olm.operatorframework.io/feature-set: standard
-  name: operator-controller-controller-manager
-  namespace: olmv1-system
-spec:
-  egress:
-    - {}
-  ingress:
-    - ports:
-        - port: 8443
-          protocol: TCP
-  podSelector:
-    matchLabels:
-      control-plane: operator-controller-controller-manager
-  policyTypes:
-    - Ingress
-    - Egress
----
+# Source: olmv1/templates/mutatingwebhookconfiguration-catalogd-mutating-webhook-configuration.yml
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
+  name: catalogd-mutating-webhook-configuration
+  labels:
+    app.kubernetes.io/name: catalogd
+    app.kubernetes.io/part-of: olm
   annotations:
     cert-manager.io/inject-ca-from-secret: cert-manager/olmv1-ca
     olm.operatorframework.io/feature-set: standard
-  name: catalogd-mutating-webhook-configuration
 webhooks:
   - admissionReviewVersions:
       - v1
@@ -1841,9 +1964,6 @@ webhooks:
         path: /mutate-olm-operatorframework-io-v1-clustercatalog
         port: 9443
     failurePolicy: Fail
-    matchConditions:
-      - expression: '''name'' in object.metadata && (!has(object.metadata.labels) || !(''olm.operatorframework.io/metadata.name'' in object.metadata.labels) || object.metadata.labels[''olm.operatorframework.io/metadata.name''] != object.metadata.name)'
-        name: MissingOrIncorrectMetadataNameLabel
     name: inject-metadata-name.olm.operatorframework.io
     rules:
       - apiGroups:
@@ -1857,3 +1977,6 @@ webhooks:
           - clustercatalogs
     sideEffects: None
     timeoutSeconds: 10
+    matchConditions:
+      - name: MissingOrIncorrectMetadataNameLabel
+        expression: "'name' in object.metadata && (!has(object.metadata.labels) || !('olm.operatorframework.io/metadata.name' in object.metadata.labels) || object.metadata.labels['olm.operatorframework.io/metadata.name'] != object.metadata.name)"
