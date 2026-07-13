@@ -1649,7 +1649,7 @@ spec:
             - --pull-cas-dir=/var/ca-certs
           command:
             - ./catalogd
-          image: "quay.io/operator-framework/catalogd:v1.10.0"
+          image: "quay.io/operator-framework/catalogd:v1.10.0@sha256:d0af890a8931ce27001e8a46606a7a229a7867e96f28485cae5aebeb7e7b5b8b"
           name: manager
           livenessProbe:
             httpGet:
@@ -1796,7 +1796,7 @@ spec:
             - --pull-cas-dir=/var/ca-certs
           command:
             - /operator-controller
-          image: "quay.io/operator-framework/operator-controller:v1.10.0"
+          image: "quay.io/operator-framework/operator-controller:v1.10.0@sha256:f31759056c7238d71d08479d5980a0273f468e964e6e9803507a4f576b03a0c6"
           name: manager
           livenessProbe:
             httpGet:
