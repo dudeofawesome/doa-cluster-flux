@@ -54,6 +54,12 @@
 
   packageRules: [
     {
+      description: 'Ignore the broken catalogd v1.18.0 release',
+      matchDatasources: ['docker'],
+      matchDepNames: ['quay.io/operator-framework/catalogd'],
+      allowedVersions: '!/^v1\\.18\\.0$/',
+    },
+    {
       description: 'Automerge patch updates to the reflector Helm release',
       matchManagers: ['flux'],
       matchDatasources: ['helm'],
