@@ -40,12 +40,11 @@ spec:
       healthcheck:
         enabled: true
 
-    logs:
-      access:
-        enabled: true
-        fields:
-          headers:
-            defaultmode: keep
+    accessLog:
+      enabled: true
+      fields:
+        headers:
+          defaultMode: keep
 
     additionalArguments:
       # allow self-signed certs for intra-cluster networking
