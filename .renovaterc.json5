@@ -51,4 +51,15 @@
       '/^sources/.+\\.ya?ml$/',
     ],
   },
+
+  packageRules: [
+    {
+      description: 'Automerge patch updates to the reflector Helm release',
+      matchManagers: ['flux'],
+      matchDatasources: ['helm'],
+      matchDepNames: ['reflector'],
+      matchUpdateTypes: ['patch'],
+      automerge: true,
+    },
+  ],
 }
