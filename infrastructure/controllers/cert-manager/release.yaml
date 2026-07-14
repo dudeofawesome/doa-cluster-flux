@@ -15,4 +15,6 @@ spec:
         namespace: flux-system
       interval: 12h
   values:
-    installCRDs: true
+    crds:
+      enabled: true
+      keep: true
