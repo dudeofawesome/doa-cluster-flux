@@ -26,6 +26,23 @@ spec:
   monitoring:
     enablePodMonitor: true
 ---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: teslamate
+spec:
+  name: teslamate
+  owner: teslamate
+  cluster:
+    name: postgres
+  extensions:
+    - name: cube
+      ensure: present
+      schema: public
+    - name: earthdistance
+      ensure: present
+      schema: public
+---
 apiVersion: v1
 kind: PersistentVolume
 metadata:
