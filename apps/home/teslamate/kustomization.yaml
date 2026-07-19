@@ -1,0 +1,25 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: teslamate
+commonLabels:
+  app: teslamate
+
+resources:
+  - namespace.yaml
+  - database.yaml
+  - storage.yaml
+  - config.yaml
+  - deployment.yaml
+  - ingress.yaml
+  - secrets.yaml
+  - oidc-client.yaml
+  - ../../../services/forward-auth
+
+patches:
+  - patch: |
+      - op: replace
+        path: /spec/forwardAuth/address
+        value: http://forward-auth.teslamate.svc.cluster.local:4181
+    target:
+      kind: Middleware
+      name: forward-auth

@@ -1,0 +1,53 @@
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres
+spec:
+  bootstrap:
+    initdb:
+      database: teslamate
+      owner: teslamate
+
+  instances: 1
+
+  storage:
+    size: 10Gi
+    pvcTemplate:
+      volumeName: teslamate-db
+      volumeMode: Filesystem
+      storageClassName: 'local-path'
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+
+  monitoring:
+    enablePodMonitor: true
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: teslamate-db
+  labels:
+    type: local
+spec:
+  capacity:
+    storage: 10Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-path
+  local:
+    # TODO: find a better place for this
+    path: /mnt/teslamate/postgres
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - haleakala

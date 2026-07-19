@@ -1,0 +1,106 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: teslamate
+spec:
+  revisionHistoryLimit: 3
+  replicas: 1
+  selector:
+    matchLabels:
+      component: app
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        component: app
+    spec:
+      containers:
+        - name: teslamate
+          image: docker.io/teslamate/teslamate:latest@sha256:e77ec65007aafb40d736ed2c89675112fe8d960886ea9d7de3255f2b5360269f
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: teslamate
+                  key: encryption_key
+            - name: DATABASE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-app
+                  key: username
+            - name: DATABASE_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-app
+                  key: password
+            - name: DATABASE_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-app
+                  key: dbname
+            - name: DATABASE_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-app
+                  key: host
+            - name: DATABASE_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-app
+                  key: port
+            - name: MQTT_HOST
+              value: mqtt-cleartext.mosquitto.svc.cluster.local
+            - name: MQTT_PORT
+              value: '1883'
+            - name: VIRTUAL_HOST
+              value: teslamate.red.orleans.io
+            - name: CHECK_ORIGIN
+              value: 'true'
+            - name: TZ
+              value: America/Los_Angeles
+          ports:
+            - name: http
+              containerPort: 4000
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+          securityContext:
+            capabilities:
+              drop:
+                - ALL
+          startupProbe:
+            httpGet:
+              port: http
+              path: /
+            periodSeconds: 10
+            failureThreshold: 30
+          livenessProbe:
+            httpGet:
+              port: http
+              path: /
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              port: http
+              path: /
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            failureThreshold: 3
+          volumeMounts:
+            - name: import
+              mountPath: /opt/app/import
+      restartPolicy: Always
+      volumes:
+        - name: import
+          persistentVolumeClaim:
+            claimName: import

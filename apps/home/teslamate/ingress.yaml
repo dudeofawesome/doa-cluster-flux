@@ -1,0 +1,40 @@
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: teslamate
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`teslamate.red.orleans.io`)
+      kind: Rule
+      services:
+        - name: teslamate
+          port: 4000
+      middlewares:
+        - name: forward-auth
+          namespace: teslamate
+  tls:
+    secretName: wildcard-orleans-io
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: teslamate
+  labels:
+    monitor: teslamate
+spec:
+  selector:
+    component: app
+  ports:
+    - name: http
+      port: 4000
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: forward-auth
+data:
+  config.ini: |
+    logout-redirect = https://teslamate.red.orleans.io
