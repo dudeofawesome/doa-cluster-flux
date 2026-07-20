@@ -8,6 +8,15 @@ spec:
     initdb:
       database: teslamate
       owner: teslamate
+      postInitApplicationSQL:
+        - CREATE EXTENSION IF NOT EXISTS cube WITH SCHEMA public
+        - CREATE EXTENSION IF NOT EXISTS earthdistance WITH SCHEMA public
+        - >-
+          ALTER FUNCTION public.ll_to_earth(double precision, double precision)
+          OWNER TO teslamate
+        - >-
+          ALTER FUNCTION public.earth_box(public.earth, double precision)
+          OWNER TO teslamate
 
   instances: 1
 
@@ -25,23 +34,6 @@ spec:
 
   monitoring:
     enablePodMonitor: true
----
-apiVersion: postgresql.cnpg.io/v1
-kind: Database
-metadata:
-  name: teslamate
-spec:
-  name: teslamate
-  owner: teslamate
-  cluster:
-    name: postgres
-  extensions:
-    - name: cube
-      ensure: present
-      schema: public
-    - name: earthdistance
-      ensure: present
-      schema: public
 ---
 apiVersion: v1
 kind: PersistentVolume
