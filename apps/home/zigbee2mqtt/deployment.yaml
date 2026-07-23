@@ -17,6 +17,9 @@ spec:
       labels:
         component: app
     spec:
+      nodeSelector:
+        feature.node.kubernetes.io/sonoff-zigbee-dongle-plus.present: 'true'
+
       containers:
         - name: zigbee2mqtt
           image: docker.io/koenkk/zigbee2mqtt:2.12.1@sha256:80f7f04f72a99e4c4ef51ef7e98ee736edba6db0ecbb7abc626d0c4b0f1871f1
