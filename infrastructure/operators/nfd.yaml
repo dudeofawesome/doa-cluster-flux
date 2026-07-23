@@ -126,9 +126,16 @@ metadata:
   name: nfd-controller-manager
   namespace: operators
   annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
     kustomize.toolkit.fluxcd.io/ssa: Merge
 spec:
+  selector:
+    matchLabels:
+      control-plane: controller-manager
   template:
+    metadata:
+      labels:
+        control-plane: controller-manager
     spec:
       containers:
         - name: kube-rbac-proxy
