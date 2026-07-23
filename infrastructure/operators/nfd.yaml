@@ -140,4 +140,4 @@ spec:
       containers:
         - name: kube-rbac-proxy
           # renovate: datasource=docker depName=quay.io/brancz/kube-rbac-proxy
-          image: quay.io/brancz/kube-rbac-proxy:v0.8.0@sha256:05e15e1164fd7ac85f5702b3f87ef548f4e00de3a79e6c4a6a34c92035497a9a
+          image: quay.io/brancz/kube-rbac-proxy:v0.22.1@sha256:e8cad21b2f9ad0302f1ec972c555a1d916f51aae6003da3cd2554d5f29bb9bc4
