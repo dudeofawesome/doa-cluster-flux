@@ -8,6 +8,7 @@
     fluxcd
     kubectl
     kubectx
+    mosquitto
   ];
 
   languages = {
