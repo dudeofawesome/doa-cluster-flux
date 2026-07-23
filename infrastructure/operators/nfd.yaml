@@ -119,3 +119,18 @@ spec:
       channels: [stable]
       # renovate: datasource=github-releases depName=kubernetes-sigs/node-feature-discovery-operator extractVersion=^v(?<version>.+)$
       version: '0.6.0'
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nfd-controller-manager
+  namespace: operators
+  annotations:
+    kustomize.toolkit.fluxcd.io/ssa: Merge
+spec:
+  template:
+    spec:
+      containers:
+        - name: kube-rbac-proxy
+          # renovate: datasource=docker depName=quay.io/brancz/kube-rbac-proxy
+          image: quay.io/brancz/kube-rbac-proxy:v0.8.0@sha256:05e15e1164fd7ac85f5702b3f87ef548f4e00de3a79e6c4a6a34c92035497a9a
