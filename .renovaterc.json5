@@ -26,8 +26,9 @@
       customType: 'regex',
       managerFilePatterns: ['^olm/catalogs\\.ya?ml$'],
       matchStrings: [
-        '# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)(?: versioning=(?<versioning>\\S+))?\\n\\s*ref: \\S+:(?<currentValue>[^@\\s]+)@(?<currentDigest>sha256:[a-f0-9]+)',
+        '# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)(?: versioning=(?<versioning>\\S+))?\\n\\s*ref: \\S+@(?<currentDigest>sha256:[a-f0-9]+)',
       ],
+      currentValueTemplate: 'latest',
       versioningTemplate: '{{#if versioning}}{{{versioning}}}{{else}}docker{{/if}}',
     },
   ],
