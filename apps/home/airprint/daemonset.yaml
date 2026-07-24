@@ -39,8 +39,13 @@ spec:
         - name: cups
           image: docker.io/aguslr/cups:20260714@sha256:640c42ab5015a4d90185636240d7f7dbbe8b6cdfaea1d2760d6c861add5eda42
           command:
-            - /usr/sbin/cupsd
-            - -f
+            - /bin/sh
+            - -ec
+            - |
+              /usr/sbin/cupsd -f &
+              cupsd_pid="$!"
+              /config/bootstrap-cups.sh
+              wait "$cupsd_pid"
           securityContext:
             privileged: true
           env:
@@ -48,12 +53,6 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
-          lifecycle:
-            postStart:
-              exec:
-                command:
-                  - /bin/sh
-                  - /config/bootstrap-cups.sh
           ports:
             - name: ipp
               containerPort: 631
@@ -106,17 +105,17 @@ spec:
             - --web-interface=false
             - --reset-option=false
             - --disclose-version=false
+            - --random-paths=false
+            - --compatible-path=true
             - --local-scanners-only=true
           ports:
             - name: escl
               containerPort: 8090
               protocol: TCP
           startupProbe:
-            exec:
-              command:
-                - /bin/sh
-                - -ec
-                - test -S /run/dbus/system_bus_socket && scanimage -L | grep -q .
+            httpGet:
+              path: /eSCL/ScannerCapabilities
+              port: escl
             periodSeconds: 5
             failureThreshold: 24
           readinessProbe:

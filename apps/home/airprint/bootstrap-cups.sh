@@ -24,7 +24,7 @@ uri_count="$(
 }
 
 models="$(
-  lpinfo -m | awk 'tolower($0) ~ /splix.*scx[ -]?4623f/ { print $1 }'
+  lpinfo -m | awk '$1 == "drv:///splix-samsung.drv/scx4623f.ppd" { print $1 }'
 )"
 model_count="$(
   printf '%s\n' "$models" \
