@@ -42,7 +42,7 @@ lpadmin \
   -p "$queue" \
   -v "$uris" \
   -m "$models" \
-  -D "Samsung SCX-4623 @ ${NODE_NAME}" \
+  -D "Samsung SCX-4623" \
   -L "${NODE_NAME}" \
   -o printer-is-shared=true \
   -o media=Letter \
