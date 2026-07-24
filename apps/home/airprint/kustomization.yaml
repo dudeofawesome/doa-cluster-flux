@@ -6,6 +6,7 @@ commonLabels:
 
 resources:
   - namespace.yaml
+  - certificate.yaml
   - daemonset.yaml
 
 generatorOptions:
