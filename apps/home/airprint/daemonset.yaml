@@ -1,0 +1,152 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: airprint
+spec:
+  selector:
+    matchLabels:
+      component: airprint
+  template:
+    metadata:
+      labels:
+        component: airprint
+    spec:
+      automountServiceAccountToken: false
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      nodeSelector:
+        feature.node.kubernetes.io/usb-ff_04e8_3434.present: 'true'
+      initContainers:
+        - name: seed-cups-state
+          image: docker.io/aguslr/cups:20260714@sha256:640c42ab5015a4d90185636240d7f7dbbe8b6cdfaea1d2760d6c861add5eda42
+          command:
+            - /bin/sh
+            - -ec
+            - |
+              until test -S /run/dbus/system_bus_socket; do sleep 1; done
+              cp -a /etc/cups/. /cups-config/
+              cp /config/cupsd.conf /cups-config/cupsd.conf
+          volumeMounts:
+            - name: cups-config
+              mountPath: /cups-config
+            - name: config
+              mountPath: /config
+              readOnly: true
+            - name: system-bus
+              mountPath: /run/dbus/system_bus_socket
+              readOnly: true
+      containers:
+        - name: cups
+          image: docker.io/aguslr/cups:20260714@sha256:640c42ab5015a4d90185636240d7f7dbbe8b6cdfaea1d2760d6c861add5eda42
+          command:
+            - /usr/sbin/cupsd
+            - -f
+          securityContext:
+            privileged: true
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - /bin/sh
+                  - /config/bootstrap-cups.sh
+          ports:
+            - name: ipp
+              containerPort: 631
+              protocol: TCP
+          startupProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -ec
+                - test -S /run/dbus/system_bus_socket && lpstat -p "samsung-scx-4623-${NODE_NAME}" >/dev/null
+            periodSeconds: 5
+            failureThreshold: 24
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -ec
+                - test -S /run/dbus/system_bus_socket && lpstat -p "samsung-scx-4623-${NODE_NAME}" >/dev/null
+          livenessProbe:
+            exec:
+              command:
+                - lpstat
+                - -r
+          volumeMounts:
+            - name: usb
+              mountPath: /dev/bus/usb
+            - name: system-bus
+              mountPath: /run/dbus/system_bus_socket
+              readOnly: true
+            - name: cups-config
+              mountPath: /etc/cups
+            - name: cups-spool
+              mountPath: /var/spool/cups
+            - name: config
+              mountPath: /config
+              readOnly: true
+        - name: airsane
+          image: docker.io/aguslr/airsane:20260714@sha256:7fb4d92bfa377eef2f7095c4ebc3febb93ea0388cf05b6029dd407028c878088
+          securityContext:
+            privileged: true
+          args:
+            - --access-log=-
+            - --debug=true
+            - --listen-port=8090
+            - --hotplug=true
+            - --network-hotplug=false
+            - --mdns-announce=true
+            - --announce-secure=false
+            - --announce-base-url=http://%H:8090
+            - --web-interface=false
+            - --reset-option=false
+            - --disclose-version=false
+            - --local-scanners-only=true
+          ports:
+            - name: escl
+              containerPort: 8090
+              protocol: TCP
+          startupProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -ec
+                - test -S /run/dbus/system_bus_socket && scanimage -L | grep -q .
+            periodSeconds: 5
+            failureThreshold: 24
+          readinessProbe:
+            httpGet:
+              path: /eSCL/ScannerCapabilities
+              port: escl
+          livenessProbe:
+            httpGet:
+              path: /eSCL/ScannerCapabilities
+              port: escl
+          volumeMounts:
+            - name: usb
+              mountPath: /dev/bus/usb
+            - name: system-bus
+              mountPath: /run/dbus/system_bus_socket
+              readOnly: true
+      volumes:
+        - name: usb
+          hostPath:
+            path: /dev/bus/usb
+            type: Directory
+        - name: system-bus
+          hostPath:
+            path: /run/dbus/system_bus_socket
+            type: Socket
+        - name: cups-config
+          emptyDir: {}
+        - name: cups-spool
+          emptyDir: {}
+        - name: config
+          configMap:
+            name: cups-config
+            defaultMode: 0555
