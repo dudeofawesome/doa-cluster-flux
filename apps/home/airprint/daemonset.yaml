@@ -26,8 +26,6 @@ spec:
               until test -S /run/dbus/system_bus_socket; do sleep 1; done
               cp -a /etc/cups/. /cups-config/
               sed "s/__NODE_NAME__/${NODE_NAME}/g" /config/cupsd.conf > /cups-config/cupsd.conf
-              cp /tls/tls.crt "/cups-config/ssl/${NODE_NAME}.local.crt"
-              cp /tls/tls.key "/cups-config/ssl/${NODE_NAME}.local.key"
           env:
             - name: NODE_NAME
               valueFrom:
@@ -38,9 +36,6 @@ spec:
               mountPath: /cups-config
             - name: config
               mountPath: /config
-              readOnly: true
-            - name: tls-certificate
-              mountPath: /tls
               readOnly: true
             - name: system-bus
               mountPath: /run/dbus/system_bus_socket
@@ -159,7 +154,3 @@ spec:
           configMap:
             name: cups-config
             defaultMode: 0555
-        - name: tls-certificate
-          secret:
-            secretName: airprint-tls
-            defaultMode: 0400
