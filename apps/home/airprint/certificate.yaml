@@ -8,6 +8,6 @@ spec:
     name: private-ca
     kind: ClusterIssuer
   dnsNames:
-    - '*.local'
+    - capitol-reef.local
   privateKey:
     rotationPolicy: Always
