@@ -9,5 +9,9 @@ spec:
     kind: ClusterIssuer
   dnsNames:
     - capitol-reef.local
+  usages:
+    - digital signature
+    - key encipherment
+    - server auth
   privateKey:
     rotationPolicy: Always
