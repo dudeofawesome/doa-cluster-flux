@@ -1796,7 +1796,7 @@ spec:
             - --pull-cas-dir=/var/ca-certs
           command:
             - /operator-controller
-          image: "quay.io/operator-framework/operator-controller:v1.10.0@sha256:f31759056c7238d71d08479d5980a0273f468e964e6e9803507a4f576b03a0c6"
+          image: "quay.io/operator-framework/operator-controller:v1.11.0@sha256:186de1612e850714864958822e28284e58ab32367e000cedd81dce9e479efd1b"
           name: manager
           livenessProbe:
             httpGet:
