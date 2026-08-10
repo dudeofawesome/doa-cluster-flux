@@ -1649,7 +1649,7 @@ spec:
             - --pull-cas-dir=/var/ca-certs
           command:
             - ./catalogd
-          image: "quay.io/operator-framework/catalogd:v1.10.0@sha256:d0af890a8931ce27001e8a46606a7a229a7867e96f28485cae5aebeb7e7b5b8b"
+          image: "quay.io/operator-framework/catalogd:v1.11.0@sha256:60786954cdd719460c1c86e5e75babba4beb21ae72b0e11535b439a3e0e9d856"
           name: manager
           livenessProbe:
             httpGet:
