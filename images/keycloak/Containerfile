@@ -1,5 +1,5 @@
 # renovate: datasource=docker depName=quay.io/keycloak/keycloak
-ARG KC_VERSION=26.7.1@sha256:f1f1f01e472c8a78df40d8f2a49a925274eda4d3d80d5f6edbb5c880ee3c01c6
+ARG KC_VERSION=26.7.2@sha256:831330513f55695572286e521f94fcd3c7e285250ed5b848090265a33192f669
 FROM quay.io/keycloak/keycloak:${KC_VERSION} AS builder
 
 ENV KC_DB=postgres
