@@ -1,0 +1,84 @@
+name: Build CUPS
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - images/cups/**
+      - .github/workflows/build-cups.yaml
+  schedule:
+    # Weekly on Sundays at 04:30 UTC — picks up base image security patches.
+    - cron: '30 4 * * 0'
+  workflow_dispatch:
+    inputs:
+      cups_version:
+        description: 'CUPS image version override (leave empty to use Containerfile default)'
+        required: false
+        type: string
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository_owner }}/cups
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Extract version from Containerfile
+        id: version
+        run: |
+          if [ -n "${{ inputs.cups_version }}" ]; then
+            cups_ref="${{ inputs.cups_version }}"
+          else
+            cups_ref=$(grep -oP '^ARG CUPS_VERSION=\K.*' images/cups/Containerfile)
+          fi
+
+          # Docker tags cannot include a digest, so publish using the version part only.
+          cups_tag="${cups_ref%%@*}"
+
+          echo "cups_ref=${cups_ref}" >> "$GITHUB_OUTPUT"
+          echo "cups_tag=${cups_tag}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@abd2ef45e78c5afb21d64d4ca52ee8550d9572c7 # v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build image
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
+        with:
+          context: images/cups
+          file: images/cups/Containerfile
+          push: false
+          load: true
+          provenance: true
+          build-args: |
+            CUPS_VERSION=${{ steps.version.outputs.cups_ref }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.cups_tag }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.cups_tag }}-${{ github.run_id }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Push image
+        run: |
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.kc_tag }}
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.kc_tag }}-${{ github.run_id }}
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest

@@ -1,0 +1,14 @@
+# renovate: datasource=docker depName=docker.io/aguslr/cups
+ARG CUPS_VERSION=20260714@sha256:640c42ab5015a4d90185636240d7f7dbbe8b6cdfaea1d2760d6c861add5eda42
+FROM docker.io/aguslr/cups:${CUPS_VERSION}
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends libnss-mdns \
+  && rm -rf /var/lib/apt/lists/*
+
+# Use the host Avahi daemon for forward and reverse multicast DNS. The normal
+# mdns module is intentional: the minimal variant rejects reverse lookups for
+# private addresses, which CUPS needs when selecting its server certificate.
+RUN sed -i \
+  's/^hosts:.*/hosts: files mdns dns/' \
+  /etc/nsswitch.conf
