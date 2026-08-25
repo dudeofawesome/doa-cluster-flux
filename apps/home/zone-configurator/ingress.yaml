@@ -1,0 +1,40 @@
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: zone-configurator
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`presence.red.orleans.io`)
+      kind: Rule
+      services:
+        - name: zone-configurator
+          port: 42069
+      middlewares:
+        - name: forward-auth
+          namespace: zone-configurator
+  tls:
+    secretName: wildcard-orleans-io
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zone-configurator
+  labels:
+    monitor: zone-configurator
+spec:
+  selector:
+    component: app
+  ports:
+    - name: http
+      port: 42069
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: forward-auth
+data:
+  config.ini: |
+    logout-redirect = https://presence.red.orleans.io

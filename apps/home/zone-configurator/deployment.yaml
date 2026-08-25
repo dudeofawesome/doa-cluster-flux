@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zone-configurator
+spec:
+  revisionHistoryLimit: 3
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      component: app
+  template:
+    metadata:
+      labels:
+        component: app
+    spec:
+      containers:
+        - name: zone-configurator
+          image: docker.io/everythingsmarthome/everything-presence-mmwave-configurator:2.2.4@sha256:cbbd350878f15b4df6f64735fd2c5c8260af84de0e19939d820527e5e8840d7a
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: HA_BASE_URL
+              value: http://home-assistant.home-assistant.svc.cluster.local:8123
+            - name: HA_LONG_LIVED_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: zone-configurator
+                  key: ha_long_lived_token
+            - name: FIRMWARE_LAN_PORT
+              value: "38080"
+          ports:
+            - name: http
+              containerPort: 42069
+              protocol: TCP
+            - name: firmware
+              containerPort: 38080
+              hostPort: 38080
+              protocol: TCP
+          resources: {}
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 42069
+            failureThreshold: 3
+            timeoutSeconds: 1
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 42069
+            failureThreshold: 3
+            timeoutSeconds: 1
+            periodSeconds: 10
+          startupProbe:
+            httpGet:
+              path: /api/health
+              port: 42069
+            failureThreshold: 30
+            timeoutSeconds: 1
+            periodSeconds: 5
+          volumeMounts:
+            - name: config
+              mountPath: /config
+      restartPolicy: Always
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: config
