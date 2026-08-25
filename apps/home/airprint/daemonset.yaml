@@ -71,7 +71,7 @@ spec:
                   test -S /run/dbus/system_bus_socket
                   lpstat -p "samsung-scx-4623-${NODE_NAME}" >/dev/null
                   openssl s_client -brief \
-                    -connect "${NODE_NAME}.local:631" \
+                    -connect 127.0.0.1:631 \
                     -servername "${NODE_NAME}.local" \
                     </dev/null >/dev/null 2>&1
             periodSeconds: 5
@@ -86,7 +86,7 @@ spec:
                   test -S /run/dbus/system_bus_socket
                   lpstat -p "samsung-scx-4623-${NODE_NAME}" >/dev/null
                   openssl s_client -brief \
-                    -connect "${NODE_NAME}.local:631" \
+                    -connect 127.0.0.1:631 \
                     -servername "${NODE_NAME}.local" \
                     </dev/null >/dev/null 2>&1
             timeoutSeconds: 5
