@@ -18,7 +18,7 @@ spec:
         feature.node.kubernetes.io/usb-ff_04e8_3434.present: 'true'
       initContainers:
         - name: seed-cups-state
-          image: docker.io/aguslr/cups:20260805@sha256:26e094c0a219a40b98ecbfc3b248e96bf3ce542d7f510ffccd5330a091f03871
+          image: ghcr.io/dudeofawesome/cups:20260805@sha256:2dacb105e7b76157876f6498196b2568f9e0cd27970f34caecac547bdee3c94f
           command:
             - /bin/sh
             - -ec
@@ -42,7 +42,7 @@ spec:
               readOnly: true
       containers:
         - name: cups
-          image: docker.io/aguslr/cups:20260805@sha256:26e094c0a219a40b98ecbfc3b248e96bf3ce542d7f510ffccd5330a091f03871
+          image: ghcr.io/dudeofawesome/cups:20260805@sha256:2dacb105e7b76157876f6498196b2568f9e0cd27970f34caecac547bdee3c94f
           command:
             - /bin/sh
             - -ec
@@ -67,15 +67,29 @@ spec:
               command:
                 - /bin/sh
                 - -ec
-                - test -S /run/dbus/system_bus_socket && lpstat -p "samsung-scx-4623-${NODE_NAME}" >/dev/null
+                - |
+                  test -S /run/dbus/system_bus_socket
+                  lpstat -p "samsung-scx-4623-${NODE_NAME}" >/dev/null
+                  openssl s_client -brief \
+                    -connect "${NODE_NAME}.local:631" \
+                    -servername "${NODE_NAME}.local" \
+                    </dev/null >/dev/null 2>&1
             periodSeconds: 5
             failureThreshold: 24
+            timeoutSeconds: 5
           readinessProbe:
             exec:
               command:
                 - /bin/sh
                 - -ec
-                - test -S /run/dbus/system_bus_socket && lpstat -p "samsung-scx-4623-${NODE_NAME}" >/dev/null
+                - |
+                  test -S /run/dbus/system_bus_socket
+                  lpstat -p "samsung-scx-4623-${NODE_NAME}" >/dev/null
+                  openssl s_client -brief \
+                    -connect "${NODE_NAME}.local:631" \
+                    -servername "${NODE_NAME}.local" \
+                    </dev/null >/dev/null 2>&1
+            timeoutSeconds: 5
           livenessProbe:
             exec:
               command:
@@ -86,6 +100,9 @@ spec:
               mountPath: /dev/bus/usb
             - name: system-bus
               mountPath: /run/dbus/system_bus_socket
+              readOnly: true
+            - name: avahi
+              mountPath: /run/avahi-daemon/socket
               readOnly: true
             - name: cups-config
               mountPath: /etc/cups
@@ -145,6 +162,10 @@ spec:
         - name: system-bus
           hostPath:
             path: /run/dbus/system_bus_socket
+            type: Socket
+        - name: avahi
+          hostPath:
+            path: /run/avahi-daemon/socket
             type: Socket
         - name: cups-config
           emptyDir: {}
