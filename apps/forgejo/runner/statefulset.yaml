@@ -1,0 +1,155 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: forgejo-runner
+  namespace: forgejo-runner
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: forgejo-runner
+  namespace: forgejo-runner
+spec:
+  clusterIP: None
+  selector:
+    component: runner
+  ports:
+    - name: dind
+      port: 2375
+      targetPort: dind
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: forgejo-runner
+  namespace: forgejo-runner
+spec:
+  serviceName: forgejo-runner
+  replicas: 4
+  podManagementPolicy: Parallel
+  selector:
+    matchLabels:
+      component: runner
+  template:
+    metadata:
+      labels:
+        component: runner
+    spec:
+      automountServiceAccountToken: false
+      serviceAccountName: forgejo-runner
+      priorityClassName: forgejo-runner
+      nodeSelector:
+        kubernetes.io/hostname: haleakala
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+      initContainers:
+        - name: configure
+          image: busybox:stable@sha256:73aaf090f3d85aa34ee199857f03fa3a95c8ede2ffd4cc2cdb5b94e566b11662
+          command:
+            - /bin/sh
+            - /run/configuration/configure.sh
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+          volumeMounts:
+            - name: configuration
+              mountPath: /run/configuration
+              readOnly: true
+            - name: runner-registration
+              mountPath: /run/runner-secrets
+              readOnly: true
+            - name: runner-data
+              mountPath: /runner-data
+      containers:
+        - name: runner
+          image: data.forgejo.org/forgejo/runner:13.1.0@sha256:c4af85fd9f0dd03788676a534781a87c71aa2c6a37737143e017eb94d4312952
+          imagePullPolicy: IfNotPresent
+          args:
+            - /bin/forgejo-runner
+            - daemon
+            - --config
+            - /runner-data/config.yaml
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+          volumeMounts:
+            - name: runner-data
+              mountPath: /runner-data
+        - name: dind
+          image: docker.io/library/docker:29.0.1-dind@sha256:ecac43e78380d9b9d3bd24f0ab42b370f6391a1a06a66065c10a00b9d6d57a3e
+          imagePullPolicy: IfNotPresent
+          args:
+            - dockerd
+            - --host=tcp://0.0.0.0:2375
+            - --tls=false
+            - --storage-driver=overlay2
+          env:
+            - name: DOCKER_TLS_CERTDIR
+              value: ''
+          ports:
+            - name: dind
+              containerPort: 2375
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+              ephemeral-storage: 1Gi
+            limits:
+              cpu: '2'
+              memory: 4Gi
+              ephemeral-storage: 20Gi
+          securityContext:
+            privileged: true
+          startupProbe:
+            tcpSocket:
+              port: dind
+            periodSeconds: 2
+            failureThreshold: 60
+          readinessProbe:
+            tcpSocket:
+              port: dind
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            tcpSocket:
+              port: dind
+            periodSeconds: 30
+            failureThreshold: 3
+          volumeMounts:
+            - name: docker-data
+              mountPath: /var/lib/docker
+      terminationGracePeriodSeconds: 60
+      volumes:
+        - name: configuration
+          configMap:
+            name: configuration
+            defaultMode: 0555
+        - name: runner-registration
+          secret:
+            secretName: runner-registration
+        - name: runner-data
+          emptyDir:
+            sizeLimit: 1Gi
+        - name: docker-data
+          emptyDir:
+            sizeLimit: 20Gi

@@ -1,0 +1,16 @@
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: forgejo-service
+value: 1000
+globalDefault: false
+description: Keep the Forgejo service and database ahead of CI workloads.
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: forgejo-runner
+value: -1000
+globalDefault: false
+description: Evict Forgejo Actions runners before stateful service workloads.

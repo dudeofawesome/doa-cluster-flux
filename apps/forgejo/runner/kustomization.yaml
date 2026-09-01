@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: forgejo-runner
+labels:
+  - pairs:
+      app: forgejo-runner
+    includeSelectors: false
+
+resources:
+  - namespace.yaml
+  - config.yaml
+  - statefulset.yaml
+  - network-policy.yaml

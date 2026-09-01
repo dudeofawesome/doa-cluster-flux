@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: configuration
+  namespace: forgejo-runner
+data:
+  configure.sh: |
+    #!/bin/sh
+    set -eu
+
+    token="$(cat "/run/runner-secrets/$HOSTNAME")"
+    if [ "${#token}" -ne 40 ]; then
+      echo "runner token for $HOSTNAME must contain 40 hexadecimal characters" >&2
+      exit 1
+    fi
+    case "$token" in
+      *[!0-9a-f]*)
+        echo "runner token for $HOSTNAME contains a non-hexadecimal character" >&2
+        exit 1
+        ;;
+    esac
+
+    identifier="$(printf '%.16s' "$token")"
+    uuid_hex="$(
+      printf '%s' "$identifier" \
+        | od -An -tx1 \
+        | tr -d ' \n'
+    )"
+    uuid="$(
+      printf '%s\n' "$uuid_hex" \
+        | sed 's/^\(........\)\(....\)\(....\)\(....\)\(............\)$/\1-\2-\3-\4-\5/'
+    )"
+
+    umask 077
+    mkdir -p /runner-data/cache /runner-data/work
+
+    cat > /runner-data/config.yaml <<EOF
+    log:
+      level: info
+    runner:
+      capacity: 1
+      timeout: 3h
+      shutdown_timeout: 30s
+      fetch_timeout: 5s
+      fetch_interval: 2s
+      labels:
+        - docker:docker://docker.io/library/node:22.23.2-bookworm@sha256:8a34c4ab3ea2c5cd194f07e317b2a8f09461d3c8b05c4e34c8ccd56d56024c4d
+        - ubuntu-latest:docker://docker.io/library/node:22.23.2-bookworm@sha256:8a34c4ab3ea2c5cd194f07e317b2a8f09461d3c8b05c4e34c8ccd56d56024c4d
+        - self-hosted:docker://docker.io/library/node:22.23.2-bookworm@sha256:8a34c4ab3ea2c5cd194f07e317b2a8f09461d3c8b05c4e34c8ccd56d56024c4d
+      envs:
+        DOCKER_HOST: tcp://dind.internal:2375
+    cache:
+      enabled: true
+      dir: /runner-data/cache
+    host:
+      workdir_parent: /runner-data/work
+    container:
+      docker_host: tcp://127.0.0.1:2375
+      privileged: false
+      options: --add-host=dind.internal:host-gateway --cpus=2 --memory=4g --pids-limit=1024
+      valid_volumes: []
+    server:
+      connections:
+        forgejo:
+          url: http://forgejo.forgejo.svc.cluster.local:3000/
+          uuid: $uuid
+          token: $token
+    EOF

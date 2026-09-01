@@ -1,0 +1,51 @@
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres
+  namespace: forgejo
+spec:
+  bootstrap:
+    initdb:
+      database: forgejo
+      owner: forgejo
+  instances: 1
+  priorityClassName: forgejo-service
+  storage:
+    size: 5Gi
+    pvcTemplate:
+      volumeName: forgejo-postgres
+      volumeMode: Filesystem
+      storageClassName: local-path
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+  monitoring:
+    enablePodMonitor: false
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: forgejo-postgres
+  labels:
+    type: local
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-path
+  local:
+    path: /mnt/forgejo-postgres
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - haleakala

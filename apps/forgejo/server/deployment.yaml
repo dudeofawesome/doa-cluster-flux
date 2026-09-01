@@ -1,0 +1,185 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: forgejo
+  namespace: forgejo
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      component: app
+  template:
+    metadata:
+      labels:
+        component: app
+    spec:
+      automountServiceAccountToken: false
+      priorityClassName: forgejo-service
+      nodeSelector:
+        kubernetes.io/hostname: haleakala
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+      initContainers:
+        - name: volume-permissions
+          image: busybox:stable@sha256:73aaf090f3d85aa34ee199857f03fa3a95c8ede2ffd4cc2cdb5b94e566b11662
+          command:
+            - sh
+            - -ec
+            - chown 1000:1000 /var/lib/gitea
+          securityContext:
+            runAsNonRoot: false
+            runAsUser: 0
+            runAsGroup: 0
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/gitea
+        - name: bootstrap
+          image: codeberg.org/forgejo/forgejo:16.0.3-rootless@sha256:214f4ae63ee78be1e445e58573c88dc7215e72091210852e0df94eaac1a25685
+          command:
+            - /bin/sh
+            - /run/bootstrap/bootstrap.sh
+          env:
+            - name: TZ
+              value: UTC
+            - name: FORGEJO__database__USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-app
+                  key: username
+            - name: FORGEJO__database__PASSWD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-app
+                  key: password
+            - name: FORGEJO__security__SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: forgejo
+                  key: secret_key
+            - name: FORGEJO__security__INTERNAL_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: forgejo
+                  key: internal_token
+            - name: FORGEJO__server__LFS_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: forgejo
+                  key: lfs_jwt_secret
+            - name: FORGEJO_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: forgejo
+                  key: admin_password
+            - name: OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: oidc
+                  key: client_secret
+          volumeMounts: &forgejo-volume-mounts
+            - name: data
+              mountPath: /var/lib/gitea
+            - name: configuration
+              mountPath: /var/lib/gitea/custom/conf/app.ini
+              subPath: app.ini
+              readOnly: true
+            - name: bootstrap
+              mountPath: /run/bootstrap
+              readOnly: true
+            - name: runner-registration
+              mountPath: /run/runner-secrets
+              readOnly: true
+      containers:
+        - name: forgejo
+          image: codeberg.org/forgejo/forgejo:16.0.3-rootless@sha256:214f4ae63ee78be1e445e58573c88dc7215e72091210852e0df94eaac1a25685
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: TZ
+              value: UTC
+            - name: FORGEJO__database__USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-app
+                  key: username
+            - name: FORGEJO__database__PASSWD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-app
+                  key: password
+            - name: FORGEJO__security__SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: forgejo
+                  key: secret_key
+            - name: FORGEJO__security__INTERNAL_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: forgejo
+                  key: internal_token
+            - name: FORGEJO__server__LFS_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: forgejo
+                  key: lfs_jwt_secret
+          ports:
+            - name: http
+              containerPort: 3000
+            - name: ssh
+              containerPort: 2222
+              hostPort: 2222
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: '2'
+              memory: 2Gi
+          startupProbe:
+            httpGet:
+              path: /api/healthz
+              port: http
+            periodSeconds: 5
+            failureThreshold: 60
+            timeoutSeconds: 3
+          readinessProbe:
+            httpGet:
+              path: /api/healthz
+              port: http
+            periodSeconds: 10
+            failureThreshold: 3
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /api/healthz
+              port: http
+            periodSeconds: 30
+            failureThreshold: 3
+            timeoutSeconds: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts: *forgejo-volume-mounts
+      terminationGracePeriodSeconds: 120
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: data
+        - name: configuration
+          configMap:
+            name: configuration
+        - name: bootstrap
+          configMap:
+            name: bootstrap
+            defaultMode: 0555
+        - name: runner-registration
+          secret:
+            secretName: runner-registration

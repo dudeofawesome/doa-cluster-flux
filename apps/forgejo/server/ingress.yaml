@@ -1,0 +1,30 @@
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: forgejo
+  namespace: forgejo
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`git.orleans.io`)
+      kind: Rule
+      services:
+        - name: forgejo
+          port: 3000
+  tls:
+    secretName: wildcard-orleans-io
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: forgejo
+  namespace: forgejo
+spec:
+  selector:
+    component: app
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http
