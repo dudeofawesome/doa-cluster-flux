@@ -177,7 +177,6 @@ data:
       --scopes openid \
       --scopes profile \
       --scopes email \
-      --scopes groups \
       --required-claim-name groups \
       --required-claim-value /Users \
       --group-claim-name groups \
