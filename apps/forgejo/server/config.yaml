@@ -74,6 +74,7 @@ data:
 
     [oauth2_client]
     ACCOUNT_LINKING = disabled
+    ENABLE_AUTO_REGISTRATION = true
     REGISTER_EMAIL_CONFIRM = false
 
     [openid]
