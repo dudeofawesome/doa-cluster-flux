@@ -42,16 +42,49 @@ spec:
               value: '4321'
             - name: DATABASE_URL
               value: file:data/gitea-mirror.db
+
             - name: BETTER_AUTH_URL
               value: http://localhost:4321
             - name: PUBLIC_BETTER_AUTH_URL
               value: http://localhost:4321
             - name: BETTER_AUTH_TRUSTED_ORIGINS
               value: http://localhost:4321
+            - name: BETTER_AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: github-mirror
+                  key: better_auth_secret
+            - name: ENCRYPTION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: github-mirror
+                  key: encryption_secret
+
             - name: GITHUB_USERNAME
               value: dudeofawesome
             - name: GITHUB_TYPE
               value: personal
+            - name: GITHUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: github-mirror
+                  key: github_token
+
+            - name: GITEA_URL
+              value: http://forgejo.forgejo.svc.cluster.local:3000
+            - name: GITEA_EXTERNAL_URL
+              value: https://git.orleans.io
+            - name: GITEA_USERNAME
+              value: dudeofawesome
+            - name: GITEA_MIRROR_INTERVAL
+              value: 1h
+            - name: GITEA_LFS
+              value: 'true'
+            - name: GITEA_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: github-mirror
+                  key: gitea_token
 
             - name: MIRROR_STRATEGY
               value: preserve
@@ -83,19 +116,9 @@ spec:
               value: 'true'
             - name: MIRROR_ISSUES
               value: 'true'
-
-            - name: GITEA_URL
-              value: http://forgejo.forgejo.svc.cluster.local:3000
-            - name: GITEA_EXTERNAL_URL
-              value: https://git.orleans.io
-            - name: GITEA_USERNAME
-              value: dudeofawesome
-            - name: GITEA_MIRROR_INTERVAL
-              value: 1h
-            - name: GITEA_LFS
-              value: 'true'
             - name: GITEA_PRESERVE_VISIBILITY
               value: 'true'
+
             - name: SCHEDULE_ENABLED
               value: 'true'
             - name: SCHEDULE_INTERVAL
@@ -112,26 +135,6 @@ spec:
               value: 'true'
             - name: CLEANUP_ORPHANED_REPO_ACTION
               value: archive
-            - name: GITHUB_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: github-mirror
-                  key: github_token
-            - name: GITEA_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: github-mirror
-                  key: gitea_token
-            - name: BETTER_AUTH_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: github-mirror
-                  key: better_auth_secret
-            - name: ENCRYPTION_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: github-mirror
-                  key: encryption_secret
           ports:
             - name: http
               containerPort: 4321
