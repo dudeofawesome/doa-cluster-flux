@@ -55,6 +55,15 @@
 
   packageRules: [
     {
+      description: 'Group OLM controller image updates',
+      matchDatasources: ['docker'],
+      matchDepNames: [
+        'quay.io/operator-framework/catalogd',
+        'quay.io/operator-framework/operator-controller',
+      ],
+      groupName: 'OLM',
+    },
+    {
       description: 'Ignore the broken catalogd v1.18.0 release',
       matchDatasources: ['docker'],
       matchDepNames: ['quay.io/operator-framework/catalogd'],
