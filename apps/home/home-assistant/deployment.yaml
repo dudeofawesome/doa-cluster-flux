@@ -38,6 +38,9 @@ spec:
             - configMapRef:
                 name: environment
           env:
+            - name: SETUP_PORT
+              value: '8123'
+
             - name: DB_URI
               valueFrom:
                 secretKeyRef:
@@ -66,21 +69,21 @@ spec:
           resources: {}
           livenessProbe:
             tcpSocket:
-              port: 8123
+              port: http
             initialDelaySeconds: 0
             failureThreshold: 3
             timeoutSeconds: 1
             periodSeconds: 10
           readinessProbe:
             tcpSocket:
-              port: 8123
+              port: http
             initialDelaySeconds: 0
             failureThreshold: 3
             timeoutSeconds: 1
             periodSeconds: 10
           startupProbe:
             tcpSocket:
-              port: 8123
+              port: http
             initialDelaySeconds: 0
             failureThreshold: 30
             timeoutSeconds: 1
