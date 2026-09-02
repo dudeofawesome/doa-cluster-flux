@@ -122,7 +122,7 @@ spec:
             - name: SCHEDULE_ENABLED
               value: 'true'
             - name: SCHEDULE_INTERVAL
-              value: '3600'
+              value: '86400'
             - name: AUTO_IMPORT_REPOS
               value: 'true'
             - name: AUTO_MIRROR_REPOS
