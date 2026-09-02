@@ -18,3 +18,8 @@ resources:
   - deployment.yaml
   - ingress.yaml
   - network-policy.yaml
+
+configMapGenerator:
+  - name: configuration
+    files:
+      - app.ini
