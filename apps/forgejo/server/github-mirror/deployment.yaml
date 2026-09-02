@@ -52,6 +52,9 @@ spec:
               value: dudeofawesome
             - name: GITHUB_TYPE
               value: personal
+
+            - name: MIRROR_STRATEGY
+              value: preserve
             - name: PRIVATE_REPOSITORIES
               value: 'true'
             - name: PUBLIC_REPOSITORIES
@@ -66,8 +69,21 @@ spec:
               value: 'false'
             - name: MIRROR_ORGANIZATIONS
               value: 'false'
-            - name: MIRROR_STRATEGY
-              value: preserve
+            - name: MIRROR_LABELS
+              value: 'true'
+            - name: MIRROR_RELEASES
+              value: 'true'
+            - name: MIRROR_WIKI
+              value: 'true'
+            - name: MIRROR_METADATA
+              value: 'true'
+            - name: MIRROR_MILESTONES
+              value: 'true'
+            - name: MIRROR_PULL_REQUESTS
+              value: 'true'
+            - name: MIRROR_ISSUES
+              value: 'true'
+
             - name: GITEA_URL
               value: http://forgejo.forgejo.svc.cluster.local:3000
             - name: GITEA_EXTERNAL_URL
@@ -79,12 +95,6 @@ spec:
             - name: GITEA_LFS
               value: 'true'
             - name: GITEA_PRESERVE_VISIBILITY
-              value: 'true'
-            - name: MIRROR_RELEASES
-              value: 'true'
-            - name: MIRROR_WIKI
-              value: 'true'
-            - name: MIRROR_METADATA
               value: 'true'
             - name: SCHEDULE_ENABLED
               value: 'true'
