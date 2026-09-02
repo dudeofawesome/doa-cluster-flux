@@ -67,7 +67,7 @@ spec:
             - name: MIRROR_ORGANIZATIONS
               value: 'false'
             - name: MIRROR_STRATEGY
-              value: flat-user
+              value: preserve
             - name: GITEA_URL
               value: http://forgejo.forgejo.svc.cluster.local:3000
             - name: GITEA_EXTERNAL_URL
@@ -81,11 +81,11 @@ spec:
             - name: GITEA_PRESERVE_VISIBILITY
               value: 'true'
             - name: MIRROR_RELEASES
-              value: 'false'
+              value: 'true'
             - name: MIRROR_WIKI
-              value: 'false'
+              value: 'true'
             - name: MIRROR_METADATA
-              value: 'false'
+              value: 'true'
             - name: SCHEDULE_ENABLED
               value: 'true'
             - name: SCHEDULE_INTERVAL
