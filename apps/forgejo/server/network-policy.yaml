@@ -29,6 +29,9 @@ spec:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: kube-system
+        - podSelector:
+            matchLabels:
+              component: gitea-mirror
       ports:
         - protocol: TCP
           port: 3000
