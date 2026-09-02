@@ -24,10 +24,13 @@
     };
   };
 
-  tasks = {
-    "k8s:switch-kube-context" = {
-      exec = "kubectx doa-admin";
-      before = [ "devenv:enterShell" ];
-    };
-  };
+  env.KUBECONFIG =
+    let
+      kubeContextOverlay = pkgs.writeText "doa-cluster-flux-kubeconfig-overlay" ''
+        apiVersion: v1
+        kind: Config
+        current-context: doa-admin
+      '';
+    in
+    "${kubeContextOverlay}:${builtins.getEnv "HOME"}/.kube/config";
 }
