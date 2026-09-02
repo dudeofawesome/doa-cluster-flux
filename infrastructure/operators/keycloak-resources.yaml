@@ -5,6 +5,10 @@ metadata:
   name: edp-keycloak
 spec:
   namespace: operators
+  install:
+    preflight:
+      crdUpgradeSafety:
+        enforcement: None
   source:
     sourceType: Catalog
     catalog:
