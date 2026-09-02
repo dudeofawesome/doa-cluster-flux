@@ -516,7 +516,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.20.1
+    controller-gen.kubebuilder.io/version: v0.21.0
     olm.operatorframework.io/generator: standard
   name: clusterextensions.olm.operatorframework.io
 spec:
@@ -620,8 +620,7 @@ spec:
                 namespace:
                   description: |-
                     namespace specifies a Kubernetes namespace.
-                    This is the namespace where the provided ServiceAccount must exist.
-                    It also designates the default namespace where namespace-scoped resources for the extension are applied to the cluster.
+                    It designates the default namespace where namespace-scoped resources for the extension are applied to the cluster.
                     Some extensions may contain namespace-scoped resources to be applied in other namespaces.
                     This namespace must exist.
 
@@ -639,18 +638,19 @@ spec:
                       rule: self.matches("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$")
                 serviceAccount:
                   description: |-
-                    serviceAccount specifies a ServiceAccount used to perform all interactions with the cluster
-                    that are required to manage the extension.
-                    The ServiceAccount must be configured with the necessary permissions to perform these interactions.
-                    The ServiceAccount must exist in the namespace referenced in the spec.
-                    The serviceAccount field is required.
+                    serviceAccount is a deprecated field and is completely ignored.
+                    OLMv1 is a single-tenant system where users with ClusterExtension write access are
+                    effectively delegated cluster-admin trust. The operator-controller runs with
+                    cluster-admin privileges and uses its own service account for all cluster interactions.
+
+                    Deprecated: serviceAccount is no longer used and will be removed in a future release.
+                  minProperties: 1
                   properties:
                     name:
                       description: |-
-                        name is a required, immutable reference to the name of the ServiceAccount used for installation
-                        and management of the content for the package specified in the packageName field.
+                        name is a deprecated field and is completely ignored.
 
-                        This ServiceAccount must exist in the installNamespace.
+                        Deprecated: name is no longer used and will be removed in a future release.
 
                         The name field follows the DNS subdomain standard as defined in [RFC 1123].
                         It must contain only lowercase alphanumeric characters, hyphens (-) or periods (.),
@@ -669,14 +669,13 @@ spec:
 
                         [RFC 1123]: https://tools.ietf.org/html/rfc1123
                       maxLength: 253
+                      minLength: 1
                       type: string
                       x-kubernetes-validations:
-                        - message: name is immutable
+                        - message: name is immutable once set but may be cleared
                           rule: self == oldSelf
                         - message: name must be a valid DNS1123 subdomain. It must contain only lowercase alphanumeric characters, hyphens (-) or periods (.), start and end with an alphanumeric character, and be no longer than 253 characters
                           rule: self.matches("^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$")
-                  required:
-                    - name
                   type: object
                 source:
                   description: |-
@@ -947,7 +946,6 @@ spec:
                       rule: 'has(self.sourceType) && self.sourceType == ''Catalog'' ? has(self.catalog) : !has(self.catalog)'
               required:
                 - namespace
-                - serviceAccount
                 - source
               type: object
             status:
@@ -1210,77 +1208,6 @@ rules:
       - list
       - watch
 ---
-# Source: olmv1/templates/rbac/clusterrole-operator-controller-manager-role.yml
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: operator-controller-manager-role
-  labels:
-    app.kubernetes.io/name: operator-controller
-    app.kubernetes.io/part-of: olm
-  annotations:
-    olm.operatorframework.io/feature-set: standard
-rules:
-  - apiGroups:
-      - ""
-    resources:
-      - serviceaccounts/token
-    verbs:
-      - create
-  - apiGroups:
-      - ""
-    resources:
-      - serviceaccounts
-    verbs:
-      - get
-  - apiGroups:
-      - apiextensions.k8s.io
-    resources:
-      - customresourcedefinitions
-    verbs:
-      - get
-  - apiGroups:
-      - olm.operatorframework.io
-    resources:
-      - clustercatalogs
-    verbs:
-      - get
-      - list
-      - watch
-  - apiGroups:
-      - olm.operatorframework.io
-    resources:
-      - clusterextensions
-    verbs:
-      - get
-      - list
-      - patch
-      - update
-      - watch
-  - apiGroups:
-      - olm.operatorframework.io
-    resources:
-      - clusterextensions/finalizers
-    verbs:
-      - update
-  - apiGroups:
-      - olm.operatorframework.io
-    resources:
-      - clusterextensions/status
-    verbs:
-      - patch
-      - update
-  - apiGroups:
-      - rbac.authorization.k8s.io
-    resources:
-      - clusterrolebindings
-      - clusterroles
-      - rolebindings
-      - roles
-    verbs:
-      - list
-      - watch
----
 # Source: olmv1/templates/rbac/clusterrolebinding-catalogd-manager-rolebinding.yml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -1347,11 +1274,11 @@ metadata:
   labels:
     app.kubernetes.io/name: operator-controller
     app.kubernetes.io/part-of: olm
-  name: operator-controller-manager-rolebinding
+  name: operator-controller-cluster-admin-rolebinding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: operator-controller-manager-role
+  name: cluster-admin
 subjects:
   - kind: ServiceAccount
     name: operator-controller-controller-manager
@@ -1649,7 +1576,7 @@ spec:
             - --pull-cas-dir=/var/ca-certs
           command:
             - ./catalogd
-          image: "quay.io/operator-framework/catalogd:v1.10.0@sha256:d0af890a8931ce27001e8a46606a7a229a7867e96f28485cae5aebeb7e7b5b8b"
+          image: "quay.io/operator-framework/catalogd:v1.11.0@sha256:60786954cdd719460c1c86e5e75babba4beb21ae72b0e11535b439a3e0e9d856"
           name: manager
           livenessProbe:
             httpGet:
@@ -1699,14 +1626,14 @@ spec:
               - key: tls.key
                 path: tls.key
             optional: false
-            secretName: catalogd-service-cert-v1.10.0
+            secretName: catalogd-service-cert-v1.11.0
         - name: ca-certs
           secret:
             items:
               - key: ca.crt
                 path: olm-ca.crt
             optional: false
-            secretName: catalogd-service-cert-v1.10.0
+            secretName: catalogd-service-cert-v1.11.0
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -1785,10 +1712,7 @@ spec:
             - --feature-gates=BoxcutterRuntime=false
             - --feature-gates=BundleReleaseSupport=false
             - --feature-gates=DeploymentConfig=false
-            - --feature-gates=HelmChartSupport=false
-            - --feature-gates=PreflightPermissions=false
             - --feature-gates=SingleOwnNamespaceInstallSupport=false
-            - --feature-gates=SyntheticPermissions=false
             - --feature-gates=WebhookProviderOpenshiftServiceCA=false
             - --tls-cert=/var/certs/tls.crt
             - --tls-key=/var/certs/tls.key
@@ -1796,7 +1720,7 @@ spec:
             - --pull-cas-dir=/var/ca-certs
           command:
             - /operator-controller
-          image: "quay.io/operator-framework/operator-controller:v1.10.0@sha256:f31759056c7238d71d08479d5980a0273f468e964e6e9803507a4f576b03a0c6"
+          image: "quay.io/operator-framework/operator-controller:v1.11.0@sha256:186de1612e850714864958822e28284e58ab32367e000cedd81dce9e479efd1b"
           name: manager
           livenessProbe:
             httpGet:
@@ -1916,7 +1840,7 @@ spec:
     algorithm: ECDSA
     rotationPolicy: Always
     size: 256
-  secretName: catalogd-service-cert-v1.10.0
+  secretName: catalogd-service-cert-v1.11.0
 ---
 # Source: olmv1/templates/cert-manager/certificate-olmv1-system-operator-controller-cert.yml
 apiVersion: cert-manager.io/v1
@@ -1980,3 +1904,45 @@ webhooks:
     matchConditions:
       - name: MissingOrIncorrectMetadataNameLabel
         expression: "'name' in object.metadata && (!has(object.metadata.labels) || !('olm.operatorframework.io/metadata.name' in object.metadata.labels) || object.metadata.labels['olm.operatorframework.io/metadata.name'] != object.metadata.name)"
+---
+# Source: olmv1/templates/validatingadmissionpolicy-clusterextension-serviceaccount-deprecated.yml
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: clusterextension-serviceaccount-deprecated
+  labels:
+    app.kubernetes.io/name: operator-controller
+    app.kubernetes.io/part-of: olm
+  annotations:
+    olm.operatorframework.io/feature-set: standard
+spec:
+  failurePolicy: Ignore
+  matchConstraints:
+    resourceRules:
+      - apiGroups:
+          - olm.operatorframework.io
+        apiVersions:
+          - v1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - clusterextensions
+  validations:
+    - expression: "!has(object.spec.serviceAccount) || !has(object.spec.serviceAccount.name) || object.spec.serviceAccount.name == ''"
+      message: "spec.serviceAccount is deprecated, ignored, and will be removed in a future release. The operator-controller's cluster-admin service account is used for all cluster interactions."
+---
+# Source: olmv1/templates/validatingadmissionpolicybinding-clusterextension-serviceaccount-deprecated.yml
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: clusterextension-serviceaccount-deprecated
+  labels:
+    app.kubernetes.io/name: operator-controller
+    app.kubernetes.io/part-of: olm
+  annotations:
+    olm.operatorframework.io/feature-set: standard
+spec:
+  policyName: clusterextension-serviceaccount-deprecated
+  validationActions:
+    - Warn

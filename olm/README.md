@@ -5,7 +5,7 @@ including any breaking changes and changes to the official installation method.
 Then regenerate from an explicit stable release tag:
 
 ```bash
-./update.sh v1.10.0
+./update.sh v1.11.0
 ```
 
 Validate the rendered Flux manifests and review the generated diff before
