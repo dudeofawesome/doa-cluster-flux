@@ -1,0 +1,169 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitea-mirror
+  namespace: forgejo
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      component: gitea-mirror
+  template:
+    metadata:
+      annotations:
+        secrets.revision: '1'
+      labels:
+        component: gitea-mirror
+    spec:
+      automountServiceAccountToken: false
+      nodeSelector:
+        kubernetes.io/hostname: haleakala
+      securityContext:
+        fsGroup: 1001
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 1001
+        runAsNonRoot: true
+        runAsUser: 1001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: gitea-mirror
+          image: ghcr.io/raylabshq/gitea-mirror:v3.28.0@sha256:b99bd1a4dd618a39367909e8288af81cb0b4cf82cd6fc023a6e3cff645e8c7a7
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: HOST
+              value: 0.0.0.0
+            - name: PORT
+              value: '4321'
+            - name: DATABASE_URL
+              value: file:data/gitea-mirror.db
+            - name: BETTER_AUTH_URL
+              value: http://localhost:4321
+            - name: PUBLIC_BETTER_AUTH_URL
+              value: http://localhost:4321
+            - name: BETTER_AUTH_TRUSTED_ORIGINS
+              value: http://localhost:4321
+            - name: GITHUB_USERNAME
+              value: dudeofawesome
+            - name: GITHUB_TYPE
+              value: personal
+            - name: PRIVATE_REPOSITORIES
+              value: 'true'
+            - name: PUBLIC_REPOSITORIES
+              value: 'true'
+            - name: INCLUDE_ARCHIVED
+              value: 'true'
+            - name: INCLUDE_COLLABORATOR_REPOS
+              value: 'false'
+            - name: SKIP_FORKS
+              value: 'false'
+            - name: MIRROR_STARRED
+              value: 'false'
+            - name: MIRROR_ORGANIZATIONS
+              value: 'false'
+            - name: MIRROR_STRATEGY
+              value: flat-user
+            - name: GITEA_URL
+              value: http://forgejo.forgejo.svc.cluster.local:3000
+            - name: GITEA_EXTERNAL_URL
+              value: https://git.orleans.io
+            - name: GITEA_USERNAME
+              value: dudeofawesome
+            - name: GITEA_MIRROR_INTERVAL
+              value: 1h
+            - name: GITEA_LFS
+              value: 'true'
+            - name: GITEA_PRESERVE_VISIBILITY
+              value: 'true'
+            - name: MIRROR_RELEASES
+              value: 'false'
+            - name: MIRROR_WIKI
+              value: 'false'
+            - name: MIRROR_METADATA
+              value: 'false'
+            - name: SCHEDULE_ENABLED
+              value: 'true'
+            - name: SCHEDULE_INTERVAL
+              value: '3600'
+            - name: AUTO_IMPORT_REPOS
+              value: 'true'
+            - name: AUTO_MIRROR_REPOS
+              value: 'true'
+            - name: CLEANUP_ENABLED
+              value: 'true'
+            - name: CLEANUP_RETENTION_DAYS
+              value: '30'
+            - name: CLEANUP_DELETE_IF_NOT_IN_GITHUB
+              value: 'true'
+            - name: CLEANUP_ORPHANED_REPO_ACTION
+              value: archive
+            - name: GITHUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: github-mirror
+                  key: github_token
+            - name: GITEA_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: github-mirror
+                  key: gitea_token
+            - name: BETTER_AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: github-mirror
+                  key: better_auth_secret
+            - name: ENCRYPTION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: github-mirror
+                  key: encryption_secret
+          ports:
+            - name: http
+              containerPort: 4321
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: '1'
+              memory: 1Gi
+          startupProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 18
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            periodSeconds: 10
+            failureThreshold: 6
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            periodSeconds: 30
+            failureThreshold: 3
+            timeoutSeconds: 5
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+      terminationGracePeriodSeconds: 60
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: gitea-mirror

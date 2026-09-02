@@ -14,6 +14,7 @@ resources:
   - secrets.yaml
   - oidc/secrets.yaml
   - runner-registration/secrets.yaml
+  - github-mirror
   - oidc-client.yaml
   - deployment.yaml
   - ingress.yaml

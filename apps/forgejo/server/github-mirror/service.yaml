@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: gitea-mirror
+  namespace: forgejo
+spec:
+  selector:
+    component: gitea-mirror
+  ports:
+    - name: http
+      port: 4321
+      targetPort: http
