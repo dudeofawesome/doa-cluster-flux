@@ -1,0 +1,49 @@
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres
+spec:
+  bootstrap:
+    initdb:
+      database: ntfy
+      owner: ntfy
+
+  instances: 1
+
+  storage:
+    size: 5Gi
+    pvcTemplate:
+      volumeName: ntfy-data
+      volumeMode: Filesystem
+      storageClassName: local-path
+      accessModes:
+        - ReadWriteOnce
+
+  monitoring:
+    enablePodMonitor: true
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ntfy-data
+  labels:
+    type: local
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-path
+  local:
+    path: /mnt/ntfy
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - haleakala

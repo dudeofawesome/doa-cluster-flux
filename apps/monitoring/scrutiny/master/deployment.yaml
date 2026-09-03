@@ -32,6 +32,11 @@ spec:
               value: orleans
             - name: SCRUTINY_WEB_INFLUXDB_BUCKET
               value: scrutiny
+            - name: SCRUTINY_WEB_NOTIFY_URLS
+              valueFrom:
+                secretKeyRef:
+                  name: ntfy
+                  key: url
           ports:
             - name: http
               containerPort: 8080

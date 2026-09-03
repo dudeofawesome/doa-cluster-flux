@@ -1,0 +1,15 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ntfy
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`notify.orleans.io`)
+      kind: Rule
+      services:
+        - name: ntfy
+          port: 80
+  tls:
+    secretName: wildcard-orleans-io
