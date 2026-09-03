@@ -1,0 +1,43 @@
+---
+apiVersion: v1.edp.epam.com/v1
+kind: KeycloakClient
+metadata:
+  name: kubernetes
+  namespace: keycloak
+spec:
+  clientId: kubernetes
+  name: Kubernetes
+  description: Human authentication to the doa-cluster Kubernetes API
+  protocol: openid-connect
+  enabled: true
+  public: true
+  standardFlowEnabled: true
+  implicitFlowEnabled: false
+  directAccess: false
+  consentRequired: false
+  frontChannelLogout: false
+  fullScopeAllowed: false
+  bearerOnly: false
+  surrogateAuthRequired: false
+  authorizationServicesEnabled: false
+  realmRef:
+    kind: ClusterKeycloakRealm
+    name: sequoia
+  redirectUris:
+    - http://localhost:8000
+    - http://localhost:18000
+  protocolMappers:
+    - name: groups
+      protocol: openid-connect
+      protocolMapper: oidc-group-membership-mapper
+      config:
+        access.token.claim: 'true'
+        claim.name: groups
+        full.path: 'true'
+        id.token.claim: 'true'
+        userinfo.token.claim: 'true'
+  attributes:
+    display.on.consent.screen: 'false'
+    oauth2.device.authorization.grant.enabled: 'false'
+    oidc.ciba.grant.enabled: 'false'
+    pkce.code.challenge.method: S256

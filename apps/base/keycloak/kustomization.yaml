@@ -14,5 +14,6 @@ resources:
   - resources/auth-flows/direct-grant-single-factor.yaml
   - resources/base.yaml
   - resources/groups.yaml
+  - resources/kubernetes-client.yaml
   - resources/realm.yaml
   - resources/roles.yaml
