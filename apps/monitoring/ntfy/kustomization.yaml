@@ -1,8 +1,11 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: ntfy
-commonLabels:
-  app: ntfy
+labels:
+  - pairs:
+      app: ntfy
+    includeSelectors: false
+    includeTemplates: true
 
 resources:
   - namespace.yaml
