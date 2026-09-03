@@ -1,0 +1,7 @@
+title: |
+  {{ .involvedObject.kind }}/{{ .involvedObject.name }}: {{ .reason }}
+message: |
+  {{ .message }}
+
+  Namespace: {{ .involvedObject.namespace }}
+  Controller: {{ .reportingController }}

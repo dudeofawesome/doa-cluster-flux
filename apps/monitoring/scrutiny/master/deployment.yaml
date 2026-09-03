@@ -7,6 +7,8 @@ metadata:
   name: scrutiny
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       component: app
@@ -47,9 +49,16 @@ spec:
             limits:
               cpu: 300m
               memory: 500Mi
+          volumeMounts:
+            - name: config
+              mountPath: /opt/scrutiny/config
           # readinessProbe:
           #   initialDelaySeconds: 30
           #   timeoutSeconds: 30
           #   httpGet:
           #     path: /realms/sequoia
           #     port: 8080
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: scrutiny-config

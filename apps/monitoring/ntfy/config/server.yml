@@ -1,0 +1,18 @@
+base-url: https://notify.orleans.io
+listen-http: :8080
+
+behind-proxy: true
+proxy-trusted-hosts: 10.42.0.0/16
+
+cache-duration: 720h
+
+auth-default-access: deny-all
+enable-login: true
+require-login: true
+enable-signup: false
+
+upstream-base-url: https://ntfy.sh
+
+web-push-email-address: tourist-04.iced@icloud.com
+
+template-dir: /etc/ntfy/templates

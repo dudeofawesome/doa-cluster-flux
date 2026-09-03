@@ -2,6 +2,44 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
+  name: scrutiny-config
+  labels:
+    type: local
+spec:
+  volumeName: scrutiny-config
+  storageClassName: local-path
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: scrutiny-config
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-path
+  local:
+    path: /mnt/scrutiny-config
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - haleakala
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
   name: scrutiny-influxdb-data
   labels:
     type: local

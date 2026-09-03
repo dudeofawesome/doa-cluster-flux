@@ -10,8 +10,13 @@ labels:
 resources:
   - namespace.yaml
   - database.yaml
-  - config.yaml
   - secrets.yaml
   - deployment.yaml
   - ingress.yaml
   - network-policy.yaml
+
+configMapGenerator:
+  - name: config
+    files:
+      - config/server.yml
+      - config/flux.yml
