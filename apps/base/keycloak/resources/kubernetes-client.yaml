@@ -26,16 +26,22 @@ spec:
   redirectUris:
     - http://localhost:8000
     - http://localhost:18000
+  clientRolesV2:
+    - name: kubernetes_admin
+      description: Full administrative access to the Kubernetes cluster
   protocolMappers:
-    - name: groups
+    - name: kubernetes roles
       protocol: openid-connect
-      protocolMapper: oidc-group-membership-mapper
+      protocolMapper: oidc-usermodel-client-role-mapper
       config:
         access.token.claim: 'true'
-        claim.name: groups
-        full.path: 'true'
+        claim.name: kubernetes_roles
         id.token.claim: 'true'
+        introspection.token.claim: 'true'
+        jsonType.label: String
+        multivalued: 'true'
         userinfo.token.claim: 'true'
+        usermodel.clientRoleMapping.clientId: kubernetes
   attributes:
     display.on.consent.screen: 'false'
     oauth2.device.authorization.grant.enabled: 'false'

@@ -5,7 +5,7 @@ metadata:
   name: keycloak-admins-owner
 subjects:
   - kind: Group
-    name: oidc:/Admins
+    name: oidc:kubernetes:kubernetes_admin
     apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: ClusterRole

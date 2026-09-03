@@ -9,6 +9,10 @@ spec:
   realmRef:
     kind: ClusterKeycloakRealm
     name: sequoia
+  clientRoles:
+    - clientId: kubernetes
+      roles:
+        - kubernetes_admin
   realmRoles:
     - realm-admin
 ---
