@@ -13,6 +13,9 @@ spec:
     - clientId: kubernetes
       roles:
         - kubernetes_admin
+    - clientId: home-assistant
+      roles:
+        - home-assistant_admin
   realmRoles:
     - realm-admin
 ---
