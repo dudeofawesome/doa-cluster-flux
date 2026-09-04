@@ -3,7 +3,7 @@ apiVersion: helm.mariadb.mmontes.io/v1alpha1
 kind: MariadbOperator
 metadata:
   name: mariadb-operator
-  namespace: operators
+  namespace: mariadb-operator
 spec:
   image:
     repository: ghcr.io/mariadb-operator/mariadb-operator

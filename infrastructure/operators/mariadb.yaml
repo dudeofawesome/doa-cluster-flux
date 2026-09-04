@@ -3,8 +3,10 @@ apiVersion: olm.operatorframework.io/v1
 kind: ClusterExtension
 metadata:
   name: mariadb-operator
+  annotations:
+    kustomize.toolkit.fluxcd.io/force: enabled
 spec:
-  namespace: operators
+  namespace: mariadb-operator
   source:
     sourceType: Catalog
     catalog:
