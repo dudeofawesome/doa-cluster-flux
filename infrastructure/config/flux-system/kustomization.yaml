@@ -4,3 +4,5 @@ namespace: flux-system
 resources:
   - webhook-receiver.yaml
   - secrets.yaml
+  - ntfy.yaml
+  - ntfy/secrets.yaml

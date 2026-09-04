@@ -1,0 +1,58 @@
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Provider
+metadata:
+  name: ntfy-errors
+  namespace: flux-system
+spec:
+  type: generic
+  address: http://ntfy.ntfy.svc.cluster.local/cluster-alerts?template=flux&priority=high&tags=warning
+  secretRef:
+    name: ntfy-provider
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Provider
+metadata:
+  name: ntfy-changes
+  namespace: flux-system
+spec:
+  type: generic
+  address: http://ntfy.ntfy.svc.cluster.local/cluster-alerts?template=flux&priority=default&tags=information_source
+  secretRef:
+    name: ntfy-provider
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Alert
+metadata:
+  name: ntfy-errors
+  namespace: flux-system
+spec:
+  providerRef:
+    name: ntfy-errors
+  eventSeverity: error
+  eventSources:
+    - kind: Kustomization
+      name: '*'
+      namespace: '*'
+    - kind: HelmRelease
+      name: '*'
+      namespace: '*'
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Alert
+metadata:
+  name: ntfy-changes
+  namespace: flux-system
+spec:
+  providerRef:
+    name: ntfy-changes
+  eventSeverity: info
+  eventSources:
+    - kind: Kustomization
+      name: '*'
+      namespace: '*'
+    - kind: HelmRelease
+      name: '*'
+      namespace: '*'
+  inclusionList:
+    - '(?i).*(applied revision|reconciliation finished|succeeded).*'
