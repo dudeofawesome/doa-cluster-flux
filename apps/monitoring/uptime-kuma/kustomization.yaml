@@ -12,4 +12,5 @@ resources:
   - storage.yaml
   - database.yaml
   - deployment.yaml
+  - ingress.yaml
   - network-policy.yaml
