@@ -55,6 +55,14 @@
 
   packageRules: [
     {
+      description: 'Group Zigbee2MQTT image and schema updates',
+      matchDepNames: [
+        'docker.io/koenkk/zigbee2mqtt',
+        'Koenkk/zigbee2mqtt',
+      ],
+      groupName: 'Zigbee2MQTT',
+    },
+    {
       description: 'Group OLM controller image updates',
       matchDatasources: ['docker'],
       matchDepNames: [
