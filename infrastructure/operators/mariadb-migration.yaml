@@ -33,21 +33,22 @@ subjects:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: mariadb-operator-migration
+  name: mariadb-operator-migration-finalizer
   namespace: mariadb-operator
 spec:
-  backoffLimit: 3
+  backoffLimit: 0
   template:
     spec:
-      restartPolicy: OnFailure
+      restartPolicy: Never
       serviceAccountName: mariadb-operator-migration
       containers:
         - name: kubectl
           image: registry.k8s.io/kubectl:v1.33.4
           args:
             - patch
-            - mariadboperator
+            - mariadboperators.helm.mariadb.mmontes.io
             - mariadb-operator
             - --namespace=operators
+            - --request-timeout=30s
             - --type=merge
             - --patch={"metadata":{"finalizers":[]}}
