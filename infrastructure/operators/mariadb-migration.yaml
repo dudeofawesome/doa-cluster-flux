@@ -33,7 +33,7 @@ subjects:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: mariadb-operator-migration-finalizer
+  name: mariadb-operator-migration-finalizer-v2
   namespace: mariadb-operator
 spec:
   backoffLimit: 0
@@ -44,6 +44,11 @@ spec:
       containers:
         - name: kubectl
           image: registry.k8s.io/kubectl:v1.33.4
+          env:
+            - name: KUBERNETES_SERVICE_HOST
+              value: kubernetes.default.svc
+            - name: KUBERNETES_SERVICE_PORT
+              value: "443"
           args:
             - patch
             - mariadboperators.helm.mariadb.mmontes.io
