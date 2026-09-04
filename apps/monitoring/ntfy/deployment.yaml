@@ -52,6 +52,11 @@ spec:
                 secretKeyRef:
                   name: ntfy
                   key: auth-tokens
+            - name: NTFY_UPSTREAM_ACCESS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: ntfy
+                  key: upstream-access-token
             - name: NTFY_WEB_PUSH_PUBLIC_KEY
               valueFrom:
                 secretKeyRef:
