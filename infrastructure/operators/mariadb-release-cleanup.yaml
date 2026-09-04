@@ -1,0 +1,80 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mariadb-release-cleanup
+  namespace: mariadb-operator
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mariadb-release-cleanup-token
+  namespace: mariadb-operator
+  annotations:
+    kubernetes.io/service-account.name: mariadb-release-cleanup
+type: kubernetes.io/service-account-token
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: mariadb-release-cleanup
+rules:
+  - apiGroups:
+      - rbac.authorization.k8s.io
+    resources:
+      - clusterroles
+      - clusterrolebindings
+    verbs:
+      - delete
+  - apiGroups:
+      - admissionregistration.k8s.io
+    resources:
+      - validatingwebhookconfigurations
+    verbs:
+      - delete
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: mariadb-release-cleanup
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: mariadb-release-cleanup
+subjects:
+  - kind: ServiceAccount
+    name: mariadb-release-cleanup
+    namespace: mariadb-operator
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mariadb-release-cleanup
+  namespace: mariadb-operator
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      restartPolicy: Never
+      serviceAccountName: mariadb-release-cleanup
+      containers:
+        - name: kubectl
+          image: registry.k8s.io/kubectl:v1.33.4
+          env:
+            - name: KUBERNETES_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-release-cleanup-token
+                  key: token
+          args:
+            - --server=https://kubernetes.default.svc
+            - --certificate-authority=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            - --token=$(KUBERNETES_TOKEN)
+            - delete
+            - clusterrole/mariadb-operator-view
+            - clusterrole/mariadb-operator-edit
+            - clusterrole/mariadb-operator
+            - clusterrolebinding/mariadb-operator
+            - clusterrolebinding/mariadb-operator:auth-delegator
+            - validatingwebhookconfiguration/mariadb-operator-webhook
+            - --ignore-not-found
