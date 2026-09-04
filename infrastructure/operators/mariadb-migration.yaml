@@ -5,6 +5,15 @@ metadata:
   name: mariadb-operator-migration
   namespace: mariadb-operator
 ---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mariadb-operator-migration-token
+  namespace: mariadb-operator
+  annotations:
+    kubernetes.io/service-account.name: mariadb-operator-migration
+type: kubernetes.io/service-account-token
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -33,7 +42,7 @@ subjects:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: mariadb-operator-migration-finalizer-v2
+  name: mariadb-operator-migration-finalizer-v3
   namespace: mariadb-operator
 spec:
   backoffLimit: 0
@@ -45,11 +54,15 @@ spec:
         - name: kubectl
           image: registry.k8s.io/kubectl:v1.33.4
           env:
-            - name: KUBERNETES_SERVICE_HOST
-              value: kubernetes.default.svc
-            - name: KUBERNETES_SERVICE_PORT
-              value: "443"
+            - name: KUBERNETES_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-operator-migration-token
+                  key: token
           args:
+            - --server=https://kubernetes.default.svc
+            - --certificate-authority=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            - --token=$(KUBERNETES_TOKEN)
             - patch
             - mariadboperators.helm.mariadb.mmontes.io
             - mariadb-operator
