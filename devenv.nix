@@ -9,6 +9,7 @@
     kubectl
     kubectx
     mosquitto
+    renovate
   ];
 
   languages = {
