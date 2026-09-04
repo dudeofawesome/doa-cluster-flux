@@ -10,5 +10,6 @@ labels:
 resources:
   - namespace.yaml
   - storage.yaml
+  - database.yaml
   - deployment.yaml
   - network-policy.yaml

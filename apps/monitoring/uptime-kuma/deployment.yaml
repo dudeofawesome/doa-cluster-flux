@@ -53,6 +53,11 @@ spec:
           env:
             - name: TZ
               value: America/Los_Angeles
+            - name: UPTIME_KUMA_DB_TYPE
+              value: mariadb
+          envFrom:
+            - secretRef:
+                name: database-connection
           ports:
             - name: http
               containerPort: 3001

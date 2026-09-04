@@ -1,0 +1,84 @@
+apiVersion: k8s.mariadb.com/v1alpha1
+kind: MariaDB
+metadata:
+  name: mariadb
+spec:
+  rootPasswordSecretKeyRef:
+    name: mariadb-root
+    key: password
+    generate: true
+  username: uptime-kuma
+  passwordSecretKeyRef:
+    name: mariadb-password
+    key: password
+    generate: true
+  database: uptime-kuma
+  port: 3306
+  storage:
+    size: 5Gi
+    volumeClaimTemplate:
+      storageClassName: local-path
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+      selector:
+        matchLabels:
+          storage: uptime-kuma-mariadb
+  service:
+    type: ClusterIP
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+---
+apiVersion: k8s.mariadb.com/v1alpha1
+kind: Connection
+metadata:
+  name: uptime-kuma
+spec:
+  mariaDbRef:
+    name: mariadb
+  username: uptime-kuma
+  passwordSecretKeyRef:
+    name: mariadb-password
+    key: password
+  database: uptime-kuma
+  secretName: database-connection
+  secretTemplate:
+    key: dsn
+    usernameKey: UPTIME_KUMA_DB_USERNAME
+    passwordKey: UPTIME_KUMA_DB_PASSWORD
+    hostKey: UPTIME_KUMA_DB_HOSTNAME
+    portKey: UPTIME_KUMA_DB_PORT
+    databaseKey: UPTIME_KUMA_DB_NAME
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: uptime-kuma-mariadb
+  labels:
+    storage: uptime-kuma-mariadb
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-path
+  hostPath:
+    path: /mnt/uptime-kuma-mariadb
+    type: DirectoryOrCreate
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - haleakala
