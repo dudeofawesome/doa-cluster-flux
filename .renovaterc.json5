@@ -70,6 +70,13 @@
       allowedVersions: '!/^v1\\.18\\.0$/',
     },
     {
+      description: 'Automerge OLM catalog digest updates',
+      matchDatasources: ['docker'],
+      matchDepNames: ['quay.io/operatorhubio/catalog'],
+      matchUpdateTypes: ['digest'],
+      automerge: true,
+    },
+    {
       description: 'Automerge patch updates to the reflector Helm release',
       matchManagers: ['flux'],
       matchDatasources: ['helm'],
