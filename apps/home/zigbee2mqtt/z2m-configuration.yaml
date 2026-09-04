@@ -1,5 +1,5 @@
 # renovate: datasource=github-tags depName=Koenkk/zigbee2mqtt versioning=semver-coerced
-# yaml-language-server: $schema=https://raw.githubusercontent.com/Koenkk/zigbee2mqtt/refs/tags/2.14.0/lib/util/settings.schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Koenkk/zigbee2mqtt/refs/tags/2.14.1/lib/util/settings.schema.json
 
 version: 5
 
