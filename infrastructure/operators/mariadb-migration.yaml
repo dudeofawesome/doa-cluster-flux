@@ -24,6 +24,7 @@ rules:
     resources:
       - mariadboperators
     verbs:
+      - get
       - patch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -42,7 +43,7 @@ subjects:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: mariadb-operator-migration-finalizer-v3
+  name: mariadb-operator-migration-finalizer-v4
   namespace: mariadb-operator
 spec:
   backoffLimit: 0
