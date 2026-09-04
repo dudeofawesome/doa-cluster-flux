@@ -1,0 +1,14 @@
+---
+apiVersion: olm.operatorframework.io/v1
+kind: ClusterExtension
+metadata:
+  name: mariadb-operator
+spec:
+  namespace: operators
+  source:
+    sourceType: Catalog
+    catalog:
+      packageName: mariadb-operator
+      channels: [alpha]
+      # renovate: datasource=github-releases depName=mariadb-operator/mariadb-operator extractVersion=^(?<version>\d+\.\d+\.\d+)$
+      version: '26.6.0'
