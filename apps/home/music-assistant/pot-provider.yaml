@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bgutil-ytdlp-pot-provider
+spec:
+  revisionHistoryLimit: 3
+  replicas: 1
+  selector:
+    matchLabels:
+      component: pot-provider
+  template:
+    metadata:
+      labels:
+        component: pot-provider
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: pot-provider
+          # Keep compatible with Music Assistant's supported PO token server version.
+          # https://www.music-assistant.io/music-providers/youtube-music/
+          image: brainicism/bgutil-ytdlp-pot-provider:1.2.1@sha256:7064546d70a58680aec236b50859c4fca065092d7ed462c85ea5d897b003095e
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 4416
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: http
+            failureThreshold: 3
+            timeoutSeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: http
+            failureThreshold: 3
+            timeoutSeconds: 5
+            periodSeconds: 10
+          startupProbe:
+            httpGet:
+              path: /ping
+              port: http
+            failureThreshold: 30
+            timeoutSeconds: 5
+            periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bgutil-ytdlp-pot-provider
+spec:
+  type: ClusterIP
+  selector:
+    component: pot-provider
+  ports:
+    - name: http
+      port: 4416
+      targetPort: http
+      protocol: TCP
