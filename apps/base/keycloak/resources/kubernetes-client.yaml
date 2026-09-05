@@ -23,6 +23,8 @@ spec:
   realmRef:
     kind: ClusterKeycloakRealm
     name: sequoia
+  optionalClientScopes:
+    - offline_access
   redirectUris:
     - http://localhost:8000
     - http://localhost:18000
