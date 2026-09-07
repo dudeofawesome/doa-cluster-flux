@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: zone-configurator
-          image: docker.io/everythingsmarthome/everything-presence-mmwave-configurator:2.2.4@sha256:f011a104e3f074befaf60a15b87383fd41b532b747050e9274d7d07274ba1a0b
+          image: docker.io/everythingsmarthome/everything-presence-mmwave-configurator:2.2.4@sha256:2274bc250563491d26c4c44dc4f190e6e55558ed47dd2ac684292e7d52615467
           imagePullPolicy: IfNotPresent
           env:
             - name: HA_BASE_URL
