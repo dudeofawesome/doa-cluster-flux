@@ -18,7 +18,7 @@ spec:
         - name: pot-provider
           # Keep compatible with Music Assistant's supported PO token server version.
           # https://www.music-assistant.io/music-providers/youtube-music/
-          image: brainicism/bgutil-ytdlp-pot-provider:1.2.1@sha256:7064546d70a58680aec236b50859c4fca065092d7ed462c85ea5d897b003095e
+          image: brainicism/bgutil-ytdlp-pot-provider:2.0.0@sha256:ed86b6fdd5e430ddd7c8ce1adb55e1ab54db7c7dbc1bcbf3a82454a85b971164
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
