@@ -41,7 +41,7 @@ spec:
       serviceAccountName: forgejo-runner
       priorityClassName: forgejo-runner
       nodeSelector:
-        kubernetes.io/hostname: haleakala
+        kubernetes.io/hostname: kings-canyon
       securityContext:
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch

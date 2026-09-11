@@ -22,7 +22,7 @@ spec:
             - key: kubernetes.io/hostname
               operator: In
               values:
-                - haleakala
+                - kings-canyon
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

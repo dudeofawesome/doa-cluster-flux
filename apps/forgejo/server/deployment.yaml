@@ -19,7 +19,7 @@ spec:
       automountServiceAccountToken: false
       priorityClassName: forgejo-service
       nodeSelector:
-        kubernetes.io/hostname: haleakala
+        kubernetes.io/hostname: kings-canyon
       securityContext:
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
