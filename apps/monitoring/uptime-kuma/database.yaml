@@ -3,6 +3,10 @@ kind: MariaDB
 metadata:
   name: mariadb
 spec:
+  myCnf: |
+    [mariadb]
+    # Buffered redo-log writes avoid EINVAL from direct I/O on bcachefs.
+    innodb_log_file_buffering=ON
   rootPasswordSecretKeyRef:
     name: mariadb-root
     key: password
