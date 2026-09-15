@@ -8,6 +8,8 @@ resources:
   - ingress.yaml
   - rbac.yaml
   - secrets.yaml
+  - oidc-client.yaml
+  - oidc/secrets.yaml
 configMapGenerator:
   - name: grafana-config
     files:

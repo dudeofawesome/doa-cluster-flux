@@ -29,6 +29,11 @@ spec:
         - name: grafana
           image: docker.io/grafana/grafana:13.2.1-distroless
           env:
+            - name: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: oidc
+                  key: client_secret
             - name: GF_SECURITY_ADMIN_USER
               valueFrom:
                 secretKeyRef:
