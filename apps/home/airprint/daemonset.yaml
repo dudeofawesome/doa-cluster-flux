@@ -18,7 +18,7 @@ spec:
         feature.node.kubernetes.io/usb-ff_04e8_3434.present: 'true'
       initContainers:
         - name: seed-cups-state
-          image: ghcr.io/dudeofawesome/cups:20260825@sha256:d3cef00320b4cf2d0fc2fa1da341d0b51c86dd5c55d8d872768bbdd60abce583
+          image: ghcr.io/dudeofawesome/cups:20260825@sha256:71b0c1699c0d14a6c5b2cde877ee279d9b694151e32d3cfdf07307f5de16cafe
           command:
             - /bin/sh
             - -ec
@@ -42,7 +42,7 @@ spec:
               readOnly: true
       containers:
         - name: cups
-          image: ghcr.io/dudeofawesome/cups:20260825@sha256:d3cef00320b4cf2d0fc2fa1da341d0b51c86dd5c55d8d872768bbdd60abce583
+          image: ghcr.io/dudeofawesome/cups:20260825@sha256:71b0c1699c0d14a6c5b2cde877ee279d9b694151e32d3cfdf07307f5de16cafe
           command:
             - /bin/sh
             - -ec
