@@ -1,0 +1,156 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: monitoring
+spec:
+  interval: 30m
+  timeout: 10m
+  install:
+    crds: CreateReplace
+    remediation:
+      retries: 3
+  upgrade:
+    crds: CreateReplace
+    remediation:
+      retries: 3
+  chart:
+    spec:
+      chart: kube-prometheus-stack
+      version: '89.2.0'
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community
+        namespace: flux-system
+      interval: 12h
+  values:
+    # K3s embeds these components; the standalone endpoint discovery in the
+    # upstream chart does not apply. Keep API server and kubelet monitoring.
+    kubeControllerManager:
+      enabled: false
+    kubeScheduler:
+      enabled: false
+    kubeProxy:
+      enabled: false
+    kubeEtcd:
+      enabled: false
+    defaultRules:
+      rules:
+        kubeControllerManager: false
+        kubeSchedulerAlerting: false
+        kubeSchedulerRecording: false
+        kubeProxy: false
+        etcd: false
+
+    prometheus:
+      additionalPodMonitors:
+        - name: flux
+          namespaceSelector:
+            matchNames:
+              - flux-system
+          selector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values:
+                  - source-controller
+                  - kustomize-controller
+                  - helm-controller
+                  - notification-controller
+          podMetricsEndpoints:
+            - port: http-prom
+      prometheusSpec:
+        replicas: 1
+        retention: 15d
+        retentionSize: 16GB
+        scrapeInterval: 30s
+        evaluationInterval: 30s
+        externalLabels:
+          cluster: doa-cluster
+        nodeSelector:
+          kubernetes.io/hostname: kings-canyon
+        resources:
+          requests:
+            cpu: 250m
+            memory: 1Gi
+          limits:
+            memory: 3Gi
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: local-path
+              accessModes:
+                - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 20Gi
+
+    alertmanager:
+      config:
+        global:
+          resolve_timeout: 5m
+        inhibit_rules:
+          - source_matchers:
+              - severity = critical
+            target_matchers:
+              - severity =~ warning|info
+            equal:
+              - namespace
+              - alertname
+          - source_matchers:
+              - severity = warning
+            target_matchers:
+              - severity = info
+            equal:
+              - namespace
+              - alertname
+        route:
+          receiver: ntfy
+          group_by:
+            - namespace
+            - alertname
+          group_wait: 30s
+          group_interval: 5m
+          repeat_interval: 12h
+          routes:
+            - receiver: 'null'
+              matchers:
+                - alertname =~ Watchdog|InfoInhibitor
+        receivers:
+          - name: 'null'
+          - name: ntfy
+            webhook_configs:
+              - url: http://ntfy.ntfy.svc.cluster.local/cluster-alerts?template=alertmanager
+                send_resolved: true
+                max_alerts: 5
+                http_config:
+                  authorization:
+                    type: Bearer
+                    credentials_file: /etc/alertmanager/secrets/ntfy-alertmanager/token
+      alertmanagerSpec:
+        replicas: 1
+        secrets:
+          - ntfy-alertmanager
+        nodeSelector:
+          kubernetes.io/hostname: kings-canyon
+        resources:
+          requests:
+            cpu: 10m
+            memory: 64Mi
+          limits:
+            memory: 256Mi
+        storage:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: local-path
+              accessModes:
+                - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 1Gi
+
+    grafana:
+      enabled: false
+      # Keep the Kubernetes dashboards for the independently managed Grafana.
+      forceDeployDashboards: true
+      namespaceOverride: grafana
+      defaultDashboardsTimezone: browser
