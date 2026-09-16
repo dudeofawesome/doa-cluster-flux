@@ -40,6 +40,10 @@ spec:
       signout_redirect_url: https://auth.orleans.io/realms/sequoia/protocol/openid-connect/logout?post_logout_redirect_uri=https%3A%2F%2Fgrafana.orleans.io%2Flogin
     analytics:
       reporting_enabled: 'false'
+    plugins:
+      # Bundled plugins live on the read-only image filesystem. Update them
+      # with the Grafana image instead of replacing them during startup.
+      preinstall_auto_update: 'false'
     log:
       mode: console
   deployment:
