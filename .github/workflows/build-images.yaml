@@ -4,12 +4,14 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - images/avahi2dns/**
       - images/cups/**
       - images/keycloak/**
       - .github/workflows/build-images.yaml
   push:
     branches: [main]
     paths:
+      - images/avahi2dns/**
       - images/cups/**
       - images/keycloak/**
       - .github/workflows/build-images.yaml
@@ -43,6 +45,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - image: avahi2dns
+            platforms: linux/amd64,linux/arm64
+            version_arg: AVAHI2DNS_VERSION
+            version_override: ''
           - image: cups
             platforms: linux/amd64,linux/arm64
             version_arg: CUPS_VERSION
@@ -81,7 +87,7 @@ jobs:
           echo "image_tag=${image_tag}" >> "$GITHUB_OUTPUT"
 
       - name: Set up QEMU
-        if: matrix.image == 'cups'
+        if: matrix.image != 'keycloak'
         uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4
 
       - name: Set up Docker Buildx
