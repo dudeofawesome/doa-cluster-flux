@@ -3,11 +3,12 @@ FROM --platform=$BUILDPLATFORM docker.io/library/golang:1.26-alpine@sha256:ce864
 # Upstream release binaries require glibc. Build statically for Alpine instead.
 # Updating the version also requires updating the source archive checksum.
 ARG AVAHI2DNS_VERSION=0.2.1
+ARG AVAHI2DNS_COMMIT=2b3106a70921d9264b2f9f14298c03f2867970bf
 ARG TARGETARCH
 WORKDIR /src
 RUN wget -O /tmp/source.tar.gz \
-    "https://github.com/LouisBrunner/avahi2dns/archive/refs/tags/${AVAHI2DNS_VERSION}.tar.gz" \
-  && echo '3e40b1bb9d4d5b5c21c2b3de13773fbe4abbf1f34419eb91ac03c797a9930ac74a0aabd0f7f201b89579909173a61468a609afde5ad7d682c736fcffd17f3907  /tmp/source.tar.gz' | sha512sum -c - \
+    "https://github.com/LouisBrunner/avahi2dns/archive/${AVAHI2DNS_COMMIT}.tar.gz" \
+  && echo 'be6c6f50e2c9d068525d53691235ce65afc11235007a49356d90d8badd2763cfefe904274f3c75f037c799d19c6d89d5276077943b04aecfb2237a00b5f57aa9  /tmp/source.tar.gz' | sha512sum -c - \
   && tar -xzf /tmp/source.tar.gz --strip-components=1 \
   && CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} \
     go build -trimpath -ldflags='-s -w' -o /out/avahi2dns .
