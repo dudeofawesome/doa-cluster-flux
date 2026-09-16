@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns-custom
+data:
+  mdns.override: |
+    # Imported into the K3s root server before its ordinary upstream forwarder.
+    # The kubernetes plugin handles cluster.local first, including NXDOMAIN.
+    forward local 10.43.0.54 {
+      except cluster.local
+      # avahi2dns serves UDP; CoreDNS still accepts TCP from cluster clients.
+      prefer_udp
+      max_concurrent 128
+    }

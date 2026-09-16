@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: avahi2dns
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: avahi2dns
+  template:
+    metadata:
+      labels:
+        app: avahi2dns
+    spec:
+      automountServiceAccountToken: false
+      nodeSelector:
+        kubernetes.io/os: linux
+        kubernetes.io/hostname: kings-canyon
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: avahi2dns
+          image: ghcr.io/dudeofawesome/avahi2dns:0.2.1@sha256:322171fcd0d5ad5a4fe080fa32a7866ed832fdb268d61554272328314fb1340f
+          args:
+            - --addr=0.0.0.0
+            - --port=5354
+            - --domains=local
+            - --timeout=1500ms
+            # The pod network is IPv4. Do not return unusable IPv6 link-local
+            # addresses advertised by LAN devices to pods on other nodes.
+            - --v4only
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          ports:
+            - name: dns
+              containerPort: 5354
+              protocol: UDP
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 64Mi
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -ec
+                - |
+                  dig +short +time=1 +tries=1 @127.0.0.1 -p 5354 local. SOA |
+                    grep -q '^local\.'
+            timeoutSeconds: 2
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -ec
+                - |
+                  dig +short +time=1 +tries=1 @127.0.0.1 -p 5354 local. SOA |
+                    grep -q '^local\.'
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 2
+          volumeMounts:
+            - name: system-bus
+              mountPath: /run/dbus/system_bus_socket
+              readOnly: true
+      # Avahi performs multicast on the host; the bridge only needs its D-Bus
+      # socket. Keeping the bridge in the pod network avoids exposing LAN DNS.
+      volumes:
+        - name: system-bus
+          hostPath:
+            path: /run/dbus/system_bus_socket
+            type: Socket
