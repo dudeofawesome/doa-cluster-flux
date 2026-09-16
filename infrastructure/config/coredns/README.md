@@ -6,7 +6,7 @@ The bridge runs on `kings-canyon`, where Avahi resolution of LAN devices has bee
 
 This supports IPv4 hostname lookups (A records). AAAA queries return no data because LAN IPv6 link-local addresses cannot be used across the pod network. It does not proxy DNS-SD browsing, SRV/TXT discovery, or reverse DNS. Applications using their own DNS servers bypass this configuration.
 
-`avahi2dns` 0.2.1 is built by `.github/workflows/build-images.yaml` from checksum-verified upstream binaries. CoreDNS accepts both TCP and UDP clients and uses UDP to reach the bridge. Avahi lookups are bounded to 1.5 seconds, below CoreDNS's default upstream read timeout. Readiness checks query the bridge's local SOA record and do not depend on any particular device being powered on.
+`avahi2dns` 0.2.1 is built statically by `.github/workflows/build-images.yaml` from checksum-verified upstream source. The image build checks that the executable starts as its unprivileged runtime user on both supported architectures. CoreDNS accepts both TCP and UDP clients and uses UDP to reach the bridge. Avahi lookups are bounded to 1.5 seconds, below CoreDNS's default upstream read timeout. Readiness checks query the bridge's local SOA record and do not depend on any particular device being powered on.
 
 ## Rollout and verification
 
