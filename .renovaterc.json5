@@ -6,6 +6,14 @@
   customManagers: [
     {
       customType: 'regex',
+      managerFilePatterns: ['/^infrastructure/operators/.+[.]ya?ml$/'],
+      matchStrings: [
+        '# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+) extractVersion=(?<extractVersion>\\S+) versioning=(?<versioning>\\S+)\\n\\s*channels: \\[(?<currentValue>v[0-9]+)\\]',
+      ],
+      versioningTemplate: '{{{versioning}}}',
+    },
+    {
+      customType: 'regex',
       managerFilePatterns: [
         '/^apps/home/zigbee2mqtt/z2m-configuration\\.ya?ml$/',
       ],

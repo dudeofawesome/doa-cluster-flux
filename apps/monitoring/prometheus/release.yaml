@@ -154,3 +154,8 @@ spec:
       forceDeployDashboards: true
       namespaceOverride: grafana
       defaultDashboardsTimezone: browser
+      operator:
+        dashboardsConfigMapRefEnabled: true
+        matchLabels:
+          dashboards: grafana
+        folder: Kubernetes

@@ -3,20 +3,10 @@ kind: Kustomization
 namespace: grafana
 resources:
   - namespace.yaml
-  - deployment.yaml
+  - grafana.yaml
   - storage.yaml
   - ingress.yaml
-  - rbac.yaml
   - secrets.yaml
   - oidc-client.yaml
   - oidc/secrets.yaml
-configMapGenerator:
-  - name: grafana-config
-    files:
-      - config/grafana.ini
-  - name: grafana-datasources
-    files:
-      - config/datasources.yaml
-  - name: grafana-dashboards
-    files:
-      - config/dashboards.yaml
+  - datasources.yaml

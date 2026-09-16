@@ -1,0 +1,15 @@
+---
+apiVersion: olm.operatorframework.io/v1
+kind: ClusterExtension
+metadata:
+  name: grafana
+spec:
+  namespace: operators
+  source:
+    sourceType: Catalog
+    catalog:
+      packageName: grafana-operator
+      # renovate: datasource=github-releases depName=grafana/grafana-operator extractVersion=^(?<version>v[0-9]+)[.] versioning=semver-coerced
+      channels: [v5]
+      # renovate: datasource=github-releases depName=grafana/grafana-operator extractVersion=^v(?<version>\\d+\\.\\d+\\.\\d+)$
+      version: '5.24.0'
