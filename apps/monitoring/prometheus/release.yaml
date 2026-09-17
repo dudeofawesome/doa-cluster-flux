@@ -3,6 +3,9 @@ kind: HelmRelease
 metadata:
   name: monitoring
 spec:
+  # Temporary: restore dashboard resources after the Grafana operator migration.
+  driftDetection:
+    mode: enabled
   interval: 30m
   timeout: 10m
   install:
