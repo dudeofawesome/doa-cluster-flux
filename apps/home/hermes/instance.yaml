@@ -12,7 +12,10 @@ spec:
     raw:
       model:
         provider: openai-codex
-        default: gpt-5.6-sol
+        default: gpt-6-astra
+      display:
+        bell_on_prompt: true
+        bell_on_complete: true
       dashboard:
         public_url: https://hermes.orleans.io
         trusted_proxies:
