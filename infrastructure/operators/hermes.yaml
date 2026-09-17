@@ -1,0 +1,14 @@
+---
+apiVersion: olm.operatorframework.io/v1
+kind: ClusterExtension
+metadata:
+  name: hermes-operator
+spec:
+  namespace: operators
+  source:
+    sourceType: Catalog
+    catalog:
+      packageName: hermes-operator
+      channels: [stable]
+      # renovate: datasource=github-releases depName=paperclipinc/hermes-operator extractVersion=^v(?<version>\d+\.\d+\.\d+)$
+      version: '0.2.0'

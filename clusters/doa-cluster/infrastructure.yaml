@@ -29,6 +29,7 @@ metadata:
 spec:
   dependsOn:
     - name: olm
+    - name: infrastructure-controllers
   interval: 1h
   wait: true
   timeout: 5m0s
