@@ -3,8 +3,11 @@ apiVersion: olm.operatorframework.io/v1
 kind: ClusterExtension
 metadata:
   name: grafana
+  annotations:
+    # Remove after moving the operator; OLM's namespace is immutable.
+    kustomize.toolkit.fluxcd.io/force: enabled
 spec:
-  namespace: operators
+  namespace: grafana-operator
   source:
     sourceType: Catalog
     catalog:
