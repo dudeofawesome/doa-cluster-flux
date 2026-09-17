@@ -3,9 +3,6 @@ apiVersion: olm.operatorframework.io/v1
 kind: ClusterExtension
 metadata:
   name: hermes-operator
-  annotations:
-    # Remove after the namespace migration; OLM's spec.namespace is immutable.
-    kustomize.toolkit.fluxcd.io/force: enabled
 spec:
   namespace: hermes-operator
   source:
