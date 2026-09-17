@@ -12,3 +12,39 @@ spec:
       channels: [stable]
       # renovate: datasource=github-releases depName=paperclipinc/hermes-operator extractVersion=^v(?<version>\d+\.\d+\.\d+)$
       version: '0.2.0'
+---
+# The 0.2.0 OLM installation omits leader-election Lease permissions.
+# Keep this namespace-scoped supplement until the upstream bundle includes them.
+# https://github.com/paperclipinc/hermes-operator/blob/v0.2.0/config/rbac/leader_election_role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: hermes-operator-leader-election
+  namespace: hermes-operator
+rules:
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: hermes-operator-leader-election
+  namespace: hermes-operator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: hermes-operator-leader-election
+subjects:
+  - kind: ServiceAccount
+    name: hermes-operator-controller-manager
+    namespace: hermes-operator
