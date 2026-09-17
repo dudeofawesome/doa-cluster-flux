@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spoolman
+spec:
+  revisionHistoryLimit: 3
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      component: app
+  template:
+    metadata:
+      labels:
+        component: app
+    spec:
+      enableServiceLinks: false
+      containers:
+        - name: spoolman
+          image: ghcr.io/donkie/spoolman:0.26.1@sha256:cf9b41e17b93ce7d4ca584d9809142f8918fd290f2cd7d3b8b12ff76c75482f0
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          env:
+            - name: TZ
+              value: America/Los_Angeles
+            - name: SPOOLMAN_DB_TYPE
+              value: postgres
+            - name: SPOOLMAN_DB_HOST
+              value: postgres-rw
+            - name: SPOOLMAN_DB_PORT
+              value: '5432'
+            - name: SPOOLMAN_DB_NAME
+              value: spoolman
+            - name: SPOOLMAN_DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-app
+                  key: username
+            - name: SPOOLMAN_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-app
+                  key: password
+            - name: SPOOLMAN_AUTOMATIC_BACKUP
+              value: 'FALSE'
+            - name: SPOOLMAN_PORT
+              value: '8000'
+          ports:
+            - name: http
+              containerPort: 8000
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 1Gi
+          startupProbe:
+            httpGet:
+              path: /api/v1/health
+              port: http
+            failureThreshold: 60
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: http
+            periodSeconds: 30

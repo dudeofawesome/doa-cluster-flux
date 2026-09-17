@@ -1,0 +1,52 @@
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres
+spec:
+  bootstrap:
+    initdb:
+      database: spoolman
+      owner: spoolman
+
+  instances: 1
+
+  storage:
+    size: 5Gi
+    pvcTemplate:
+      volumeName: spoolman-db
+      volumeMode: Filesystem
+      storageClassName: local-path
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+
+  monitoring:
+    enablePodMonitor: true
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: spoolman-db
+  labels:
+    type: local
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-path
+  local:
+    path: /mnt/spoolman/postgres
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - kings-canyon
