@@ -1,0 +1,65 @@
+---
+apiVersion: hermes.agent/v1
+kind: HermesInstance
+metadata:
+  name: hermes
+spec:
+  image:
+    repository: docker.io/nousresearch/hermes-agent
+    tag: v2026.9.14
+    digest: sha256:99641e57ec762c59e54cb44aa6746b7fc68c18b3c5ddb088af54234c613d9294
+  config:
+    raw:
+      model:
+        provider: openai-codex
+        default: gpt-5.6-sol
+      dashboard:
+        public_url: https://hermes.orleans.io
+        trusted_proxies:
+          - 10.42.1.0/24
+          - 10.42.2.0/24
+        oauth:
+          provider: self-hosted
+          self_hosted:
+            issuer: https://auth.orleans.io/realms/sequoia
+            client_id: hermes
+            scopes: openid profile email
+  env:
+    - name: TZ
+      value: America/Los_Angeles
+    - name: HERMES_DASHBOARD
+      value: 'true'
+    - name: HERMES_DASHBOARD_HOST
+      value: 0.0.0.0
+    - name: HERMES_DASHBOARD_PORT
+      value: '9119'
+  storage:
+    persistence:
+      enabled: true
+      storageClassName: local-path
+      size: 10Gi
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: '2'
+      memory: 4Gi
+  networking:
+    service:
+      type: ClusterIP
+      ports:
+        - name: gateway
+          port: 8443
+        - name: dashboard
+          port: 9119
+  security:
+    networkPolicy:
+      enabled: true
+      allowDNS: true
+      allowedIngressNamespaces:
+        - kube-system
+  selfConfigure:
+    enabled: false
+  autoUpdate:
+    enabled: false

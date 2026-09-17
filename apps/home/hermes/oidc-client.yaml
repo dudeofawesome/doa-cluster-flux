@@ -1,0 +1,33 @@
+---
+apiVersion: v1.edp.epam.com/v1
+kind: KeycloakClient
+metadata:
+  name: hermes
+spec:
+  clientId: hermes
+  name: Hermes
+  description: Hermes agent dashboard at hermes.orleans.io
+  protocol: openid-connect
+  enabled: true
+  public: true
+  standardFlowEnabled: true
+  implicitFlowEnabled: false
+  directAccess: false
+  consentRequired: false
+  fullScopeAllowed: false
+  bearerOnly: false
+  authorizationServicesEnabled: false
+  realmRef:
+    kind: ClusterKeycloakRealm
+    name: sequoia
+  webUrl: https://hermes.orleans.io
+  redirectUris:
+    - https://hermes.orleans.io/auth/callback
+  webOrigins:
+    - https://hermes.orleans.io
+  defaultClientScopes:
+    - profile
+    - email
+  attributes:
+    pkce.code.challenge.method: S256
+    post.logout.redirect.uris: https://hermes.orleans.io
