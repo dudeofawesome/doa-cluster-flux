@@ -8,6 +8,10 @@ spec:
   realmName: sequoia
   displayName: 'Sequoia'
   clusterKeycloakRef: keycloak
+  sessions:
+    ssoSessionSettings:
+      idleTimeout: 604800 # 7 days
+      maxLifespan: 2592000 # 30 days
   passwordPolicy:
     - type: notUsername
       value: 'true'
