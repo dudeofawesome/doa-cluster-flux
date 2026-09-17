@@ -2,6 +2,17 @@
 
 Kubernetes K3s cluster, managed with gitops via FluxCD, with Operator Lifecycle Manager v1, cert-manager, Traefik
 
+## Rules
+
 **Do not** modify cluster state without explicit permission (explicit command "deploy changes"). Updates to deployed resources must always go through git
 
 Run non-basic commands from inside the devenv (`devenv shell --quiet -- {command}`), which will not work in a sandbox.
+
+sops-encrypted files must have this header at the top
+
+```
+WARNING_unencrypted: |
+  DO NOT MODIFY THIS FILE DIRECTLY!
+  instead, run this command:
+  `sops {path_to_file}`
+```
