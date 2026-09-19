@@ -8,12 +8,17 @@ resources:
   - namespace.yaml
   - database.yaml
   - deployment.yaml
+  - catalog.yaml
   - ingress.yaml
   - config.yaml
   - secrets.yaml
   - oidc-client.yaml
   - ../../../services/forward-auth
 
+configMapGenerator:
+  - name: filament-catalog-nginx
+    files:
+      - nginx.conf=catalog-nginx.conf
 patches:
   - patch: |
       - op: replace

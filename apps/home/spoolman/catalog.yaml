@@ -1,0 +1,191 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: filament-catalog
+spec:
+  storageClassName: local-path
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: filament-catalog-settings
+data:
+  OFD_SOURCE_URL: https://github.com/OpenFilamentCollective/open-filament-database/releases/latest/download/all.json.gz
+  CATALOG_MIN_RECORDS: '1000'
+  CATALOG_MAX_DROP: '0.2'
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: filament-catalog
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      component: filament-catalog
+  template:
+    metadata:
+      labels:
+        component: filament-catalog
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      nodeSelector:
+        kubernetes.io/hostname: kings-canyon
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        - name: bootstrap
+          image: ghcr.io/dudeofawesome/filament-catalog:0.1.0
+          imagePullPolicy: Always
+          args: [refresh, --if-missing]
+          envFrom:
+            - configMapRef:
+                name: filament-catalog-settings
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: '1'
+              memory: 512Mi
+          volumeMounts:
+            - name: catalog
+              mountPath: /data
+      containers:
+        - name: http
+          image: docker.io/library/nginx:stable-alpine@sha256:ef8676b33d681f272ba429b27658bdd7e640963279714c96bddf1dc76307f7b6
+          imagePullPolicy: IfNotPresent
+          command: [nginx]
+          args: [-c, /etc/catalog/nginx.conf, -g, 'daemon off;']
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          ports:
+            - name: http
+              containerPort: 8080
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
+          readinessProbe:
+            httpGet:
+              path: /metadata.json
+              port: http
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+          volumeMounts:
+            - name: catalog
+              mountPath: /data
+              readOnly: true
+            - name: nginx-config
+              mountPath: /etc/catalog
+              readOnly: true
+            - name: nginx-tmp
+              mountPath: /tmp
+      volumes:
+        - name: catalog
+          persistentVolumeClaim:
+            claimName: filament-catalog
+        - name: nginx-config
+          configMap:
+            name: filament-catalog-nginx
+        - name: nginx-tmp
+          emptyDir:
+            sizeLimit: 16Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: filament-catalog
+spec:
+  selector:
+    component: filament-catalog
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: filament-catalog-refresh
+spec:
+  schedule: '30 3 * * *'
+  timeZone: Etc/UTC
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 21600
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      activeDeadlineSeconds: 900
+      template:
+        metadata:
+          labels:
+            component: filament-catalog-refresh
+        spec:
+          restartPolicy: Never
+          automountServiceAccountToken: false
+          enableServiceLinks: false
+          nodeSelector:
+            kubernetes.io/hostname: kings-canyon
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            fsGroup: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: refresh
+              image: ghcr.io/dudeofawesome/filament-catalog:0.1.0
+              imagePullPolicy: Always
+              args: [refresh]
+              envFrom:
+                - configMapRef:
+                    name: filament-catalog-settings
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: [ALL]
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 128Mi
+                limits:
+                  cpu: '1'
+                  memory: 512Mi
+              volumeMounts:
+                - name: catalog
+                  mountPath: /data
+          volumes:
+            - name: catalog
+              persistentVolumeClaim:
+                claimName: filament-catalog

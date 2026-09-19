@@ -28,6 +28,12 @@ spec:
             capabilities:
               drop: [ALL]
           env:
+            - name: EXTERNAL_DB_URL
+              value: http://filament-catalog.spoolman.svc.cluster.local:8080/
+            - name: EXTERNAL_DB_NAME
+              value: Open Filament Database
+            - name: EXTERNAL_DB_SYNC_INTERVAL
+              value: '3600'
             - name: TZ
               value: America/Los_Angeles
             - name: SPOOLMAN_DB_TYPE
