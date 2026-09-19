@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config
+data:
+  NODE_ENV: production
+  PORT: '3000'
+  TZ: America/Los_Angeles
+  APP_URL: https://trek.orleans.io
+  ALLOWED_ORIGINS: https://trek.orleans.io
+  TRUST_PROXY: '1'
+  FORCE_HTTPS: 'true'
+  COOKIE_SECURE: 'true'
+  OIDC_ISSUER: https://auth.orleans.io/realms/sequoia
+  OIDC_CLIENT_ID: trek
+  OIDC_DISPLAY_NAME: Orleans
+  OIDC_ONLY: 'true'
+  OIDC_SCOPE: openid profile email
+  OIDC_ADMIN_CLAIM: groups
+  OIDC_ADMIN_VALUE: /Admins
