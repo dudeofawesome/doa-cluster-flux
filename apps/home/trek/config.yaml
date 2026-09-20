@@ -13,7 +13,7 @@ data:
   COOKIE_SECURE: 'true'
   OIDC_ISSUER: https://auth.orleans.io/realms/sequoia
   OIDC_CLIENT_ID: trek
-  OIDC_DISPLAY_NAME: Orleans
+  OIDC_DISPLAY_NAME: Sequoia
   OIDC_ONLY: 'true'
   OIDC_SCOPE: openid profile email
   OIDC_ADMIN_CLAIM: groups
