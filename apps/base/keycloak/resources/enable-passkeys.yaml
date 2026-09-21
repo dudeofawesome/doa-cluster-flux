@@ -1,0 +1,49 @@
+---
+# Operator v1.35.0 does not expose webAuthnPolicyPasswordlessPasskeysEnabled.
+# Keep this one-time realm update in Git until the operator supports the field.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: keycloak-enable-passkeys
+  namespace: keycloak
+  annotations:
+    kustomize.toolkit.fluxcd.io/force: enabled
+spec:
+  backoffLimit: 6
+  activeDeadlineSeconds: 240
+  template:
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      containers:
+        - name: enable-passkeys
+          image: 'ghcr.io/dudeofawesome/keycloak:26.6@sha256:f172c873e355c83f6508a0f9608d77b70246b734879c72e95e600680f22e1f4b'
+          command: ['/bin/bash', '-euc']
+          args:
+            - |
+              /opt/keycloak/bin/kcadm.sh update realms/sequoia \
+                --no-config \
+                --server https://auth.orleans.io \
+                --realm master \
+                --user "$KEYCLOAK_ADMIN" \
+                --password "$KEYCLOAK_ADMIN_PASSWORD" \
+                -n \
+                --set webAuthnPolicyPasswordlessPasskeysEnabled=true
+          env:
+            - name: KEYCLOAK_ADMIN
+              valueFrom:
+                secretKeyRef:
+                  name: admin
+                  key: username
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: admin
+                  key: password
+          resources:
+            requests:
+              cpu: 10m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi

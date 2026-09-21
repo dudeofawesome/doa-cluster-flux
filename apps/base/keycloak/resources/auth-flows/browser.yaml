@@ -22,10 +22,6 @@ spec:
       authenticator: identity-provider-redirector
       requirement: ALTERNATIVE
       priority: 20
-    - alias: Passkey
-      authenticator: webauthn-authenticator-passwordless
-      requirement: ALTERNATIVE
-      priority: 35
     - alias: traditional-login
       authenticatorFlow: true
       requirement: ALTERNATIVE
@@ -38,7 +34,7 @@ metadata:
   namespace: keycloak
 spec:
   alias: traditional-login
-  description: Traditional MFA login forms
+  description: Password or built-in passkey login
   realmRef:
     kind: ClusterKeycloakRealm
     name: sequoia
@@ -61,7 +57,7 @@ metadata:
   namespace: keycloak
 spec:
   alias: traditional-login-forms
-  description: Traditional MFA login forms
+  description: Password or built-in passkey login, with conditional OTP
   realmRef:
     kind: ClusterKeycloakRealm
     name: sequoia
@@ -73,6 +69,7 @@ spec:
   providerId: basic-flow
   authenticationExecutions:
     - alias: Username Password Form
+      # Also offers passkey autofill and a button when the realm enables passkeys.
       authenticator: auth-username-password-form
       requirement: REQUIRED
       priority: 10
@@ -103,7 +100,16 @@ spec:
       authenticator: conditional-user-configured
       requirement: REQUIRED
       priority: 10
+    - alias: Condition - credential
+      authenticator: conditional-credential
+      requirement: REQUIRED
+      priority: 20
+      authenticatorConfig:
+        alias: traditional-login-skip-otp-after-passkey
+        config:
+          credentials: webauthn-passwordless
+          included: 'false'
     - alias: OTP Form
       authenticator: auth-otp-form
       requirement: REQUIRED
-      priority: 20
+      priority: 30
