@@ -26,6 +26,10 @@ spec:
       authenticator: webauthn-authenticator-passwordless
       requirement: ALTERNATIVE
       priority: 35
+    - alias: traditional-login
+      authenticatorFlow: true
+      requirement: ALTERNATIVE
+      priority: 40
 ---
 apiVersion: v1.edp.epam.com/v1
 kind: KeycloakAuthFlow
@@ -42,7 +46,13 @@ spec:
   topLevel: false
   parentName: browser - Sequoia
   childType: basic-flow
+  childRequirement: ALTERNATIVE
   providerId: basic-flow
+  authenticationExecutions:
+    - alias: traditional-login-forms
+      authenticatorFlow: true
+      requirement: REQUIRED
+      priority: 10
 ---
 apiVersion: v1.edp.epam.com/v1
 kind: KeycloakAuthFlow
@@ -59,13 +69,41 @@ spec:
   topLevel: false
   parentName: traditional-login
   childType: basic-flow
+  childRequirement: REQUIRED
   providerId: basic-flow
   authenticationExecutions:
     - alias: Username Password Form
       authenticator: auth-username-password-form
       requirement: REQUIRED
       priority: 10
-    - alias: Browser - Conditional OTP Form
-      authenticator: auth-conditional-otp-form
+    - alias: traditional-login-otp
+      authenticatorFlow: true
       requirement: CONDITIONAL
+      priority: 20
+---
+apiVersion: v1.edp.epam.com/v1
+kind: KeycloakAuthFlow
+metadata:
+  name: traditional-login-otp
+  namespace: keycloak
+spec:
+  alias: traditional-login-otp
+  description: Require OTP for password login when the user has configured it
+  realmRef:
+    kind: ClusterKeycloakRealm
+    name: sequoia
+  builtIn: false
+  topLevel: false
+  parentName: traditional-login-forms
+  childType: basic-flow
+  childRequirement: CONDITIONAL
+  providerId: basic-flow
+  authenticationExecutions:
+    - alias: Condition - User Configured
+      authenticator: conditional-user-configured
+      requirement: REQUIRED
+      priority: 10
+    - alias: OTP Form
+      authenticator: auth-otp-form
+      requirement: REQUIRED
       priority: 20
