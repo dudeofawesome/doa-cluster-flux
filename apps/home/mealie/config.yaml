@@ -5,6 +5,8 @@ metadata:
 data:
   BASE_URL: https://recipes.orleans.io
   TZ: America/Los_Angeles
+  DEFAULT_GROUP: Home
+  DEFAULT_HOUSEHOLD: Orleans
   DB_ENGINE: postgres
   POSTGRES_SERVER: postgres-rw
   POSTGRES_PORT: '5432'
