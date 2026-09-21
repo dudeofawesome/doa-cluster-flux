@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config
+data:
+  BASE_URL: https://recipes.orleans.io
+  TZ: America/Los_Angeles
+  DB_ENGINE: postgres
+  POSTGRES_SERVER: postgres-rw
+  POSTGRES_PORT: '5432'
+  POSTGRES_DB: mealie
+  ALLOW_SIGNUP: 'false'
+  ALLOW_PASSWORD_LOGIN: 'false'
+  OIDC_AUTH_ENABLED: 'true'
+  OIDC_SIGNUP_ENABLED: 'true'
+  OIDC_AUTO_REDIRECT: 'true'
+  OIDC_PROVIDER_NAME: Sequoia
+  OIDC_CONFIGURATION_URL: https://auth.orleans.io/realms/sequoia/.well-known/openid-configuration
+  OIDC_CLIENT_ID: mealie
+  OIDC_REQUIRES_EMAIL_VERIFICATION: 'true'
+  OIDC_USER_GROUP: /Users
+  OIDC_ADMIN_GROUP: /Admins
+  OIDC_GROUPS_CLAIM: groups
+  # The client mapper supplies groups without a separate Keycloak client scope.
+  OIDC_SCOPES_OVERRIDE: openid profile email

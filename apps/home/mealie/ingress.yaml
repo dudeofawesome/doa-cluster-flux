@@ -1,0 +1,29 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: mealie
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    # ALLOW_PASSWORD_LOGIN only hides the form; block password token issuance.
+    # OAuth callbacks, token refresh, and authenticated API access remain available.
+    - match: Host(`recipes.orleans.io`) && !PathRegexp(`^/api/auth/token/*$`)
+      kind: Rule
+      services:
+        - name: mealie
+          port: 9000
+  tls:
+    secretName: wildcard-orleans-io
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mealie
+spec:
+  selector:
+    component: app
+  ports:
+    - name: http
+      port: 9000
+      targetPort: http
