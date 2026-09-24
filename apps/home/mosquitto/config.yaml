@@ -5,6 +5,9 @@ metadata:
 data:
   mosquitto.conf: |
 
+    persistence true
+    persistence_location /mosquitto/data/
+
     # Internal cleartext listener for in-cluster clients.
     listener 1883
 
