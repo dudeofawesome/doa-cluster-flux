@@ -21,5 +21,6 @@ data:
   CLAUDE_DIR: /data/claude
   OPENAI_CODEX_DIR: /data/chatgpt
   # Receipt scanning becomes available after configuring a provider in /admin.
-  AI_PROVIDER_PRIORITY: openai
+  AI_PROVIDER_PRIORITY: openai-codex
+  OPENAI_CODEX_MODEL: gpt-6-sol
   LOG_LEVEL: info
