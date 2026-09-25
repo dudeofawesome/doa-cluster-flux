@@ -9,6 +9,10 @@ resources:
   - deployment.yaml
   - storage.yaml
   - ingress.yaml
-  - config.yaml
   - secrets.yaml
   - oidc-client.yaml
+
+configMapGenerator:
+  - name: config
+    envs:
+      - config.env
