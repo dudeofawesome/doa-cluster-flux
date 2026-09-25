@@ -1,0 +1,2 @@
+# Non-secret environment settings used by Sharetab's ConfigMap generator.
+!./config.env
