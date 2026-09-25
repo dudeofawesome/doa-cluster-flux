@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config
+data:
+  NODE_ENV: production
+  HOSTNAME: '0.0.0.0'
+  PORT: '3000'
+  TZ: America/Los_Angeles
+  NEXTAUTH_URL: https://sharetab.orleans.io
+  AUTH_TRUST_HOST: 'true'
+  ADMIN_EMAIL: louis@orleans.io
+  OIDC_ISSUER: https://auth.orleans.io/realms/sequoia
+  OIDC_CLIENT_ID: sharetab
+  OIDC_DISPLAY_NAME: Sequoia
+  OIDC_AUTO_REGISTER: 'true'
+  OIDC_ALLOW_EMAIL_LINKING: 'false'
+  OIDC_TOKEN_AUTH_METHOD: client_secret_basic
+  DISABLE_PASSWORD_LOGIN: 'true'
+  UPLOAD_DIR: /data/uploads
+  CLAUDE_DIR: /data/claude
+  OPENAI_CODEX_DIR: /data/chatgpt
+  # Receipt scanning becomes available after configuring a provider in /admin.
+  AI_PROVIDER_PRIORITY: openai
+  LOG_LEVEL: info

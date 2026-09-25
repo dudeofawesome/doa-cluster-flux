@@ -1,0 +1,33 @@
+apiVersion: v1.edp.epam.com/v1
+kind: KeycloakClient
+metadata:
+  name: sharetab
+spec:
+  clientId: sharetab
+  name: ShareTab
+  description: Shared expenses at sharetab.orleans.io
+  protocol: openid-connect
+  enabled: true
+  standardFlowEnabled: true
+  implicitFlowEnabled: false
+  directAccess: false
+  public: false
+  consentRequired: false
+  fullScopeAllowed: false
+  bearerOnly: false
+  clientAuthenticatorType: client-secret
+  authorizationServicesEnabled: false
+  realmRef:
+    kind: ClusterKeycloakRealm
+    name: sequoia
+  secret: '$sharetab:OIDC_CLIENT_SECRET'
+  webUrl: https://sharetab.orleans.io
+  redirectUris:
+    - https://sharetab.orleans.io/api/auth/callback/oidc
+  webOrigins:
+    - https://sharetab.orleans.io
+  defaultClientScopes:
+    - profile
+    - email
+  attributes:
+    pkce.code.challenge.method: S256

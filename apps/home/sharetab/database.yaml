@@ -1,0 +1,15 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres
+spec:
+  instances: 1
+  bootstrap:
+    initdb:
+      database: sharetab
+      owner: sharetab
+  storage:
+    size: 5Gi
+    storageClass: local-path
+  monitoring:
+    enablePodMonitor: true

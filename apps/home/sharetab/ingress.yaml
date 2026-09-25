@@ -1,0 +1,27 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: sharetab
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`sharetab.orleans.io`)
+      kind: Rule
+      services:
+        - name: sharetab
+          port: 3000
+  tls:
+    secretName: wildcard-orleans-io
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sharetab
+spec:
+  selector:
+    component: app
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http
