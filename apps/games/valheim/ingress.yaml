@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: valheim
+spec:
+  selector:
+    app: valheim
+  ports:
+    - name: game
+      port: 2456
+      targetPort: game
+      protocol: UDP
+    - name: query
+      port: 2457
+      targetPort: query
+      protocol: UDP
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRouteUDP
+metadata:
+  name: valheim-game
+spec:
+  entryPoints:
+    - valheim-game
+  routes:
+    - services:
+        - name: valheim
+          port: 2456
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRouteUDP
+metadata:
+  name: valheim-query
+spec:
+  entryPoints:
+    - valheim-query
+  routes:
+    - services:
+        - name: valheim
+          port: 2457

@@ -1,0 +1,102 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: valheim
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: valheim
+  template:
+    metadata:
+      labels:
+        app: valheim
+    spec:
+      automountServiceAccountToken: false
+      nodeSelector:
+        kubernetes.io/arch: amd64
+      terminationGracePeriodSeconds: 120
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: valheim
+          image: ghcr.io/community-valheim-tools/valheim-server:1.4.0@sha256:f3ccde9a4e292663cf5096d502ff33cc9617015f6d70b6a9ca0968543f165ef2
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            # Upstream bootstrap configures users, ownership and cron as root;
+            # supervisor runs the game and updater as PUID/PGID 1000.
+            runAsUser: 0
+            runAsGroup: 0
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+              add:
+                - CHOWN
+                - DAC_OVERRIDE
+                - FOWNER
+                - SETUID
+                - SETGID
+                - KILL
+          envFrom:
+            - configMapRef:
+                name: config
+            - secretRef:
+                name: valheim
+          ports:
+            - name: game
+              containerPort: 2456
+              protocol: UDP
+            - name: query
+              containerPort: 2457
+              protocol: UDP
+          # A private server does not answer A2S queries. Check the actual
+          # game process, upstream startup state, and bound UDP socket instead.
+          startupProbe:
+            exec:
+              command: &healthcheck
+                - /bin/bash
+                - -ec
+                - |
+                  source /usr/local/etc/valheim/defaults
+                  source /usr/local/etc/valheim/common
+                  grep -qx running "$SERVER_STATUS_FILE"
+                  kill -0 "$(cat "$valheim_server_pidfile")"
+                  server_is_listening
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 180
+          readinessProbe:
+            exec:
+              command: *healthcheck
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            exec:
+              command: *healthcheck
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 10
+          resources:
+            requests:
+              cpu: '1'
+              memory: 4Gi
+            limits:
+              memory: 8Gi
+          volumeMounts:
+            - name: data
+              mountPath: /config
+            - name: server
+              mountPath: /opt/valheim
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: data
+        - name: server
+          persistentVolumeClaim:
+            claimName: server
