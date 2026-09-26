@@ -26,4 +26,6 @@ node_modules/
 *passwd*
 *.*key
 *.env
+# Non-secret settings consumed by Kustomize.
+!config.env
 .decrypted~*
