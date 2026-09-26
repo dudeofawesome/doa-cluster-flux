@@ -26,6 +26,7 @@ keys:
   # Then add the public key to a new key here:
   clusters:
     - &cluster_doa-cluster 'age1meara2mcpfxz9xzj0q0tur82a09paacevld6vnpfgkht2w8yayyq8y35pc'
+    - &cluster_games 'age1ey9gn7hzm2dh82u70acwjsghhke6w4hu0t0c08ulcejq0azz6e2sgtwxuv'
 
   groups:
     all-age-keys: &all-age-keys
@@ -42,6 +43,14 @@ keys:
   # `find . \( -wholename "*/secrets/*.yaml" -o -name "secrets.yaml" \) -type f -exec sops updatekeys --yes {} \;`
 
 creation_rules:
+  - path_regex: 'apps/games/.+/secrets?\.ya?ml$'
+    encrypted_regex: '^(data|stringData)$'
+    key_groups:
+      - age:
+          - *user_dudeofawesome
+          - *user_josh
+          - *user_edgar
+          - *cluster_games
   # Clusters
   - path_regex: '.+/secrets?\.ya?ml$'
     encrypted_regex: '^(data|stringData)$'
