@@ -25,6 +25,18 @@ spec:
         allowCrossNamespace: true # Use Middlewares across namespaces
 
     ports:
+      valheim-game:
+        port: 2456
+        exposedPort: 2456
+        protocol: UDP
+        expose:
+          default: true
+      valheim-query:
+        port: 2457
+        exposedPort: 2457
+        protocol: UDP
+        expose:
+          default: true
       web:
         http:
           redirections:
