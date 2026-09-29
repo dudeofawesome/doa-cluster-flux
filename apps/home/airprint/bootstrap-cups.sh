@@ -37,7 +37,7 @@ model_count="$(
   exit 1
 }
 
-lpadmin -x "$queue" 2>/dev/null || true
+# Update the seeded queue in place so its stable Bonjour UUID is preserved.
 lpadmin \
   -p "$queue" \
   -v "$uris" \

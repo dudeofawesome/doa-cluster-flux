@@ -26,6 +26,11 @@ spec:
               until test -S /run/dbus/system_bus_socket; do sleep 1; done
               cp -a /etc/cups/. /cups-config/
               sed "s/__NODE_NAME__/${NODE_NAME}/g" /config/cupsd.conf > /cups-config/cupsd.conf
+              # Keep Bonjour identity stable across pod replacements (ephemeral state).
+              uuid="$(printf '%s' "airprint:${NODE_NAME}" | sha256sum | cut -c1-32)"
+              uuid="$(printf '%s' "$uuid" | sed -E 's/^(.{8})(.{4}).(.{3}).(.{3})(.{12})$/\1-\2-8\3-8\4-\5/')"
+              printf '<Printer samsung-scx-4623-%s>\nUUID urn:uuid:%s\n</Printer>\n' \
+                "$NODE_NAME" "$uuid" > /cups-config/printers.conf
           env:
             - name: NODE_NAME
               valueFrom:
