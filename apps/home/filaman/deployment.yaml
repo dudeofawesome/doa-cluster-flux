@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: filaman
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      component: app
+  template:
+    metadata:
+      labels:
+        component: app
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: filaman
+          image: ghcr.io/fire-devils/filaman-system:v1.3.9@sha256:9c3f1b4223e24dd59a0f4ae2ec80ae81bc36a64caefd5192340e51e6928cea56
+          imagePullPolicy: IfNotPresent
+          workingDir: /app
+          command: [python, /etc/filaman/startup.py]
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          envFrom:
+            - configMapRef:
+                name: config
+            - secretRef:
+                name: filaman
+          env:
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-app
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-app
+                  key: password
+          ports:
+            - name: http
+              containerPort: 8000
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 1Gi
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            failureThreshold: 60
+            periodSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+                - python
+                - -c
+                - "import json, urllib.request; r = urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=3); assert json.load(r)['status'] == 'ok'"
+            periodSeconds: 10
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 30
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+            - name: tmp
+              mountPath: /tmp
+            - name: startup
+              mountPath: /etc/filaman
+              readOnly: true
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: data
+        - name: tmp
+          emptyDir: {}
+        - name: startup
+          configMap:
+            name: startup

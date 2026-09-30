@@ -1,27 +1,23 @@
----
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: spoolman
+  name: filaman
 spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`spoolman.red.orleans.io`)
+    - match: Host(`filaman.orleans.io`)
       kind: Rule
       services:
-        - name: spoolman
+        - name: filaman
           port: 8000
-      middlewares:
-        - name: forward-auth
-          namespace: spoolman
   tls:
     secretName: wildcard-orleans-io
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: spoolman
+  name: filaman
 spec:
   selector:
     component: app
@@ -29,11 +25,3 @@ spec:
     - name: http
       port: 8000
       targetPort: http
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: forward-auth
-data:
-  config.ini: |
-    logout-redirect = https://spoolman.red.orleans.io
