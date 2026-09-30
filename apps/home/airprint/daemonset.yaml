@@ -126,6 +126,8 @@ spec:
               readOnly: true
             - name: cups-config
               mountPath: /etc/cups
+            - name: cups-tls
+              mountPath: /etc/cups/ssl
             - name: cups-hosts
               mountPath: /etc/hosts
               subPath: hosts
@@ -196,6 +198,11 @@ spec:
           emptyDir: {}
         - name: cups-hosts
           emptyDir: {}
+        # macOS pins the server certificate; retain it when the pod is replaced.
+        - name: cups-tls
+          hostPath:
+            path: /var/lib/airprint/cups-ssl
+            type: DirectoryOrCreate
         - name: cups-spool
           emptyDir: {}
         - name: config
