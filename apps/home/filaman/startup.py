@@ -14,6 +14,7 @@ os.environ["DATABASE_URL"] = (
     + "@postgres-rw:5432/filaman"
 )
 Path("/app/data/uploads").mkdir(parents=True, exist_ok=True)
+Path("/app/data/python").mkdir(parents=True, exist_ok=True)
 subprocess.run(["alembic", "upgrade", "head"], check=True)
 os.execvp("gunicorn", [
     "gunicorn", "--workers", "1",

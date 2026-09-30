@@ -1,0 +1,3 @@
+[pip]
+target = "/app/data/python"
+link-mode = "copy"

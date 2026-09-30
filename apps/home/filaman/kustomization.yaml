@@ -19,3 +19,4 @@ configMapGenerator:
   - name: startup
     files:
       - startup.py
+      - uv.toml
