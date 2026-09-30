@@ -12,8 +12,8 @@ spec:
         component: airprint
     spec:
       automountServiceAccountToken: false
-      hostNetwork: true
-      dnsPolicy: ClusterFirstWithHostNet
+      hostNetwork: false
+      dnsPolicy: ClusterFirst
       nodeSelector:
         feature.node.kubernetes.io/usb-ff_04e8_3434.present: 'true'
       initContainers:
@@ -26,12 +26,20 @@ spec:
               until test -S /run/dbus/system_bus_socket; do sleep 1; done
               cp -a /etc/cups/. /cups-config/
               sed "s/__NODE_NAME__/${NODE_NAME}/g" /config/cupsd.conf > /cups-config/cupsd.conf
+              # CUPS reverse-resolves the local socket address when selecting TLS credentials.
+              # Put the advertised node name first, retaining Kubernetes' other hosts entries.
+              printf '%s %s.local\n' "$POD_IP" "$NODE_NAME" > /cups-hosts/hosts
+              cat /etc/hosts >> /cups-hosts/hosts
               # Keep Bonjour identity stable across pod replacements (ephemeral state).
               uuid="$(printf '%s' "airprint:${NODE_NAME}" | sha256sum | cut -c1-32)"
               uuid="$(printf '%s' "$uuid" | sed -E 's/^(.{8})(.{4}).(.{3}).(.{3})(.{12})$/\1-\2-8\3-8\4-\5/')"
               printf '<Printer samsung-scx-4623-%s>\nUUID urn:uuid:%s\n</Printer>\n' \
                 "$NODE_NAME" "$uuid" > /cups-config/printers.conf
           env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
             - name: NODE_NAME
               valueFrom:
                 fieldRef:
@@ -39,6 +47,8 @@ spec:
           volumeMounts:
             - name: cups-config
               mountPath: /cups-config
+            - name: cups-hosts
+              mountPath: /cups-hosts
             - name: config
               mountPath: /config
               readOnly: true
@@ -59,6 +69,10 @@ spec:
           securityContext:
             privileged: true
           env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
             - name: NODE_NAME
               valueFrom:
                 fieldRef:
@@ -66,6 +80,7 @@ spec:
           ports:
             - name: ipp
               containerPort: 631
+              hostPort: 631
               protocol: TCP
           startupProbe:
             exec:
@@ -76,7 +91,7 @@ spec:
                   test -S /run/dbus/system_bus_socket
                   lpstat -p "samsung-scx-4623-${NODE_NAME}" >/dev/null
                   openssl s_client -brief \
-                    -connect 127.0.0.1:631 \
+                    -connect "${POD_IP}:631" \
                     -servername "${NODE_NAME}.local" \
                     </dev/null >/dev/null 2>&1
             periodSeconds: 5
@@ -91,7 +106,7 @@ spec:
                   test -S /run/dbus/system_bus_socket
                   lpstat -p "samsung-scx-4623-${NODE_NAME}" >/dev/null
                   openssl s_client -brief \
-                    -connect 127.0.0.1:631 \
+                    -connect "${POD_IP}:631" \
                     -servername "${NODE_NAME}.local" \
                     </dev/null >/dev/null 2>&1
             timeoutSeconds: 5
@@ -111,6 +126,10 @@ spec:
               readOnly: true
             - name: cups-config
               mountPath: /etc/cups
+            - name: cups-hosts
+              mountPath: /etc/hosts
+              subPath: hosts
+              readOnly: true
             - name: cups-spool
               mountPath: /var/spool/cups
             - name: config
@@ -138,6 +157,7 @@ spec:
           ports:
             - name: escl
               containerPort: 8090
+              hostPort: 8090
               protocol: TCP
           startupProbe:
             httpGet:
@@ -173,6 +193,8 @@ spec:
             path: /run/avahi-daemon/socket
             type: Socket
         - name: cups-config
+          emptyDir: {}
+        - name: cups-hosts
           emptyDir: {}
         - name: cups-spool
           emptyDir: {}
