@@ -1,0 +1,33 @@
+apiVersion: renovate-operator.mogenius.com/v1alpha1
+kind: RenovateJob
+metadata:
+  name: github
+spec:
+  schedule: '0 * * * *'
+  provider:
+    name: github
+  # No discovery filters: the GitHub App installation controls repository scope.
+  image: ghcr.io/renovatebot/renovate:44.131.0
+  parallelism: 2
+  githubAppReference:
+    secretName: github-app-credentials
+    appIdSecretKey: APP_ID
+    installationIdSecretKey: INSTALL_ID
+    pemSecretKey: PEM
+  serviceAccount:
+    automountServiceAccountToken: false
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      memory: 2Gi
+  webhook:
+    enabled: true
+    authentication:
+      enabled: true
+      secretRef:
+        name: github-webhook
+        key: secret
+    sync:
+      enabled: false

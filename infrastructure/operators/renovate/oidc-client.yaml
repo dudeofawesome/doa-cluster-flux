@@ -1,0 +1,43 @@
+apiVersion: v1.edp.epam.com/v1
+kind: KeycloakClient
+metadata:
+  name: renovate-operator
+spec:
+  clientId: renovate-operator
+  name: Renovate
+  description: Dependency automation at renovate.orleans.io
+  protocol: openid-connect
+  enabled: true
+  standardFlowEnabled: true
+  implicitFlowEnabled: false
+  directAccess: false
+  public: false
+  consentRequired: false
+  fullScopeAllowed: false
+  bearerOnly: false
+  clientAuthenticatorType: client-secret
+  authorizationServicesEnabled: false
+  realmRef:
+    kind: ClusterKeycloakRealm
+    name: sequoia
+  secret: '$oidc:client_secret'
+  webUrl: https://renovate.orleans.io
+  redirectUris:
+    - https://renovate.orleans.io/auth/callback
+  webOrigins:
+    - https://renovate.orleans.io
+  defaultClientScopes:
+    - profile
+    - email
+  protocolMappers:
+    - name: groups
+      protocol: openid-connect
+      protocolMapper: oidc-group-membership-mapper
+      config:
+        access.token.claim: 'true'
+        claim.name: groups
+        full.path: 'true'
+        id.token.claim: 'true'
+        userinfo.token.claim: 'true'
+  attributes:
+    pkce.code.challenge.method: S256

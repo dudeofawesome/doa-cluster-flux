@@ -1,0 +1,88 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: renovate-operator
+spec:
+  interval: 30m
+  install:
+    crds: CreateReplace
+  upgrade:
+    crds: CreateReplace
+  chart:
+    spec:
+      chart: renovate-operator
+      version: '6.4.0'
+      sourceRef:
+        kind: HelmRepository
+        name: mogenius
+        namespace: flux-system
+      interval: 12h
+  values:
+    fullnameOverride: renovate-operator
+    crd:
+      # Manage CRDs through Helm instead of the chart's kubectl hook Job.
+      mode: template
+    webhook:
+      enabled: true
+      port: 8082
+      # The externally managed Traefik route is not visible to the chart.
+      baseUrl: https://renovate.orleans.io
+    auth:
+      oidc:
+        enabled: true
+        issuerUrl: https://auth.orleans.io/realms/sequoia
+        clientId: renovate-operator
+        existingSecret: oidc
+        secretKey: client_secret
+        sessionSecretKey: session_secret
+        redirectUrl: https://renovate.orleans.io/auth/callback
+        allowedGroupPattern: '^/Admins$'
+    authorization:
+      defaults:
+        adminGroups:
+          - /Admins
+        anonymousRead: false
+        anonymousReadLogs: false
+    config:
+      globalParallelismLimit: 2
+      jobTTLSecondsAfterFinished: 86400
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        memory: 512Mi
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              group: apps
+              version: v1
+              kind: Deployment
+              name: renovate-operator
+            patch: |
+              apiVersion: apps/v1
+              kind: Deployment
+              metadata:
+                name: renovate-operator
+              spec:
+                template:
+                  spec:
+                    containers:
+                      - name: renovate-operator
+                        startupProbe:
+                          httpGet:
+                            path: /health
+                            port: http
+                          periodSeconds: 5
+                          failureThreshold: 60
+                        readinessProbe:
+                          httpGet:
+                            path: /health
+                            port: http
+                          periodSeconds: 10
+                        livenessProbe:
+                          httpGet:
+                            path: /health
+                            port: http
+                          periodSeconds: 30

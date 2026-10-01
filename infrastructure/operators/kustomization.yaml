@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Renovate needs Sequoia at startup. Its separate Flux Kustomization waits for
+# apps-base; including it here would create a bootstrap dependency cycle.
+resources:
+  - namespace.yaml
+  - cloudnative-pg.yaml
+  - grafana.yaml
+  - hermes.yaml
+  - keycloak-resources.yaml
+  - mariadb.yaml
