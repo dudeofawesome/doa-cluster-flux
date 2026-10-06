@@ -19,9 +19,6 @@ configMapGenerator:
   - name: configuration
     files:
       - configuration.yaml=hass-configuration.yaml
-  - name: automation-blueprints
-    files:
-      - switch-light-link.yaml=blueprints/switch-light-link.yaml
   - name: authentication-scripts
     files:
       - auth-oidc.py=auth-oidc.py
