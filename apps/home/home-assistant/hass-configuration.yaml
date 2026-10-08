@@ -11,6 +11,22 @@ automation: !include automations.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
 
+sensor: !include pdu-sensors.yaml
+
+template:
+  - sensor:
+      - name: Sequoia PDU apparent power
+        unique_id: sequoia_pdu_apparent_power
+        device_class: apparent_power
+        state_class: measurement
+        unit_of_measurement: VA
+        availability: >-
+          {{ is_number(states('sensor.sequoia_pdu_current'))
+             and is_number(states('sensor.sequoia_pdu_voltage')) }}
+        state: >-
+          {{ ((states('sensor.sequoia_pdu_current') | float(0))
+              * (states('sensor.sequoia_pdu_voltage') | float(0))) | round(1) }}
+
 homeassistant:
   auth_providers:
     - name: Sequoia

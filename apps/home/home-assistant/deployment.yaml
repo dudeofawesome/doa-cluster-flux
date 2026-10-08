@@ -37,6 +37,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: environment
+            - secretRef:
+                name: pdu-snmp
           env:
             - name: SETUP_PORT
               value: '8123'
@@ -99,6 +101,10 @@ spec:
               mountPath: /usr/bin/auth-oidc.py
               subPath: auth-oidc.py
               readOnly: true
+            - name: ha-configuration-base
+              mountPath: /config/pdu-sensors.yaml
+              subPath: pdu-sensors.yaml
+              readOnly: true
       restartPolicy: Always
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
@@ -112,6 +118,8 @@ spec:
             items:
               - key: configuration.yaml
                 path: configuration.yaml
+              - key: pdu-sensors.yaml
+                path: pdu-sensors.yaml
         - name: authentication-scripts
           configMap:
             name: authentication-scripts

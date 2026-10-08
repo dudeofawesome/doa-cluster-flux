@@ -1,0 +1,220 @@
+# Verified on PDUMV30NET / PowerAlert 12.06.0069.
+# SNMPv3 authPriv: the same credential is used for authentication and privacy.
+- <<: &sequoia_pdu_snmp
+    platform: snmp
+    host: 10.0.1.41 # sequoia-pdu
+    version: '3'
+    username: !env_var PDU_SNMP_USERNAME
+    auth_protocol: hmac-md5
+    auth_key: !env_var PDU_SNMP_PASSWORD
+    priv_protocol: des
+    priv_key: !env_var PDU_SNMP_PASSWORD
+    accept_errors: true
+    scan_interval: 60
+  name: Sequoia PDU current
+  unique_id: sequoia_pdu_current
+  baseoid: '1.3.6.1.2.1.33.1.4.4.1.3.1'
+  device_class: current
+  state_class: measurement
+  unit_of_measurement: A
+  value_template: '{{ (value | float) / 10 }}'
+
+- <<: *sequoia_pdu_snmp
+  name: Sequoia PDU voltage
+  unique_id: sequoia_pdu_voltage
+  baseoid: '1.3.6.1.2.1.33.1.3.3.1.3.1'
+  device_class: voltage
+  state_class: measurement
+  unit_of_measurement: V
+  value_template: '{{ value | float }}'
+
+- <<: *sequoia_pdu_snmp
+  name: Sequoia PDU frequency
+  unique_id: sequoia_pdu_frequency
+  baseoid: '1.3.6.1.2.1.33.1.3.3.1.2.1'
+  device_class: frequency
+  state_class: measurement
+  unit_of_measurement: Hz
+  value_template: '{{ (value | float) / 10 }}'
+
+- <<: *sequoia_pdu_snmp
+  name: Sequoia PDU bank 1 breaker
+  unique_id: sequoia_pdu_bank_1_breaker
+  baseoid: '1.3.6.1.4.1.850.100.1.4.7.1.2.1'
+  icon: mdi:electric-switch
+  value_template: "{{ {0: 'open', 1: 'closed'}.get(value | int(-1), 'unknown') }}"
+
+- <<: *sequoia_pdu_snmp
+  name: Sequoia PDU bank 2 breaker
+  unique_id: sequoia_pdu_bank_2_breaker
+  baseoid: '1.3.6.1.4.1.850.100.1.4.7.1.2.2'
+  icon: mdi:electric-switch
+  value_template: "{{ {0: 'open', 1: 'closed'}.get(value | int(-1), 'unknown') }}"
+
+- <<: *sequoia_pdu_snmp
+  name: Sequoia PDU outlet 01 status
+  unique_id: sequoia_pdu_outlet_01_status
+  baseoid: '1.3.6.1.4.1.850.100.1.10.2.1.2.1'
+  icon: mdi:power-socket-us
+  value_template: "{{ {1: 'off', 2: 'on'}.get(value | int(-1), 'unknown') }}"
+
+- <<: *sequoia_pdu_snmp
+  name: Sequoia PDU outlet 02 status
+  unique_id: sequoia_pdu_outlet_02_status
+  baseoid: '1.3.6.1.4.1.850.100.1.10.2.1.2.2'
+  icon: mdi:power-socket-us
+  value_template: "{{ {1: 'off', 2: 'on'}.get(value | int(-1), 'unknown') }}"
+
+- <<: *sequoia_pdu_snmp
+  name: Sequoia PDU outlet 03 status
+  unique_id: sequoia_pdu_outlet_03_status
+  baseoid: '1.3.6.1.4.1.850.100.1.10.2.1.2.3'
+  icon: mdi:power-socket-us
+  value_template: "{{ {1: 'off', 2: 'on'}.get(value | int(-1), 'unknown') }}"
+
+- <<: *sequoia_pdu_snmp
+  name: Sequoia PDU outlet 04 status
+  unique_id: sequoia_pdu_outlet_04_status
+  baseoid: '1.3.6.1.4.1.850.100.1.10.2.1.2.4'
+  icon: mdi:power-socket-us
+  value_template: "{{ {1: 'off', 2: 'on'}.get(value | int(-1), 'unknown') }}"
+
+- <<: *sequoia_pdu_snmp
+  name: Sequoia PDU outlet 05 status
+  unique_id: sequoia_pdu_outlet_05_status
+  baseoid: '1.3.6.1.4.1.850.100.1.10.2.1.2.5'
+  icon: mdi:power-socket-us
+  value_template: "{{ {1: 'off', 2: 'on'}.get(value | int(-1), 'unknown') }}"
+
+- <<: *sequoia_pdu_snmp
+  name: Sequoia PDU outlet 06 status
+  unique_id: sequoia_pdu_outlet_06_status
+  baseoid: '1.3.6.1.4.1.850.100.1.10.2.1.2.6'
+  icon: mdi:power-socket-us
+  value_template: "{{ {1: 'off', 2: 'on'}.get(value | int(-1), 'unknown') }}"
+
+- <<: *sequoia_pdu_snmp
+  name: Sequoia PDU outlet 07 status
+  unique_id: sequoia_pdu_outlet_07_status
+  baseoid: '1.3.6.1.4.1.850.100.1.10.2.1.2.7'
+  icon: mdi:power-socket-us
+  value_template: "{{ {1: 'off', 2: 'on'}.get(value | int(-1), 'unknown') }}"
+
+- <<: *sequoia_pdu_snmp
+  name: Sequoia PDU outlet 08 status
+  unique_id: sequoia_pdu_outlet_08_status
+  baseoid: '1.3.6.1.4.1.850.100.1.10.2.1.2.8'
+  icon: mdi:power-socket-us
+  value_template: "{{ {1: 'off', 2: 'on'}.get(value | int(-1), 'unknown') }}"
+
+- <<: *sequoia_pdu_snmp
+  name: Sequoia PDU outlet 09 status
+  unique_id: sequoia_pdu_outlet_09_status
+  baseoid: '1.3.6.1.4.1.850.100.1.10.2.1.2.9'
+  icon: mdi:power-socket-us
+  value_template: "{{ {1: 'off', 2: 'on'}.get(value | int(-1), 'unknown') }}"
+
+- <<: *sequoia_pdu_snmp
+  name: Sequoia PDU outlet 10 status
+  unique_id: sequoia_pdu_outlet_10_status
+  baseoid: '1.3.6.1.4.1.850.100.1.10.2.1.2.10'
+  icon: mdi:power-socket-us
+  value_template: "{{ {1: 'off', 2: 'on'}.get(value | int(-1), 'unknown') }}"
+
+- <<: *sequoia_pdu_snmp
+  name: Sequoia PDU outlet 11 status
+  unique_id: sequoia_pdu_outlet_11_status
+  baseoid: '1.3.6.1.4.1.850.100.1.10.2.1.2.11'
+  icon: mdi:power-socket-us
+  value_template: "{{ {1: 'off', 2: 'on'}.get(value | int(-1), 'unknown') }}"
+
+- <<: *sequoia_pdu_snmp
+  name: Sequoia PDU outlet 12 status
+  unique_id: sequoia_pdu_outlet_12_status
+  baseoid: '1.3.6.1.4.1.850.100.1.10.2.1.2.12'
+  icon: mdi:power-socket-us
+  value_template: "{{ {1: 'off', 2: 'on'}.get(value | int(-1), 'unknown') }}"
+
+- <<: *sequoia_pdu_snmp
+  name: Sequoia PDU outlet 13 status
+  unique_id: sequoia_pdu_outlet_13_status
+  baseoid: '1.3.6.1.4.1.850.100.1.10.2.1.2.13'
+  icon: mdi:power-socket-us
+  value_template: "{{ {1: 'off', 2: 'on'}.get(value | int(-1), 'unknown') }}"
+
+- <<: *sequoia_pdu_snmp
+  name: Sequoia PDU outlet 14 status
+  unique_id: sequoia_pdu_outlet_14_status
+  baseoid: '1.3.6.1.4.1.850.100.1.10.2.1.2.14'
+  icon: mdi:power-socket-us
+  value_template: "{{ {1: 'off', 2: 'on'}.get(value | int(-1), 'unknown') }}"
+
+- <<: *sequoia_pdu_snmp
+  name: Sequoia PDU outlet 15 status
+  unique_id: sequoia_pdu_outlet_15_status
+  baseoid: '1.3.6.1.4.1.850.100.1.10.2.1.2.15'
+  icon: mdi:power-socket-us
+  value_template: "{{ {1: 'off', 2: 'on'}.get(value | int(-1), 'unknown') }}"
+
+- <<: *sequoia_pdu_snmp
+  name: Sequoia PDU outlet 16 status
+  unique_id: sequoia_pdu_outlet_16_status
+  baseoid: '1.3.6.1.4.1.850.100.1.10.2.1.2.16'
+  icon: mdi:power-socket-us
+  value_template: "{{ {1: 'off', 2: 'on'}.get(value | int(-1), 'unknown') }}"
+
+- <<: *sequoia_pdu_snmp
+  name: Sequoia PDU outlet 17 status
+  unique_id: sequoia_pdu_outlet_17_status
+  baseoid: '1.3.6.1.4.1.850.100.1.10.2.1.2.17'
+  icon: mdi:power-socket-us
+  value_template: "{{ {1: 'off', 2: 'on'}.get(value | int(-1), 'unknown') }}"
+
+- <<: *sequoia_pdu_snmp
+  name: Sequoia PDU outlet 18 status
+  unique_id: sequoia_pdu_outlet_18_status
+  baseoid: '1.3.6.1.4.1.850.100.1.10.2.1.2.18'
+  icon: mdi:power-socket-us
+  value_template: "{{ {1: 'off', 2: 'on'}.get(value | int(-1), 'unknown') }}"
+
+- <<: *sequoia_pdu_snmp
+  name: Sequoia PDU outlet 19 status
+  unique_id: sequoia_pdu_outlet_19_status
+  baseoid: '1.3.6.1.4.1.850.100.1.10.2.1.2.19'
+  icon: mdi:power-socket-us
+  value_template: "{{ {1: 'off', 2: 'on'}.get(value | int(-1), 'unknown') }}"
+
+- <<: *sequoia_pdu_snmp
+  name: Sequoia PDU outlet 20 status
+  unique_id: sequoia_pdu_outlet_20_status
+  baseoid: '1.3.6.1.4.1.850.100.1.10.2.1.2.20'
+  icon: mdi:power-socket-us
+  value_template: "{{ {1: 'off', 2: 'on'}.get(value | int(-1), 'unknown') }}"
+
+- <<: *sequoia_pdu_snmp
+  name: Sequoia PDU outlet 21 status
+  unique_id: sequoia_pdu_outlet_21_status
+  baseoid: '1.3.6.1.4.1.850.100.1.10.2.1.2.21'
+  icon: mdi:power-socket-us
+  value_template: "{{ {1: 'off', 2: 'on'}.get(value | int(-1), 'unknown') }}"
+
+- <<: *sequoia_pdu_snmp
+  name: Sequoia PDU outlet 22 status
+  unique_id: sequoia_pdu_outlet_22_status
+  baseoid: '1.3.6.1.4.1.850.100.1.10.2.1.2.22'
+  icon: mdi:power-socket-us
+  value_template: "{{ {1: 'off', 2: 'on'}.get(value | int(-1), 'unknown') }}"
+
+- <<: *sequoia_pdu_snmp
+  name: Sequoia PDU outlet 23 status
+  unique_id: sequoia_pdu_outlet_23_status
+  baseoid: '1.3.6.1.4.1.850.100.1.10.2.1.2.23'
+  icon: mdi:power-socket-us
+  value_template: "{{ {1: 'off', 2: 'on'}.get(value | int(-1), 'unknown') }}"
+
+- <<: *sequoia_pdu_snmp
+  name: Sequoia PDU outlet 24 status
+  unique_id: sequoia_pdu_outlet_24_status
+  baseoid: '1.3.6.1.4.1.850.100.1.10.2.1.2.24'
+  icon: mdi:power-socket-us
+  value_template: "{{ {1: 'off', 2: 'on'}.get(value | int(-1), 'unknown') }}"
