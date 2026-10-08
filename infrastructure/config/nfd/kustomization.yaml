@@ -3,3 +3,4 @@ kind: Kustomization
 
 resources:
   - sonoff-zigbee-coordinator.yaml
+  - water-meter-rtl-sdr.yaml
