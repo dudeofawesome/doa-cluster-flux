@@ -13,7 +13,6 @@ resources:
   - ingress.yaml
   - tesla-fleet-api.yaml
   - secrets.yaml
-  - pdu/secrets.yaml
   - oidc-client.yaml
 
 configMapGenerator:
