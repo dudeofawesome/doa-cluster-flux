@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rtlamr2mqtt
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    # The receiver can only be claimed by one process at a time.
+    type: Recreate
+  selector:
+    matchLabels:
+      component: app
+  template:
+    metadata:
+      labels:
+        component: app
+    spec:
+      automountServiceAccountToken: false
+      nodeSelector:
+        feature.node.kubernetes.io/water-meter-rtl-sdr.present: 'true'
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: rtlamr2mqtt
+          image: docker.io/allangood/rtlamr2mqtt:2026.5.9@sha256:0c2f49d3106f3c5b0e6cb3c1d79ae5af547519a694b026b2b8f6565fbb0ee8eb
+          securityContext:
+            # The device plugin grants access only to the allocated receiver.
+            privileged: false
+            allowPrivilegeEscalation: false
+            runAsUser: 0 # USB device-node permissions; not a privileged container.
+            capabilities:
+              drop: [ALL]
+            seccompProfile:
+              type: RuntimeDefault
+            readOnlyRootFilesystem: true
+          env:
+            - name: TZ
+              value: America/Los_Angeles
+            - name: PYTHONDONTWRITEBYTECODE
+              value: '1'
+            - name: PYTHONUNBUFFERED
+              value: '1'
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+              devic.es/water-meter-rtl-sdr: '1'
+            limits:
+              cpu: '1'
+              memory: 256Mi
+              devic.es/water-meter-rtl-sdr: '1'
+          startupProbe:
+            exec:
+              command: ['python', '/etc/rtlamr2mqtt/healthcheck.py']
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 36
+          readinessProbe:
+            exec:
+              command: ['python', '/etc/rtlamr2mqtt/healthcheck.py']
+            periodSeconds: 15
+            timeoutSeconds: 5
+          livenessProbe:
+            exec:
+              command: ['python', '/etc/rtlamr2mqtt/healthcheck.py']
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 12
+          volumeMounts:
+            - name: configuration
+              mountPath: /etc/rtlamr2mqtt.yaml
+              subPath: rtlamr2mqtt.yaml
+              readOnly: true
+            - name: configuration
+              mountPath: /etc/rtlamr2mqtt/healthcheck.py
+              subPath: healthcheck.py
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: configuration
+          configMap:
+            name: configuration
+        - name: tmp
+          emptyDir:
+            sizeLimit: 32Mi

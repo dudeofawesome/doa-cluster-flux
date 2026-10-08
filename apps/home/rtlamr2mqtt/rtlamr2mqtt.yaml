@@ -1,0 +1,39 @@
+general:
+  sleep_for: 0
+  verbosity: info
+  device_id: 0
+  rtltcp_host: '127.0.0.1:1234'
+  listen_mode: false
+
+mqtt:
+  host: mqtt-cleartext.mosquitto.svc.cluster.local
+  port: 1883
+  tls_enabled: false
+  base_topic: water-meter
+  ha_autodiscovery_topic: homeassistant
+  ha_status_topic: homeassistant/status
+  discovery_interval: 300
+
+custom_parameters:
+  # Set gain on the server itself; the tested Nix rtlamr ignored gain flags.
+  # Keep the sample server private to this container.
+  rtltcp: '-a 127.0.0.1 -g 49.6'
+  # Suppress rtlamr's default AGC override and publish unchanged packets too.
+  # Unchanged readings must refresh last-seen and expire_after.
+  rtlamr: '-tunergainmode=false -unique=false'
+
+meters:
+  # Candidate printed on the home's Itron 100W+; not received/verified yet.
+  - id: 74877242
+    protocol: scm+
+    name: Home water meter (unverified)
+    icon: mdi:water
+    state_class: total_increasing
+    expire_after: 900
+    manufacturer: Itron
+    model: 100W+ ERW-1300-402
+    # Keep raw counts until the endpoint, units, and scaling are verified.
+    # For confirmed hundredths of a US gallon, add:
+    # format: '########.##'
+    # unit_of_measurement: gal
+    # device_class: water

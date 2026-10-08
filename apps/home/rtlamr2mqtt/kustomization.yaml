@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: rtlamr2mqtt
+commonLabels:
+  app: rtlamr2mqtt
+
+resources:
+  - namespace.yaml
+  - deployment.yaml
+
+configMapGenerator:
+  - name: configuration
+    files:
+      - rtlamr2mqtt.yaml
+      - healthcheck.py
