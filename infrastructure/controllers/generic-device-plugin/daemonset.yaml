@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: generic-device-plugin
+spec:
+  selector:
+    matchLabels:
+      component: app
+  template:
+    metadata:
+      labels:
+        component: app
+    spec:
+      automountServiceAccountToken: false
+      nodeSelector:
+        kubernetes.io/os: linux
+        feature.node.kubernetes.io/water-meter-rtl-sdr.present: 'true'
+      tolerations:
+        - operator: Exists
+          effect: NoSchedule
+        - operator: Exists
+          effect: NoExecute
+      containers:
+        - name: generic-device-plugin
+          image: docker.io/squat/generic-device-plugin:0.2.0@sha256:66c8d5c270eb2b721f1064c549b9b7898152a6d2f0163380a5d37dc7636c20ff
+          args:
+            - --config=/etc/generic-device-plugin/config.yaml
+            - --plugin-directory=/var/lib/kubelet/device-plugins
+          securityContext:
+            # Infrastructure-only access to the kubelet device-plugin socket.
+            privileged: true
+            readOnlyRootFilesystem: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 16Mi
+            limits:
+              cpu: 250m
+              memory: 64Mi
+          ports:
+            - name: http
+              containerPort: 8080
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 5
+            failureThreshold: 24
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 30
+          volumeMounts:
+            - name: configuration
+              mountPath: /etc/generic-device-plugin
+              readOnly: true
+            - name: device-plugins
+              mountPath: /var/lib/kubelet/device-plugins
+            - name: usb
+              mountPath: /dev/bus/usb
+              readOnly: true
+      volumes:
+        - name: configuration
+          configMap:
+            name: configuration
+        - name: device-plugins
+          hostPath:
+            path: /var/lib/kubelet/device-plugins
+            type: Directory
+        - name: usb
+          hostPath:
+            path: /dev/bus/usb
+            type: Directory

@@ -1,0 +1,9 @@
+domain: devic.es
+devices:
+  - name: water-meter-rtl-sdr
+    groups:
+      - count: 1
+        usb:
+          - vendor: '0bda'
+            product: '2838'
+            serial: '03938241'
