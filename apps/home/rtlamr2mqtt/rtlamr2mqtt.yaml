@@ -9,7 +9,7 @@ mqtt:
   host: mqtt-cleartext.mosquitto.svc.cluster.local
   port: 1883
   tls_enabled: false
-  base_topic: water-meter
+  base_topic: rtlamr
   ha_autodiscovery_topic: homeassistant
   ha_status_topic: homeassistant/status
   discovery_interval: 300
@@ -26,14 +26,13 @@ meters:
   # Candidate printed on the home's Itron 100W+; not received/verified yet.
   - id: 74877242
     protocol: scm+
-    name: Home water meter (unverified)
+    name: 230 water meter
     icon: mdi:water
+    device_class: water
     state_class: total_increasing
     expire_after: 900
     manufacturer: Itron
-    model: 100W+ ERW-1300-402
-    # Keep raw counts until the endpoint, units, and scaling are verified.
-    # For confirmed hundredths of a US gallon, add:
-    # format: '########.##'
-    # unit_of_measurement: gal
-    # device_class: water
+    model: 100WD ERW-1300-402
+    # Raw counts are already HCF; preserve whole-unit readings.
+    format: '##########'
+    unit_of_measurement: CCF # hundreds of cubic feet (HCF)
