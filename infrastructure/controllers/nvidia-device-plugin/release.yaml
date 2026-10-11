@@ -20,6 +20,8 @@ spec:
       interval: 12h
   values:
     runtimeClassName: nvidia
+    # The NVIDIA RuntimeClass restricts scheduling to runtime-configured nodes.
+    affinity: null
     deviceListStrategy: envvar
     deviceIDStrategy: index
     migStrategy: none
