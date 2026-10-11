@@ -20,7 +20,9 @@ spec:
       interval: 12h
   values:
     runtimeClassName: nvidia
-    # The NVIDIA RuntimeClass restricts scheduling to runtime-configured nodes.
+    # Restrict DaemonSet targets as well as RuntimeClass pod scheduling.
+    nodeSelector:
+      feature.node.kubernetes.io/nvidia-runtime.configured: 'true'
     affinity: null
     deviceListStrategy: envvar
     deviceIDStrategy: index
