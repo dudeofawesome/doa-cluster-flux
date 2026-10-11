@@ -9,4 +9,5 @@ resources:
   - grafana.yaml
   - hermes.yaml
   - keycloak-resources.yaml
+  - llmkube
   - mariadb.yaml
