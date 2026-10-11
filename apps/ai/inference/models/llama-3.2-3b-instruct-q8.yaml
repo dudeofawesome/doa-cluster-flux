@@ -1,0 +1,19 @@
+apiVersion: inference.llmkube.dev/v1alpha1
+kind: Model
+metadata:
+  name: llama-3.2-3b-instruct-q8
+spec:
+  source: https://huggingface.co/bartowski/Llama-3.2-3B-Instruct-GGUF/resolve/main/Llama-3.2-3B-Instruct-Q8_0.gguf
+  format: gguf
+  quantization: Q8_0
+  hardware:
+    accelerator: cuda
+    gpu:
+      enabled: true
+      count: 1
+      vendor: nvidia
+      memory: '8Gi'
+      layers: -1
+  resources:
+    cpu: '2'
+    memory: '4Gi'

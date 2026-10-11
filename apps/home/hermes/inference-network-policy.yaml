@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: shared-inference
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: hermes
+      app.kubernetes.io/name: hermes-agent
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: inference
+          podSelector:
+            matchLabels:
+              inference.llmkube.dev/service: llama-3.2-3b-instruct
+      ports:
+        - port: 8080
+          protocol: TCP

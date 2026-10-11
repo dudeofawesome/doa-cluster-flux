@@ -2,6 +2,25 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
+  name: apps-ai
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: apps-base
+    - name: infrastructure-operators
+  interval: 10m0s
+  wait: true
+  timeout: 10m0s
+  retryInterval: 2m0s
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./apps/ai
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
   name: apps-base
   namespace: flux-system
 spec:

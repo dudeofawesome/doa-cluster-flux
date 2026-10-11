@@ -1,0 +1,18 @@
+apiVersion: inference.llmkube.dev/v1alpha1
+kind: InferenceService
+metadata:
+  name: llama-3.2-3b-instruct
+spec:
+  modelRef: llama-3.2-3b-instruct-q8
+  replicas: 1
+  image: ghcr.io/ggml-org/llama.cpp:server-cuda13
+  runtimeClassName: nvidia
+  endpoint:
+    port: 8080
+    path: /v1/chat/completions
+    type: ClusterIP
+  resources:
+    gpu: 1
+    cpu: '2'
+    memory: '4Gi'
+    gpuMemory: '8Gi'
