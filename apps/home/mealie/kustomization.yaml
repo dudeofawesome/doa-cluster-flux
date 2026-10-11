@@ -9,6 +9,7 @@ resources:
   - config.yaml
   - database.yaml
   - deployment.yaml
+  - model.yaml
   - storage.yaml
   - ingress.yaml
   - oidc-client.yaml
