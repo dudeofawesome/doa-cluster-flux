@@ -54,6 +54,7 @@ spec:
 
   # Use llama.cpp with CUDA support
   image: ghcr.io/ggml-org/llama.cpp:server-cuda13
+  runtimeClassName: nvidia
 
   # Endpoint configuration (OpenAI-compatible API)
   endpoint:
@@ -63,7 +64,7 @@ spec:
 
   # GPU Resource Requirements
   resources:
-    gpu: 2 # Each pod gets 1 L4 GPU (23GB VRAM)
+    gpu: 1 # Match the Model's single-GPU configuration.
     cpu: '2' # 2 vCPUs for inference serving (g2-standard-4 has 4 total, ~3.9 allocatable)
     memory: '4Gi' # 4GB RAM (g2-standard-4 has 16GB total, ~13.5GB allocatable)
     gpuMemory: '8Gi' # Model footprint, informational only (not enforced)
