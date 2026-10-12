@@ -1,0 +1,92 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: dcgm-exporter
+spec:
+  interval: 30m
+  dependsOn:
+    # Wait for the Prometheus Operator's ServiceMonitor CRD.
+    - name: monitoring
+      namespace: monitoring
+  chart:
+    spec:
+      chart: dcgm-exporter
+      version: '4.8.4'
+      sourceRef:
+        kind: HelmRepository
+        name: dcgm-exporter
+        namespace: flux-system
+      interval: 12h
+  values:
+    runtimeClassName: nvidia
+    nodeSelector:
+      feature.node.kubernetes.io/nvidia-runtime.configured: 'true'
+    serviceAccount:
+      automountServiceAccountToken: false
+    podSecurityContext:
+      seccompProfile:
+        type: RuntimeDefault
+    securityContext:
+      # Root can read kubelet's pod-resources socket; profiling is disabled.
+      runAsUser: 0
+      runAsNonRoot: false
+      allowPrivilegeEscalation: false
+      capabilities:
+        add: []
+        drop: [ALL]
+    extraEnv:
+      # Observe every GPU without reserving resources needed by inference pods.
+      - name: NVIDIA_VISIBLE_DEVICES
+        value: all
+      - name: NVIDIA_DRIVER_CAPABILITIES
+        value: compute,utility
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        memory: 512Mi
+    serviceMonitor:
+      enabled: true
+      interval: 30s
+      scrapeTimeout: 25s
+      additionalLabels:
+        release: monitoring
+      # Preserve the workload's pod/namespace/container labels from DCGM.
+      honorLabels: true
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_pod_node_name]
+          targetLabel: node
+    # GeForce RTX 3060s and 3080s support basic telemetry; omit datacenter profiling,
+    #   ECC and NVLink counters that are unavailable on these cards.
+    # Individual readings (especially memory temperature) depend on GPU/driver support.
+    customMetrics: |
+      # Clocks and performance state.
+      DCGM_FI_DEV_SM_CLOCK, gauge, SM clock frequency (MHz).
+      DCGM_FI_DEV_MEM_CLOCK, gauge, Memory clock frequency (MHz).
+      DCGM_FI_DEV_PSTATE, gauge, Performance state (0 is highest performance; 15 is lowest).
+      # Clock event reasons are a bitmask; an idle GPU also sets a bit.
+      DCGM_FI_DEV_CLOCKS_EVENT_REASONS, gauge, Active clock event reasons bitmask (includes idle and power or thermal limits).
+      # Decode reasons into clock_event labels for queries and dashboards.
+      DCGM_EXP_CLOCK_EVENTS_TOTAL, counter, Clock event activations observed since exporter startup by reason.
+
+      # Cooling and power headroom.
+      DCGM_FI_DEV_GPU_TEMP, gauge, GPU temperature (C).
+      DCGM_FI_DEV_MEMORY_TEMP, gauge, Memory temperature (C).
+      DCGM_FI_DEV_FAN_SPEED, gauge, Fan speed (% of maximum).
+      DCGM_FI_DEV_POWER_USAGE, gauge, Power draw (W).
+      DCGM_FI_DEV_POWER_MGMT_LIMIT, gauge, Configured power limit (W).
+      DCGM_FI_DEV_ENFORCED_POWER_LIMIT, gauge, Effective enforced power limit (W).
+      DCGM_FI_DEV_TOTAL_ENERGY_CONSUMPTION, counter, Total GPU energy consumed since driver reload (mJ).
+
+      # Utilization and VRAM capacity.
+      DCGM_FI_DEV_GPU_UTIL, gauge, GPU utilization (%).
+      DCGM_FI_DEV_MEM_COPY_UTIL, gauge, Memory utilization (%).
+      DCGM_FI_DEV_ENC_UTIL, gauge, Encoder utilization (%).
+      DCGM_FI_DEV_DEC_UTIL, gauge, Decoder utilization (%).
+      DCGM_FI_DEV_FB_TOTAL, gauge, Total framebuffer memory (MiB).
+      DCGM_FI_DEV_FB_FREE, gauge, Framebuffer memory free (MiB).
+      DCGM_FI_DEV_FB_USED, gauge, Framebuffer memory used (MiB).
+
+      # GPU and driver faults.
+      DCGM_FI_DEV_XID_ERRORS, gauge, Last XID error code.
