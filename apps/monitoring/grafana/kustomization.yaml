@@ -10,3 +10,4 @@ resources:
   - oidc-client.yaml
   - oidc/secrets.yaml
   - datasources.yaml
+  - gpu-dashboard.yaml
