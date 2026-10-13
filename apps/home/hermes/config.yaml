@@ -1,0 +1,28 @@
+model:
+  provider: local
+  default: qwen3.6-35b-a3b-iq4-xs
+providers:
+  local:
+    api: http://kubeai.kubeai-system.svc.cluster.local/openai/v1
+    transport: chat_completions
+    default_model: qwen3.6-35b-a3b-iq4-xs
+    # Match server allocations; the proxy does not expose runtime context.
+    models:
+      llama-3.2-3b-instruct-q8:
+        context_length: 65536
+      qwen3.6-35b-a3b-iq4-xs:
+        context_length: 65536
+display:
+  bell_on_prompt: true
+  bell_on_complete: true
+dashboard:
+  public_url: https://hermes.orleans.io
+  trusted_proxies:
+    - 10.42.1.0/24
+    - 10.42.2.0/24
+  oauth:
+    provider: self-hosted
+    self_hosted:
+      issuer: https://auth.orleans.io/realms/sequoia
+      client_id: hermes
+      scopes: openid profile email

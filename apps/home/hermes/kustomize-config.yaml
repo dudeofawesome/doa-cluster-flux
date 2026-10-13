@@ -1,0 +1,13 @@
+nameReference:
+  - kind: ConfigMap
+    version: v1
+    fieldSpecs:
+      - group: hermes.agent
+        version: v1
+        kind: HermesInstance
+        path: spec/config/configMapRef/name
+      # This informational env value makes the config hash part of the pod template.
+      - group: hermes.agent
+        version: v1
+        kind: HermesInstance
+        path: spec/env/value
