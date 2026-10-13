@@ -29,12 +29,14 @@ spec:
     - --parallel
     - '1'
     - --ctx-size
-    - '8192'
+    - '65536'
     - --split-mode
     - 'none'
     - --main-gpu
     - '0'
+    - --flash-attn
+    - 'on'
     - --cache-type-k
-    - 'f16'
+    - 'q8_0'
     - --cache-type-v
-    - 'f16'
+    - 'q8_0'

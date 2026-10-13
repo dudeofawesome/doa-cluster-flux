@@ -11,13 +11,19 @@ spec:
   config:
     raw:
       model:
-        provider: openai-codex
-        default: gpt-6-astra
+        provider: local
+        default: qwen3.6-35b-a3b-iq4-xs
       providers:
         local:
           api: http://kubeai.kubeai-system.svc.cluster.local/openai/v1
           transport: chat_completions
-          default_model: llama-3.2-3b-instruct-q8
+          default_model: qwen3.6-35b-a3b-iq4-xs
+          # Match server allocations; the proxy does not expose runtime context.
+          models:
+            llama-3.2-3b-instruct-q8:
+              context_length: 65536
+            qwen3.6-35b-a3b-iq4-xs:
+              context_length: 32768
       display:
         bell_on_prompt: true
         bell_on_complete: true
