@@ -15,7 +15,7 @@ spec:
         default: gpt-6-astra
       providers:
         local:
-          api: http://llama-3.2-3b-instruct.inference.svc.cluster.local:8080/v1
+          api: http://kubeai.kubeai-system.svc.cluster.local/openai/v1
           transport: chat_completions
           default_model: llama-3.2-3b-instruct-q8
       display:

@@ -13,10 +13,11 @@ spec:
     - to:
         - namespaceSelector:
             matchLabels:
-              kubernetes.io/metadata.name: inference
+              kubernetes.io/metadata.name: kubeai-system
           podSelector:
             matchLabels:
-              inference.llmkube.dev/service: llama-3.2-3b-instruct
+              app.kubernetes.io/name: kubeai
+              app.kubernetes.io/instance: kubeai
       ports:
-        - port: 8080
+        - port: 8000
           protocol: TCP
