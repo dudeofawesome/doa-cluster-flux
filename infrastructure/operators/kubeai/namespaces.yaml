@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kubeai-system
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: inference
+  annotations:
+    # Preserve the namespace/cache during ownership transfer or operator removal.
+    kustomize.toolkit.fluxcd.io/prune: disabled

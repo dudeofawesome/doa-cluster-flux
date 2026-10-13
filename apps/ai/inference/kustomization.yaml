@@ -2,7 +2,9 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: inference
 
+# The operator group bootstraps the namespace and model service account.
 resources:
-  - namespace.yaml
+  - storage.yaml
+  - network-policy.yaml
   - models/llama-3.2-3b-instruct-q8.yaml
-  - services/llama-3.2-3b-instruct.yaml
+  - models/qwen3.6-35b-a3b-iq4-xs.yaml

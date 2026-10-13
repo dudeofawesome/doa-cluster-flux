@@ -1,0 +1,116 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kubeai
+  namespace: kubeai-system
+spec:
+  interval: 30m
+  timeout: 5m
+  install:
+    crds: CreateReplace
+    strategy:
+      name: RetryOnFailure
+      retryInterval: 5m
+  upgrade:
+    crds: CreateReplace
+    strategy:
+      name: RetryOnFailure
+      retryInterval: 5m
+  chart:
+    spec:
+      chart: kubeai
+      version: '0.24.0'
+      sourceRef:
+        kind: HelmRepository
+        name: kubeai
+        namespace: flux-system
+      interval: 12h
+  values:
+    fullnameOverride: kubeai
+    replicaCount: 1
+    watchNamespaces: [inference]
+    open-webui:
+      enabled: false
+    k8s-aibom:
+      enabled: false
+    # Keep the API internal; enabling ingress would create an external HTTP route.
+    ingress:
+      enabled: false
+    service:
+      type: ClusterIP
+      port: 80
+    modelServiceAccount:
+      create: false
+      name: kubeai-models
+      automount: false
+    modelServerPods:
+      podSecurityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: [ALL]
+    modelServers:
+      LlamaCpp:
+        images:
+          # Shared image pin for all llama.cpp models using the GPU profile.
+          # TODO: Add Renovate extraction for this key, restricting updates to
+          # server-cuda13-b* tags and tracking digests; validate newer builds.
+          nvidia-gpu: ghcr.io/ggml-org/llama.cpp:server-cuda13-b11552@sha256:48f87d72fb1d226ac6064e7c7ef9068ac305dc5014b7dc9251fa62e7f9f6ddc4
+    resourceProfiles:
+      # One allocation unit; models select rtx3060:1 or rtx3060:2.
+      rtx3060:
+        imageName: nvidia-gpu
+        runtimeClassName: nvidia
+        nodeSelector:
+          kubernetes.io/hostname: kings-canyon
+          feature.node.kubernetes.io/nvidia-runtime.configured: 'true'
+        requests:
+          nvidia.com/gpu: '1'
+          cpu: '2'
+          memory: 4Gi
+        limits:
+          nvidia.com/gpu: '1'
+          memory: 16Gi
+    modelAutoscaling:
+      interval: 10s
+      timeWindow: 30s
+    modelRollouts:
+      surge: 0
+    podSecurityContext:
+      runAsNonRoot: true
+      seccompProfile:
+        type: RuntimeDefault
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        memory: 1Gi
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              group: apps
+              version: v1
+              kind: Deployment
+              name: kubeai
+            patch: |
+              apiVersion: apps/v1
+              kind: Deployment
+              metadata:
+                name: kubeai
+              spec:
+                template:
+                  spec:
+                    containers:
+                      - name: kubeai
+                        ports:
+                          - name: metrics
+                            containerPort: 8080
+                            protocol: TCP
