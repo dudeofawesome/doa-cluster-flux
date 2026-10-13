@@ -1,0 +1,71 @@
+apiVersion: kubeai.org/v1
+kind: Model
+metadata:
+  # MTP twin of qwen3.8-27b-heretic-q4-k-m for A/B comparison; see ../README.md.
+  name: qwen3.8-27b-heretic-iq4-xs-mtp
+  annotations:
+    # Reference metadata only; llama.cpp does not enforce this SHA-256.
+    inference.orleans.io/sha256: 28a03eb132c45a98d9493f0d51b5db57c38b376ec58e4892d3b441fd02128c86
+    inference.orleans.io/size-bytes: '15533827552'
+spec:
+  features: [TextGeneration]
+  engine: LlamaCpp
+  url: pvc://inference-models?model=qwen3.8-27b-heretic-iq4-xs-mtp.gguf
+  resourceProfile: rtx3060:2
+  # Omit replicas: KubeAI owns it through the scale subresource.
+  minReplicas: 0
+  maxReplicas: 1
+  targetRequests: 2
+  scaleDownDelaySeconds: 270
+  env:
+    HOME: /tmp
+    # Multilingual RVN build with the official MTP head embedded (+451 MB).
+    LLAMA_ARG_MODEL_URL: https://huggingface.co/0bserverx/Qwen3.8-27B-Heretic-Abliterated-Uncensored-GGUF/resolve/ab8d7bd81d03117501e4da60cccdff4c80f0eea0/RVN-IQ4_XS-multilingual-mtp.gguf
+  args:
+    - --threads
+    - '4'
+    - --n-gpu-layers
+    - 'all'
+    - --jinja
+    # Draft with the embedded MTP head; verification keeps output unchanged.
+    - --spec-type
+    - 'draft-mtp'
+    - --spec-draft-n-max
+    - '2'
+    - --spec-draft-type-k
+    - 'q8_0'
+    - --spec-draft-type-v
+    - 'q8_0'
+    # MTP keeps (1 + draft n-max) copies of each slot's recurrent state in
+    #   VRAM, so two slots leave room for 131072 tokens on 2x 12 GB.
+    - --parallel
+    - '2'
+    - --kv-unified
+    - --ctx-size
+    - '131072'
+    # Checkpoints and the prompt cache live in host RAM; bound them per pod.
+    - --ctx-checkpoints
+    - '8'
+    - --cache-ram
+    - '4096'
+    - --split-mode
+    - 'layer'
+    # The last GPU also holds the output layer, MTP head and draft KV (~1.2
+    #   GiB); shift a few layers to the first GPU to even out VRAM.
+    - --tensor-split
+    - '6,5'
+    - --flash-attn
+    - 'on'
+    - --cache-type-k
+    - 'q8_0'
+    - --cache-type-v
+    - 'q8_0'
+    # Qwen3.8 thinking-mode defaults; requests may still override them.
+    - --temp
+    - '1.0'
+    - --top-p
+    - '0.95'
+    - --top-k
+    - '20'
+    - --min-p
+    - '0'

@@ -1,0 +1,65 @@
+apiVersion: kubeai.org/v1
+kind: Model
+metadata:
+  # Tuned twin of qwen3.6-35b-a3b-iq4-xs for A/B comparison; see ../README.md.
+  name: qwen3.6-35b-a3b-iq4-xs-v2
+  annotations:
+    # Reference metadata only; llama.cpp does not enforce this SHA-256.
+    inference.orleans.io/sha256: 649d7508507b84638732c4f52c24c8b15843c6dca2f3ff793ae07c14a67ebbb3
+    inference.orleans.io/size-bytes: '17730509792'
+spec:
+  features: [TextGeneration]
+  engine: LlamaCpp
+  # Same GGUF as qwen3.6-35b-a3b-iq4-xs; no extra download.
+  url: pvc://inference-models?model=qwen3.6-35b-a3b-iq4-xs.gguf
+  resourceProfile: rtx3060:2
+  # Omit replicas: KubeAI owns it through the scale subresource.
+  minReplicas: 0
+  maxReplicas: 1
+  targetRequests: 4
+  scaleDownDelaySeconds: 270
+  env:
+    HOME: /tmp
+    # Native --model-url downloads to KubeAI's --model path on the mounted PVC.
+    LLAMA_ARG_MODEL_URL: https://huggingface.co/unsloth/Qwen3.6-35B-A3B-GGUF/resolve/a483e9e6cbd595906af30beda3187c2663a1118c/Qwen3.6-35B-A3B-UD-IQ4_XS.gguf
+  args:
+    - --threads
+    - '4'
+    - --n-gpu-layers
+    - 'all'
+    - --jinja
+    # Four slots share one KV pool, so any single request can still use the
+    #   full context while short requests no longer queue behind long ones.
+    - --parallel
+    - '4'
+    - --kv-unified
+    # Native context. Only 10 of 40 layers keep KV (hybrid attention), so
+    #   262144 tokens costs ~2.7 GiB at q8_0.
+    - --ctx-size
+    - '262144'
+    # Checkpoints and the prompt cache live in host RAM; bound them per pod.
+    - --ctx-checkpoints
+    - '8'
+    - --cache-ram
+    - '4096'
+    - --split-mode
+    - 'layer'
+    - --tensor-split
+    - '1,1'
+    - --flash-attn
+    - 'on'
+    - --cache-type-k
+    - 'q8_0'
+    - --cache-type-v
+    - 'q8_0'
+    # Qwen3.6 thinking-mode defaults; requests may still override them.
+    - --temp
+    - '1.0'
+    - --top-p
+    - '0.95'
+    - --top-k
+    - '20'
+    - --min-p
+    - '0'
+    - --presence-penalty
+    - '1.5'
