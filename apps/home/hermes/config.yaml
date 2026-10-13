@@ -12,6 +12,8 @@ providers:
         context_length: 65536
       qwen3.6-35b-a3b-iq4-xs:
         context_length: 65536
+      qwen3.8-27b-heretic-q4-k-m:
+        context_length: 65536
 display:
   bell_on_prompt: true
   bell_on_complete: true
