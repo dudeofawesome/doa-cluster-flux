@@ -29,7 +29,7 @@ spec:
     - --parallel
     - '1'
     - --ctx-size
-    - '32768'
+    - '65536'
     - --split-mode
     - 'layer'
     - --tensor-split
