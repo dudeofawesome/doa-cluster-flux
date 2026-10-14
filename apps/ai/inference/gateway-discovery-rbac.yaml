@@ -1,0 +1,21 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: new-api-model-discovery
+rules:
+  - apiGroups: [kubeai.org]
+    resources: [models]
+    verbs: [list]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: new-api-model-discovery
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: new-api-model-discovery
+subjects:
+  - kind: ServiceAccount
+    name: model-discovery
+    namespace: new-api

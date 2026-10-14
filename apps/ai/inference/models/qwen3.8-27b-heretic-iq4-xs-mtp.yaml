@@ -3,6 +3,8 @@ kind: Model
 metadata:
   # MTP twin of qwen3.8-27b-heretic-q4-k-m for A/B comparison; see ../README.md.
   name: qwen3.8-27b-heretic-iq4-xs-mtp
+  labels:
+    inference.orleans.io/expose: 'true'
   annotations:
     # Reference metadata only; llama.cpp does not enforce this SHA-256.
     inference.orleans.io/sha256: 28a03eb132c45a98d9493f0d51b5db57c38b376ec58e4892d3b441fd02128c86

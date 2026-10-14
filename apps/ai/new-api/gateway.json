@@ -1,0 +1,12 @@
+{
+  "public_url": "https://inference.orleans.io",
+  "issuer": "https://auth.orleans.io/realms/sequoia",
+  "client_id": "inference",
+  "allowed_group": "/inference-users",
+  "channel_name": "kubeai",
+  "upstream_base_url": "http://kubeai.kubeai-system.svc.cluster.local/openai",
+  "model_discovery": {
+    "namespace": "inference",
+    "label_selector": "inference.orleans.io/expose=true"
+  }
+}

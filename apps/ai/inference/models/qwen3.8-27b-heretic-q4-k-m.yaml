@@ -2,6 +2,8 @@ apiVersion: kubeai.org/v1
 kind: Model
 metadata:
   name: qwen3.8-27b-heretic-q4-k-m
+  labels:
+    inference.orleans.io/expose: 'true'
   annotations:
     # Reference metadata only; llama.cpp does not enforce this SHA-256.
     inference.orleans.io/sha256: 9ed40ccc8b8432f38b9a85d0ca67928167f5719e8c10bd299e56d34facaf6e61

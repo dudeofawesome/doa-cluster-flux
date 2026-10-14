@@ -2,6 +2,8 @@ apiVersion: kubeai.org/v1
 kind: Model
 metadata:
   name: llama-3.2-3b-instruct-q8
+  labels:
+    inference.orleans.io/expose: 'true'
   annotations:
     # Reference metadata only; llama.cpp does not enforce this SHA-256.
     inference.orleans.io/sha256: b5607b5090a8280063fff2d706bb3408ca6542341b06aab39c3eca0a28575921

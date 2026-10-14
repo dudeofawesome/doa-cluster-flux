@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: new-api
+spec:
+  selector:
+    app: new-api
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: new-api
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    # Bootstrap and password/passkey sign-in stay private. OIDC callbacks,
+    # session refresh, and API-key management remain reachable.
+    - match: Host(`inference.orleans.io`) && !PathRegexp(`^/api/(setup|reset_password|user/(login|register|reset|passkey/login))(/|$)`)
+      kind: Rule
+      services:
+        - name: new-api
+          port: 3000
+  tls:
+    secretName: wildcard-orleans-io

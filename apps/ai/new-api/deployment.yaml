@@ -1,0 +1,164 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: new-api
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: new-api
+  template:
+    metadata:
+      labels:
+        app: new-api
+    spec:
+      serviceAccountName: model-discovery
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: new-api
+          image: docker.io/calciumion/new-api:v1.0.0-rc.44@sha256:67bf271602177ff31bbb4b34f20d5f33003d3108514bd23412cff66498c05a84
+          args: ['--log-dir', '/data/logs']
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          env:
+            - name: TZ
+              value: America/Los_Angeles
+            - name: SQL_DSN
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-app
+                  key: uri
+            - name: SESSION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: new-api
+                  key: session_secret
+            - name: SESSION_COOKIE_SECURE
+              value: 'true'
+            - name: SESSION_COOKIE_TRUSTED_URL
+              value: https://inference.orleans.io
+            - name: SQL_MAX_OPEN_CONNS
+              value: '10'
+            - name: SQL_MAX_IDLE_CONNS
+              value: '5'
+            - name: MEMORY_CACHE_ENABLED
+              value: 'false'
+            - name: GENERATE_DEFAULT_TOKEN
+              value: 'false'
+            - name: CHANNEL_UPSTREAM_MODEL_UPDATE_TASK_ENABLED
+              value: 'false'
+            - name: RELAY_TIMEOUT
+              value: '300'
+            - name: STREAMING_TIMEOUT
+              value: '300'
+            - name: MAX_REQUEST_BODY_MB
+              value: '16'
+          ports:
+            - name: http
+              containerPort: 3000
+          startupProbe:
+            httpGet:
+              path: /api/status
+              port: http
+            failureThreshold: 60
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /api/status
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/status
+              port: http
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 1Gi
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: tmp
+              mountPath: /tmp
+        - name: config
+          image: python:3.13.9-alpine3.22
+          command: ['python', '-B', '/config/reconcile.py']
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          env:
+            - name: NEW_API_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: new-api
+                  key: root_password
+            - name: NEW_API_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: new-api
+                  key: client_secret
+          # The Service gets no ready endpoints until managed configuration exists.
+          readinessProbe:
+            exec:
+              command:
+                - python
+                - -c
+                - 'import pathlib,time; p=pathlib.Path("/tmp/config-ready"); assert p.exists() and time.time()-p.stat().st_mtime < 360'
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 64Mi
+          volumeMounts:
+            - name: config
+              mountPath: /config
+              readOnly: true
+            - name: config-state
+              mountPath: /tmp
+            - name: kubernetes-api
+              mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+              readOnly: true
+      volumes:
+        # PostgreSQL owns persistent state. These hold only logs/runtime caches.
+        - name: data
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+        - name: config-state
+          emptyDir: {}
+        - name: config
+          configMap:
+            name: new-api-config
+        - name: kubernetes-api
+          projected:
+            defaultMode: 0440
+            sources:
+              - serviceAccountToken:
+                  path: token
+                  expirationSeconds: 3600
+              - configMap:
+                  name: kube-root-ca.crt
+                  items:
+                    - key: ca.crt
+                      path: ca.crt

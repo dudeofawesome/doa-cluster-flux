@@ -4,6 +4,7 @@ namespace: inference
 
 # The operator group bootstraps the namespace and model service account.
 resources:
+  - gateway-discovery-rbac.yaml
   - storage.yaml
   - network-policy.yaml
   - models/llama-3.2-3b-instruct-q8.yaml

@@ -1,0 +1,17 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+spec:
+  instances: 1
+  bootstrap:
+    initdb:
+      database: newapi
+      owner: newapi
+  storage:
+    size: 5Gi
+    storageClass: local-path
+  monitoring:
+    enablePodMonitor: true

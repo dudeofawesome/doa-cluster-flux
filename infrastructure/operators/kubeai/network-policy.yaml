@@ -16,6 +16,12 @@ spec:
               - key: kubernetes.io/metadata.name
                 operator: In
                 values: [hermes, mealie, home-assistant]
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: new-api
+          podSelector:
+            matchLabels:
+              app: new-api
       ports:
         - port: 8000
           protocol: TCP
