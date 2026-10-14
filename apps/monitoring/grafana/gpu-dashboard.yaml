@@ -13,17 +13,18 @@ spec:
       "id": null,
       "uid": "cluster-gpus",
       "title": "GPU Overview",
-      "description": "NVIDIA GeForce GPU monitoring through DCGM. Device-wide readings are deduplicated across workload assignments. Unsupported fields show no data.",
+      "description": "NVIDIA GeForce GPU monitoring through DCGM, with PCIe bandwidth through NVML. Device-wide readings are deduplicated across workload assignments. Unsupported fields show no data.",
       "tags": [
         "gpu",
         "nvidia",
-        "dcgm"
+        "dcgm",
+        "nvml"
       ],
       "timezone": "browser",
       "editable": false,
       "graphTooltip": 1,
       "schemaVersion": 39,
-      "version": 1,
+      "version": 2,
       "refresh": "30s",
       "time": {
         "from": "now-6h",
@@ -1004,6 +1005,126 @@ spec:
             "showHeader": true,
             "cellHeight": "sm"
           }
+        },
+        {
+          "id": 15,
+          "title": "PCIe RX bandwidth",
+          "type": "timeseries",
+          "description": "Device-wide PCIe traffic received by the GPU through NVML. Short driver-window samples, collected every second and scraped every five seconds; not a full-interval average or an exact byte total. Short bursts may be missed.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 56
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "Bps",
+              "min": 0,
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "fillOpacity": 8,
+                "showPoints": "never",
+                "spanNulls": false
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom",
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max by (node, UUID) (nvidia_smi_pcie_throughput_rx_bytes_per_second{node=~\"${node:regex}\",UUID=~\"${gpu:regex}\"})",
+              "legendFormat": "{{node}} · {{UUID}}",
+              "range": true,
+              "instant": false
+            }
+          ]
+        },
+        {
+          "id": 16,
+          "title": "PCIe TX bandwidth",
+          "type": "timeseries",
+          "description": "Device-wide PCIe traffic transmitted by the GPU through NVML. Short driver-window samples, collected every second and scraped every five seconds; not a full-interval average or an exact byte total. Short bursts may be missed.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 56
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "Bps",
+              "min": 0,
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "line",
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "fillOpacity": 8,
+                "showPoints": "never",
+                "spanNulls": false
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom",
+              "calcs": [
+                "lastNotNull"
+              ]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max by (node, UUID) (nvidia_smi_pcie_throughput_tx_bytes_per_second{node=~\"${node:regex}\",UUID=~\"${gpu:regex}\"})",
+              "legendFormat": "{{node}} · {{UUID}}",
+              "range": true,
+              "instant": false
+            }
+          ]
         }
       ]
     }

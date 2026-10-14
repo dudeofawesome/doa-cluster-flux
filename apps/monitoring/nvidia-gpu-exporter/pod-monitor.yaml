@@ -1,0 +1,27 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: nvidia-gpu-exporter
+  labels:
+    release: monitoring
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: nvidia-gpu-exporter
+  podMetricsEndpoints:
+    - port: metrics
+      interval: 5s
+      scrapeTimeout: 4s
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_pod_node_name]
+          targetLabel: node
+      metricRelabelings:
+        # Upstream strips GPU- from uuid; restore DCGM's label name and value.
+        - sourceLabels: [uuid]
+          regex: '(.+)'
+          targetLabel: UUID
+          replacement: 'GPU-$1'
+        # Keep this complementary exporter focused on PCIe and its own health.
+        - sourceLabels: [__name__]
+          action: keep
+          regex: 'nvidia_smi_(pcie_throughput_(rx|tx)_bytes_per_second|last_collect_(success|success_timestamp_seconds|duration_seconds)|failed_scrapes_total|nvml_return_code)'
