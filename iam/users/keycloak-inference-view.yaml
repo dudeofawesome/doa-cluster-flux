@@ -2,55 +2,55 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: keycloak-inference-hermes-view
+  name: keycloak-inference-view
   namespace: inference
 subjects:
   - kind: Group
-    name: oidc:kubernetes:inference-hermes-view
+    name: oidc:kubernetes:inference-view
     apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: ClusterRole
-  name: inference-hermes-view
+  name: inference-view
   apiGroup: rbac.authorization.k8s.io
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: keycloak-inference-hermes-view
+  name: keycloak-inference-view
   namespace: kubeai-system
 subjects:
   - kind: Group
-    name: oidc:kubernetes:inference-hermes-view
+    name: oidc:kubernetes:inference-view
     apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: ClusterRole
-  name: inference-hermes-view
+  name: inference-view
   apiGroup: rbac.authorization.k8s.io
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: keycloak-inference-hermes-view
+  name: keycloak-inference-view
   namespace: hermes
 subjects:
   - kind: Group
-    name: oidc:kubernetes:inference-hermes-view
+    name: oidc:kubernetes:inference-view
     apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: ClusterRole
-  name: inference-hermes-view
+  name: inference-view
   apiGroup: rbac.authorization.k8s.io
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: keycloak-inference-hermes-view
+  name: keycloak-inference-view
   namespace: hermes-operator
 subjects:
   - kind: Group
-    name: oidc:kubernetes:inference-hermes-view
+    name: oidc:kubernetes:inference-view
     apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: ClusterRole
-  name: inference-hermes-view
+  name: inference-view
   apiGroup: rbac.authorization.k8s.io
