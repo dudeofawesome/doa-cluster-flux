@@ -31,6 +31,8 @@ spec:
   clientRolesV2:
     - name: kubernetes_admin
       description: Full administrative access to the Kubernetes cluster
+    - name: inference-view
+      description: Read-only access to inference, kubeai-system, hermes, and hermes-operator resources
   protocolMappers:
     - name: kubernetes roles
       protocol: openid-connect
