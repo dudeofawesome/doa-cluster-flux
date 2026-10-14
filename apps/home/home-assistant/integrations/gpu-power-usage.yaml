@@ -5,8 +5,8 @@ rest:
       query: sum(max by (UUID) (DCGM_FI_DEV_POWER_USAGE))
     scan_interval: 30
     sensor:
-      - name: GPU power
-        unique_id: gpu_power
+      - name: Sequoia cluster GPU power
+        unique_id: sequoia_cluster_gpu_power
         device_class: power
         state_class: measurement
         unit_of_measurement: W
@@ -21,3 +21,17 @@ rest:
                 and value_json.status == 'success'
                 and value_json.data.result | length > 0
              else none }}
+
+sensor:
+  # Integrate watts over hours to accumulate energy in kWh.
+  - platform: integration
+    source: sensor.sequoia_cluster_gpu_power
+    name: Sequoia cluster GPU energy
+    unique_id: sequoia_cluster_gpu_energy
+    unit_prefix: k
+    unit_time: h
+    method: trapezoidal
+    round: 6
+    # Keep accumulating while power remains unchanged.
+    max_sub_interval:
+      minutes: 1
