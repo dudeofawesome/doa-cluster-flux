@@ -19,7 +19,8 @@ configMapGenerator:
   - name: configuration
     files:
       - configuration.yaml=hass-configuration.yaml
-      - pdu-sensors.yaml=pdu-sensors.yaml
+      - pdu-sensors.yaml=integrations/pdu-sensors.yaml
+      - gpu-power-usage.yaml=integrations/gpu-power-usage.yaml
   - name: authentication-scripts
     files:
       - auth-oidc.py=auth-oidc.py

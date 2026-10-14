@@ -102,8 +102,12 @@ spec:
               subPath: auth-oidc.py
               readOnly: true
             - name: ha-configuration-base
-              mountPath: /config/pdu-sensors.yaml
+              mountPath: /config/integrations/pdu-sensors.yaml
               subPath: pdu-sensors.yaml
+              readOnly: true
+            - name: ha-configuration-base
+              mountPath: /config/integrations/gpu-power-usage.yaml
+              subPath: gpu-power-usage.yaml
               readOnly: true
       restartPolicy: Always
       hostNetwork: true
@@ -120,6 +124,8 @@ spec:
                 path: configuration.yaml
               - key: pdu-sensors.yaml
                 path: pdu-sensors.yaml
+              - key: gpu-power-usage.yaml
+                path: gpu-power-usage.yaml
         - name: authentication-scripts
           configMap:
             name: authentication-scripts

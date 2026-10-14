@@ -1,0 +1,23 @@
+rest:
+  - resource: http://monitoring-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090/api/v1/query
+    params:
+      # Deduplicate workload series for each GPU before summing cluster power.
+      query: sum(max by (UUID) (DCGM_FI_DEV_POWER_USAGE))
+    scan_interval: 30
+    sensor:
+      - name: GPU power
+        unique_id: gpu_power
+        device_class: power
+        state_class: measurement
+        unit_of_measurement: W
+        availability: >-
+          {{ value_json is defined
+             and value_json.status == 'success'
+             and value_json.data.result | length > 0
+             and is_number(value_json.data.result[0].value[1]) }}
+        value_template: >-
+          {{ value_json.data.result[0].value[1] | float(none)
+             if value_json is defined
+                and value_json.status == 'success'
+                and value_json.data.result | length > 0
+             else none }}
