@@ -2,6 +2,7 @@
 
 import os
 import runpy
+from pathlib import Path
 
 import onnxruntime
 
@@ -11,9 +12,25 @@ import onnxruntime
 inference_session = onnxruntime.InferenceSession
 
 
+def available_cpu_threads():
+    """Respect both process affinity and this cluster's cgroup v2 CPU quota."""
+    threads = len(os.sched_getaffinity(0))
+    try:
+        quota, period = Path("/sys/fs/cgroup/cpu.max").read_text().split()
+    except FileNotFoundError:
+        # No visible cgroup v2 quota; affinity is the remaining bound.
+        return max(1, threads)
+
+    if quota != "max":
+        # Round down fractional CPUs to avoid oversubscribing the quota.
+        threads = min(threads, int(quota) // int(period))
+
+    return max(1, threads)
+
+
 def limited_inference_session(path_or_bytes, sess_options=None, **kwargs):
     options = sess_options if sess_options is not None else onnxruntime.SessionOptions()
-    options.intra_op_num_threads = int(os.environ["PIPER_INFERENCE_THREADS"])
+    options.intra_op_num_threads = available_cpu_threads()
     options.inter_op_num_threads = 1
     options.add_session_config_entry("session.intra_op.allow_spinning", "0")
     return inference_session(path_or_bytes, sess_options=options, **kwargs)

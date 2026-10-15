@@ -17,6 +17,6 @@
 
 ## Piper performance
 
-Piper's startup wrapper sets ONNX Runtime's native thread pool to `PIPER_INFERENCE_THREADS=2`, matching the container's two-CPU limit. Keep these values aligned when changing CPU resources. The pinned Piper version does not expose an ONNX thread setting, and `OMP_NUM_THREADS` does not control the native thread pool in this image.
+Piper's startup wrapper sizes ONNX Runtime's native thread pool from the container's cgroup v2 CPU quota (`/sys/fs/cgroup/cpu.max`) and process CPU affinity, using the smaller bound. Fractional CPU quotas round down, with a minimum of one thread; an unlimited or unavailable quota falls back to affinity. This automatically follows changes to the container's CPU limit at startup. The pinned Piper version does not expose an ONNX thread setting, and `OMP_NUM_THREADS` does not control the native thread pool in this image.
 
 With the default pool on kings-canyon (48 visible CPUs), a short sentence took 20.7–25.8 seconds to synthesize; explicitly using two threads with worker spinning disabled took 0.94–0.97 seconds with the same `en_US-lessac-high` model. Synthesis blocks Piper's event loop, so long inference can also time out Describe/Info probes and produce `ConnectionResetError` when Piper eventually answers a disconnected client.

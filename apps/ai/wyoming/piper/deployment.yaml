@@ -46,9 +46,6 @@ spec:
               value: /tmp
             - name: PYTHONDONTWRITEBYTECODE
               value: '1'
-            # Match the CPU limit; ONNX's default sees all 48 host CPUs.
-            - name: PIPER_INFERENCE_THREADS
-              value: '2'
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
