@@ -1,0 +1,26 @@
+rule_files:
+  - new-api-rules.yaml
+evaluation_interval: 1m
+tests:
+  - name: stale configuration alerts after fifteen minutes and resolves on success
+    interval: 1m
+    input_series:
+      - series: 'new_api_config_success_age_seconds{namespace="new-api",pod="gateway"}'
+        values: '0+60x16 0+60x5'
+    alert_rule_test:
+      - eval_time: 14m
+        alertname: NewAPIConfigurationStale
+        exp_alerts: []
+      - eval_time: 16m
+        alertname: NewAPIConfigurationStale
+        exp_alerts:
+          - exp_labels:
+              namespace: new-api
+              pod: gateway
+              severity: warning
+            exp_annotations:
+              summary: New API configuration reconciliation is stale
+              description: 'No complete reconciliation has succeeded for over 15 minutes in new-api/gateway. The API continues serving its applied configuration. Check the config container logs for discovery or configuration errors.'
+      - eval_time: 17m
+        alertname: NewAPIConfigurationStale
+        exp_alerts: []

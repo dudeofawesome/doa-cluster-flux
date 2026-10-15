@@ -100,6 +100,9 @@ spec:
         - name: config
           image: python:3.14.5-alpine3.22@sha256:6b91e66ab2a880ce9ca5a1b91c70f45963ff71ff68268df056336e1a657d5efd
           command: ['python', '-B', '/config/reconcile.py']
+          ports:
+            - name: config-metrics
+              containerPort: 9090
           securityContext:
             readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
@@ -116,14 +119,7 @@ spec:
                 secretKeyRef:
                   name: new-api
                   key: client_secret
-          # The Service gets no ready endpoints until managed configuration exists.
-          readinessProbe:
-            exec:
-              command:
-                - python
-                - -c
-                - 'import pathlib,time; p=pathlib.Path("/tmp/config-ready"); assert p.exists() and time.time()-p.stat().st_mtime < 360'
-            periodSeconds: 10
+          # Reconciliation failures must not withdraw the healthy API endpoint.
           resources:
             requests:
               cpu: 10m
@@ -134,8 +130,6 @@ spec:
             - name: config
               mountPath: /config
               readOnly: true
-            - name: config-state
-              mountPath: /tmp
             - name: kubernetes-api
               mountPath: /var/run/secrets/kubernetes.io/serviceaccount
               readOnly: true
@@ -144,8 +138,6 @@ spec:
         - name: data
           emptyDir: {}
         - name: tmp
-          emptyDir: {}
-        - name: config-state
           emptyDir: {}
         - name: config
           configMap:

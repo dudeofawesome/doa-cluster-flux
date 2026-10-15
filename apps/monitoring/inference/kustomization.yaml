@@ -4,3 +4,4 @@ namespace: monitoring
 
 resources:
   - pod-monitors.yaml
+  - new-api.yaml

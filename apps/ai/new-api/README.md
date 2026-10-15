@@ -29,9 +29,9 @@ python -B apps/ai/new-api/smoke-test.py
 
 It verifies PostgreSQL initialization, non-root/read-only startup, repeated configuration reconciliation without duplicate resources, dynamic catalog changes, unchanged catalog on discovery failure, disabling an empty catalog, recovery to a nonempty catalog, verified-group admission, rejection of missing-group/unverified users, multiple non-admin keys, free-model requests without credits, streaming, per-key model restrictions, key revocation, and user rate limiting. A mock identity provider does not replace checking the actual Keycloak callback and group mapper after authorized deployment.
 
-Run the discovery unit tests for pagination, rotated-token reads, filtering, and partial/malformed snapshot rejection:
+Run the unit tests for session renewal, rate-limit backoff, discovery pagination, rotated-token reads, filtering, and partial/malformed snapshot rejection:
 
 ```sh
 python -B -m unittest discover \
-  --start-directory apps/ai/new-api --pattern test_discovery.py
+  --start-directory apps/ai/new-api --pattern 'test_*.py'
 ```

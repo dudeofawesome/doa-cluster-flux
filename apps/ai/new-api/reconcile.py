@@ -8,10 +8,56 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from pathlib import Path
+from http.cookies import SimpleCookie
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from threading import Thread
+
+
+class ReconciliationMetrics:
+    def __init__(self):
+        self.last_success = None
+        self.started = time.monotonic()
+
+    def succeeded(self):
+        self.last_success = time.monotonic()
+
+    def render(self):
+        last_success = self.last_success
+        age = time.monotonic() - (self.started if last_success is None else last_success)
+        return (
+            "# HELP new_api_config_success_age_seconds Seconds since complete reconciliation, or startup if none succeeded.\n"
+            "# TYPE new_api_config_success_age_seconds gauge\n"
+            f"new_api_config_success_age_seconds {max(0, age)}\n"
+        ).encode()
+
+    def serve(self, address=("0.0.0.0", 9090)):
+        metrics = self
+
+        class Handler(BaseHTTPRequestHandler):
+            def do_GET(self):
+                if self.path != "/metrics":
+                    self.send_error(404)
+                    return
+                body = metrics.render()
+                self.send_response(200)
+                self.send_header("Content-Type", "text/plain; version=0.0.4; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+            def log_message(self, *args):
+                pass
+
+        server = ThreadingHTTPServer(address, Handler)
+        Thread(target=server.serve_forever, daemon=True).start()
+        return server
 
 
 class APIError(RuntimeError):
-    pass
+    def __init__(self, message, status=None, retry_after=30):
+        super().__init__(message)
+        self.status = status
+        self.retry_after = retry_after
 
 
 class DiscoveryError(RuntimeError):
@@ -69,11 +115,27 @@ class Client:
         self.base_url = base_url.rstrip("/")
         self.password = password
         self.token = None
+        self.refresh_token = None
 
     def request(self, method, path, payload=None):
+        authenticated = self.token is not None
+        try:
+            return self._request(method, path, payload)
+        except APIError as error:
+            if error.status != 401 or not authenticated or path.startswith("/api/user/auth/"):
+                raise
+        # Recover once within this reconciliation, without creating another session.
+        self.initialize()
+        return self._request(method, path, payload)
+
+    def _request(self, method, path, payload=None):
         headers = {"Content-Type": "application/json"}
         if self.token:
             headers["Authorization"] = "Bearer " + self.token
+        if path == "/api/user/auth/refresh" and self.refresh_token:
+            # Browser cookies remain Secure. This client talks only over localhost
+            # and explicitly sends the refresh credential only to its auth route.
+            headers["Cookie"] = "new_api_refresh=" + self.refresh_token
         request = urllib.request.Request(
             self.base_url + path,
             data=json.dumps(payload).encode() if payload is not None else None,
@@ -83,11 +145,22 @@ class Client:
         try:
             with urllib.request.urlopen(request, timeout=30) as response:
                 result = json.load(response)
+                if path in ("/api/user/login", "/api/user/auth/refresh"):
+                    for header in response.headers.get_all("Set-Cookie", []):
+                        cookies = SimpleCookie(header)
+                        if "new_api_refresh" in cookies:
+                            self.refresh_token = cookies["new_api_refresh"].value or None
         except urllib.error.HTTPError as error:
             if error.code == 401:
                 self.token = None
+            retry_after = 30
+            if error.code == 429:
+                try:
+                    retry_after = max(30, int(error.headers.get("Retry-After", "1200")))
+                except ValueError:
+                    retry_after = 1200
             # Do not include response bodies: they may contain credentials.
-            raise APIError(f"{method} {path}: HTTP {error.code}") from None
+            raise APIError(f"{method} {path}: HTTP {error.code}", error.code, retry_after) from None
         if result.get("success") is not True:
             raise APIError(f"{method} {path}: operation rejected")
         return result.get("data")
@@ -105,6 +178,15 @@ class Client:
                 "DemoSiteEnabled": False,
             })
         if not self.token:
+            if self.refresh_token:
+                try:
+                    refreshed = self._request("POST", "/api/user/auth/refresh", {})
+                    self.token = refreshed["access_token"]
+                    return
+                except APIError as error:
+                    if error.status != 401:
+                        raise
+                    self.refresh_token = None
             login = self.request("POST", "/api/user/login", {
                 "username": "cluster-root", "password": self.password,
             })
@@ -226,29 +308,27 @@ def reconcile(client, config, client_secret):
 
 
 def main():
+    metrics = ReconciliationMetrics()
+    metrics.serve()
     config = json.loads(Path("/config/gateway.json").read_text())
     client = Client("http://127.0.0.1:3000", os.environ["NEW_API_ROOT_PASSWORD"])
     discovery = ModelDiscovery()
-    ready = Path("/tmp/config-ready")
-    ready.unlink(missing_ok=True)
     while True:
         try:
             reconcile_discovered(client, config, os.environ["NEW_API_CLIENT_SECRET"], discovery)
-            ready.touch()
+            metrics.succeeded()
             print("Managed gateway configuration ready", flush=True)
             time.sleep(300)
         except DiscoveryError:
             # Keep serving the last applied catalog after a discovery-only failure.
-            # On a new pod, readiness remains false until its first complete snapshot.
-            if ready.exists():
-                ready.touch()
             print("Model discovery failed; retaining applied catalog and retrying in 30 seconds", flush=True)
             time.sleep(30)
-        except (APIError, KeyError, ValueError, OSError):
-            ready.unlink(missing_ok=True)
+        except (APIError, KeyError, ValueError, OSError) as error:
             # Avoid logging passwords, tokens, URLs with credentials, or API bodies.
-            print("Gateway configuration failed; retrying in 30 seconds", flush=True)
-            time.sleep(30)
+            delay = error.retry_after if isinstance(error, APIError) else 30
+            detail = str(error) if isinstance(error, APIError) else type(error).__name__
+            print(f"Gateway configuration failed ({detail}); retrying in {delay} seconds", flush=True)
+            time.sleep(delay)
 
 
 if __name__ == "__main__":

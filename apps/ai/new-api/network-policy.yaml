@@ -10,6 +10,16 @@ spec:
   ingress:
     - from:
         - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+      ports:
+        - port: 9090
+          protocol: TCP
+    - from:
+        - namespaceSelector:
             matchExpressions:
               - key: kubernetes.io/metadata.name
                 operator: In

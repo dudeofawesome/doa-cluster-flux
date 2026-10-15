@@ -114,7 +114,7 @@ try:
         assert 'whisper-base-en' in catalog
         docker('run', '-d', '--name', mock, '--network', network, '-p', '127.0.0.1::8000', '-e', 'MODEL_CATALOG='+json.dumps(catalog), '-e', 'MODEL_FEATURES='+json.dumps(features), 'python:3.13.9-alpine3.22', 'python', '-c', mock_code)
         env_path = Path(folder) / 'gateway.env'
-        env_path.write_text(f'SQL_DSN=postgresql://newapi:{db_password}@{database}:5432/newapi\nSESSION_SECRET={secrets.token_urlsafe(48)}\nMEMORY_CACHE_ENABLED=false\nCHANNEL_UPSTREAM_MODEL_UPDATE_TASK_ENABLED=false\n')
+        env_path.write_text(f'SQL_DSN=postgresql://newapi:{db_password}@{database}:5432/newapi\nSESSION_SECRET={secrets.token_urlsafe(48)}\nSESSION_COOKIE_SECURE=true\nMEMORY_CACHE_ENABLED=false\nCHANNEL_UPSTREAM_MODEL_UPDATE_TASK_ENABLED=false\n')
         env_path.chmod(0o600)
         docker('run', '-d', '--name', gateway, '--network', network, '--user', '65532:65532', '--read-only', '--cap-drop', 'ALL', '--security-opt', 'no-new-privileges', '--tmpfs', '/data:rw,mode=1777', '--tmpfs', '/tmp:rw,mode=1777', '-p', '127.0.0.1::3000', '--env-file', str(env_path), image, '--log-dir', '/data/logs')
     port = json.loads(docker('inspect', gateway))[0]['NetworkSettings']['Ports']['3000/tcp'][0]['HostPort']
@@ -143,6 +143,13 @@ try:
         discovery = module.ModelDiscovery(mock_base,credentials)
         module.reconcile_discovered(client, config, secret, discovery)
         module.reconcile_discovered(client, config, secret, discovery)
+        sessions = client.request('GET', '/api/user/sessions')
+        for _ in range(2):
+            client.token = 'expired-access-token'
+            module.reconcile_discovered(client, config, secret, discovery)
+        renewed_sessions = client.request('GET', '/api/user/sessions')
+        assert [s['sid'] for s in renewed_sessions] == [s['sid'] for s in sessions]
+        print('PASS: expired access tokens renew the same session with Secure refresh cookies over localhost', flush=True)
         original = list(client.channels())
         request(mock_base,'/test/discovery-error',True)
         try:
