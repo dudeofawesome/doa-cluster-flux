@@ -16,6 +16,10 @@ spec:
               - key: kubernetes.io/metadata.name
                 operator: In
                 values: [hermes, mealie, home-assistant]
+        # Home Assistant uses hostNetwork and reaches KubeAI with a node IP.
+        # Allow the Tailscale range, including other reachable tailnet devices.
+        - ipBlock:
+            cidr: 100.64.0.0/10
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: new-api

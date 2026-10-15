@@ -63,6 +63,14 @@ spec:
           # server-cuda13-b* tags and tracking digests; validate newer builds.
           nvidia-gpu: ghcr.io/ggml-org/llama.cpp:server-cuda13-b11552@sha256:48f87d72fb1d226ac6064e7c7ef9068ac305dc5014b7dc9251fa62e7f9f6ddc4
     resourceProfiles:
+      whisper-cpu:
+        imageName: cpu
+        requests:
+          cpu: 500m
+          memory: 512Mi
+        limits:
+          cpu: '2'
+          memory: 2Gi
       # One allocation unit; models select rtx3060:1 or rtx3060:2.
       rtx3060:
         imageName: nvidia-gpu
