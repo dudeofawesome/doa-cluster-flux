@@ -47,6 +47,8 @@ Check for existing cluster operators and architecture when creating supporting s
 
 App configuration should prefer native config files (rather than env vars) where there are no practical downsides.
 
+Make app config files separate files, with jsonschema headers where possible.
+
 Pushing changes to the config (env var, or file-based) should trigger the deployment to pickup the changes (either via pod recreation or app-native file watcher).
 
 ## Validate and hand off
