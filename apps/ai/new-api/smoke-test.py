@@ -1,6 +1,7 @@
 """Exercise the pinned gateway in disposable local containers; never uses Kubernetes."""
 
 import importlib.util
+import io
 import json
 import re
 import ssl
@@ -11,6 +12,8 @@ import tempfile
 import time
 import urllib.error
 import urllib.request
+import uuid
+import wave
 from pathlib import Path
 
 repo = Path(__file__).resolve().parents[3]
@@ -45,8 +48,11 @@ mock_code = '''
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import parse_qs
+from email.parser import BytesParser
+from email.policy import default
 import os
 models=json.loads(os.environ['MODEL_CATALOG'])
+features=json.loads(os.environ['MODEL_FEATURES'])
 discovery_error=False
 class Handler(BaseHTTPRequestHandler):
  def send(self,data):
@@ -55,7 +61,7 @@ class Handler(BaseHTTPRequestHandler):
   if self.path.startswith('/apis/kubeai.org/v1/namespaces/inference/models?'):
    if discovery_error:
     self.send_response(503); self.end_headers(); return
-   self.send({'metadata':{},'items':[{'metadata':{'name':name},'spec':{'features':['TextGeneration']},'status':{'replicas':0}} for name in models]}); return
+   self.send({'metadata':{},'items':[{'metadata':{'name':name},'spec':{'features':features[name]},'status':{'replicas':0}} for name in models]}); return
   code=self.headers.get('Authorization','').split()[-1]
   self.send({'sub':code,'preferred_username':code,'name':'Smoke User','email':code+'@example.test','email_verified':code!='unverified','groups':['/inference-users'] if code!='denied' else []})
  def do_POST(self):
@@ -67,6 +73,14 @@ class Handler(BaseHTTPRequestHandler):
   if self.path=='/token':
    body=parse_qs(self.rfile.read(int(self.headers['Content-Length'])).decode())
    self.send({'access_token':body['code'][0],'token_type':'Bearer'}); return
+  if self.path=='/v1/audio/transcriptions':
+   body=self.rfile.read(int(self.headers['Content-Length']))
+   message=BytesParser(policy=default).parsebytes(('Content-Type: '+self.headers['Content-Type']+'\\r\\nMIME-Version: 1.0\\r\\n\\r\\n').encode()+body)
+   parts={part.get_param('name',header='content-disposition'):part for part in message.iter_parts()}
+   assert parts['model'].get_payload(decode=True)==b'whisper-base-en'
+   assert parts['language'].get_payload(decode=True)==b'en'
+   assert parts['file'].get_payload(decode=True).startswith(b'RIFF')
+   self.send({'text':'transcription works'}); return
   body=json.loads(self.rfile.read(int(self.headers['Content-Length'])))
   assert self.path == '/v1/chat/completions', self.path
   if body.get('stream'):
@@ -96,7 +110,9 @@ try:
         else:
             raise RuntimeError('PostgreSQL not ready')
         catalog = sorted(re.search(r'^  name: (\S+)$', path.read_text(), re.M)[1] for path in (repo/'apps/ai/inference/models').glob('*.yaml') if "inference.orleans.io/expose: 'true'" in path.read_text())
-        docker('run', '-d', '--name', mock, '--network', network, '-p', '127.0.0.1::8000', '-e', 'MODEL_CATALOG='+json.dumps(catalog), 'python:3.13.9-alpine3.22', 'python', '-c', mock_code)
+        features = {name: ['SpeechToText'] if name == 'whisper-base-en' else ['TextGeneration'] for name in catalog}
+        assert 'whisper-base-en' in catalog
+        docker('run', '-d', '--name', mock, '--network', network, '-p', '127.0.0.1::8000', '-e', 'MODEL_CATALOG='+json.dumps(catalog), '-e', 'MODEL_FEATURES='+json.dumps(features), 'python:3.13.9-alpine3.22', 'python', '-c', mock_code)
         env_path = Path(folder) / 'gateway.env'
         env_path.write_text(f'SQL_DSN=postgresql://newapi:{db_password}@{database}:5432/newapi\nSESSION_SECRET={secrets.token_urlsafe(48)}\nMEMORY_CACHE_ENABLED=false\nCHANNEL_UPSTREAM_MODEL_UPDATE_TASK_ENABLED=false\n')
         env_path.chmod(0o600)
@@ -171,6 +187,35 @@ try:
     tokens = user.request('GET','/api/token/?p=1&page_size=100')['items']
     assert len(tokens)==2
     key = user.request('POST',f"/api/token/{tokens[0]['id']}/key",{})['key']
+    audio = io.BytesIO()
+    with wave.open(audio, 'wb') as wav:
+        wav.setnchannels(1)
+        wav.setsampwidth(2)
+        wav.setframerate(16000)
+        wav.writeframes(b'\x00\x00' * 16000)
+    boundary = uuid.uuid4().hex
+    parts = []
+    for name, value in [('model', b'whisper-base-en'), ('language', b'en')]:
+        parts.append(f'--{boundary}\r\nContent-Disposition: form-data; name="{name}"\r\n\r\n'.encode() + value + b'\r\n')
+    parts.append(f'--{boundary}\r\nContent-Disposition: form-data; name="file"; filename="test.wav"\r\nContent-Type: audio/wav\r\n\r\n'.encode() + audio.getvalue() + b'\r\n')
+    audio_body = b''.join(parts) + f'--{boundary}--\r\n'.encode()
+
+    def transcribe(token):
+        req = urllib.request.Request(base + '/v1/audio/transcriptions', data=audio_body, headers={'Content-Type': 'multipart/form-data; boundary=' + boundary, 'Authorization': 'Bearer ' + token})
+        with urllib.request.urlopen(req, timeout=30) as response:
+            return json.load(response)
+
+    try:
+        transcribe(key)
+        raise AssertionError('Chat-only key allowed speech model')
+    except urllib.error.HTTPError as error:
+        assert error.code in (401, 403), error.code
+    user.request('POST', '/api/token/', {'name': 'speech', 'expired_time': -1, 'unlimited_quota': True, 'model_limits_enabled': True, 'model_limits': 'whisper-base-en', 'group': 'default'})
+    speech_token = next(t for t in user.request('GET', '/api/token/?p=1&page_size=100')['items'] if t['name'] == 'speech')
+    speech_key = user.request('POST', f"/api/token/{speech_token['id']}/key", {})['key']
+    assert 'whisper-base-en' in [m['id'] for m in request(base, '/v1/models', token=speech_key)['data']]
+    assert transcribe(speech_key)['text'] == 'transcription works'
+    print('PASS: speech-only model discovery, model listing, authenticated multipart transcription, and speech model key restrictions', flush=True)
     try:
         response=request(base,'/v1/chat/completions',{'model':config['models'][0],'messages':[{'role':'user','content':'hello'}]},key)
     except urllib.error.HTTPError as error:

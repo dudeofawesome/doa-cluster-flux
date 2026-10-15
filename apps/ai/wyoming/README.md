@@ -14,3 +14,9 @@
 3. Add another **Wyoming Protocol** integration with host `whisper.wyoming.svc.cluster.local` and port `10300`.
 4. In the Assist voice assistant settings, select Piper for text-to-speech and choose `en_US-lessac-high`, and Whisper for speech-to-text.
 5. Test a spoken command; if accuracy or latency is unsuitable, tune the Whisper model and resources after measuring actual usage.
+
+## Piper performance
+
+Piper's startup wrapper sets ONNX Runtime's native thread pool to `PIPER_INFERENCE_THREADS=2`, matching the container's two-CPU limit. Keep these values aligned when changing CPU resources. The pinned Piper version does not expose an ONNX thread setting, and `OMP_NUM_THREADS` does not control the native thread pool in this image.
+
+With the default pool on kings-canyon (48 visible CPUs), a short sentence took 20.7–25.8 seconds to synthesize; explicitly using two threads with worker spinning disabled took 0.94–0.97 seconds with the same `en_US-lessac-high` model. Synthesis blocks Piper's event loop, so long inference can also time out Describe/Info probes and produce `ConnectionResetError` when Piper eventually answers a disconnected client.

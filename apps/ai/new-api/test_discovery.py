@@ -35,7 +35,7 @@ class DiscoveryTests(unittest.TestCase):
         self.context.start()
         self.addCleanup(self.context.stop)
 
-    def test_complete_snapshot_filters_deleted_and_non_text_models_and_reads_rotated_token(self):
+    def test_complete_snapshot_filters_deleted_and_unsupported_models_and_reads_rotated_token(self):
         requests = []
 
         def respond(request, **kwargs):
@@ -53,6 +53,17 @@ class DiscoveryTests(unittest.TestCase):
         self.assertEqual(query["labelSelector"], [self.settings["label_selector"]])
         self.assertEqual(query["continue"], ["next/page"])
         self.assertEqual(urllib.parse.urlsplit(requests[0].full_url).path, "/apis/kubeai.org/v1/namespaces/inference/models")
+
+    def test_speech_models_are_included_without_text_generation(self):
+        items = [
+            model("whisper-base-en", ["SpeechToText"]),
+            model("chat-and-speech", ["TextGeneration", "SpeechToText"]),
+            model("deleted-whisper", ["SpeechToText"], deleting=True),
+            model("embeddings", ["TextEmbedding"]),
+            {"metadata": {"name": "missing-features"}, "spec": {}},
+        ]
+        with patch("reconcile.urllib.request.urlopen", return_value=page(items)):
+            self.assertEqual(self.discovery.models(self.settings), ["chat-and-speech", "whisper-base-en"])
 
     def test_successful_empty_snapshot(self):
         with patch("reconcile.urllib.request.urlopen", return_value=page([])):

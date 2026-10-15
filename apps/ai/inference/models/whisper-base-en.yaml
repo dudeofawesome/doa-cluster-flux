@@ -2,6 +2,8 @@ apiVersion: kubeai.org/v1
 kind: Model
 metadata:
   name: whisper-base-en
+  labels:
+    inference.orleans.io/expose: 'true'
 spec:
   features: [SpeechToText]
   engine: FasterWhisper

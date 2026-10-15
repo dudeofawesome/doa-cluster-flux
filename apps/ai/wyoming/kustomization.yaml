@@ -6,6 +6,10 @@ labels:
       app: wyoming
     # Preserve cross-namespace NetworkPolicy peer selectors (CoreDNS and HA).
     includeSelectors: false
+configMapGenerator:
+  - name: piper-startup
+    files:
+      - run.py=piper/run.py
 resources:
   - namespace.yaml
   - network-policy.yaml

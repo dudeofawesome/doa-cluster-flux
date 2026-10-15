@@ -48,7 +48,8 @@ class ModelDiscovery:
                     result = json.load(response)
                 for model in result["items"]:
                     metadata = model["metadata"]
-                    if not metadata.get("deletionTimestamp") and "TextGeneration" in model["spec"].get("features", []):
+                    features = model["spec"].get("features", [])
+                    if not metadata.get("deletionTimestamp") and {"TextGeneration", "SpeechToText"}.intersection(features):
                         names.add(metadata["name"])
                 cursor = result["metadata"].get("continue", "")
                 if not cursor:

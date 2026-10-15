@@ -29,7 +29,14 @@ spec:
       containers:
         - name: piper
           image: rhasspy/wyoming-piper:2.5.2@sha256:7d39aafac409c2b6b09d999ed04d84c311d632e558b35baa60fad6aac722af7a
+          command:
+            - /usr/src/.venv/bin/python3
+            - /opt/piper/run.py
           args:
+            - --uri
+            - tcp://0.0.0.0:10200
+            - --data-dir
+            - /data
             - --voice
             - en_US-lessac-high
             - --download-dir
@@ -39,7 +46,8 @@ spec:
               value: /tmp
             - name: PYTHONDONTWRITEBYTECODE
               value: '1'
-            - name: OMP_NUM_THREADS
+            # Match the CPU limit; ONNX's default sees all 48 host CPUs.
+            - name: PIPER_INFERENCE_THREADS
               value: '2'
           securityContext:
             allowPrivilegeEscalation: false
@@ -81,11 +89,17 @@ spec:
             periodSeconds: 30
             failureThreshold: 6
           volumeMounts:
+            - name: startup
+              mountPath: /opt/piper
+              readOnly: true
             - name: voices
               mountPath: /data
             - name: tmp
               mountPath: /tmp
       volumes:
+        - name: startup
+          configMap:
+            name: piper-startup
         - name: voices
           persistentVolumeClaim:
             claimName: voices
