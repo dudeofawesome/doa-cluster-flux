@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: wyoming
+  name: whisper
 spec:
   replicas: 1
   revisionHistoryLimit: 3
@@ -10,10 +10,12 @@ spec:
   selector:
     matchLabels:
       app: wyoming
+      component: whisper
   template:
     metadata:
       labels:
         app: wyoming
+        component: whisper
     spec:
       automountServiceAccountToken: false
       securityContext:
@@ -25,11 +27,21 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       containers:
-        - name: piper
-          image: rhasspy/wyoming-piper:2.5.2@sha256:7d39aafac409c2b6b09d999ed04d84c311d632e558b35baa60fad6aac722af7a
+        - name: whisper
+          image: rhasspy/wyoming-whisper:3.8.1@sha256:ba6fcb6056ebe237d15a325381763a80af2fc8fcedaa04f6a714a7375eb20d80
           args:
-            - --voice
-            - en_US-lessac-high
+            - --stt-library
+            - faster-whisper
+            - --model
+            - base.en
+            - --language
+            - en
+            - --device
+            - cpu
+            - --compute-type
+            - int8
+            - --cpu-threads
+            - '2'
             - --download-dir
             - /data
           env:
@@ -46,23 +58,22 @@ spec:
               drop: [ALL]
           ports:
             - name: wyoming
-              containerPort: 10200
+              containerPort: 10300
               protocol: TCP
           resources:
             requests:
-              cpu: 250m
+              cpu: 500m
               memory: 512Mi
             limits:
               cpu: '2'
               memory: 2Gi
-          # Describe/Info checks exercise the event loop, not only the socket.
-          # Synthesis can block that loop, so allow a generous response window.
+          # First startup downloads the model; transcription can block the loop.
           startupProbe:
             exec: &health-check
               command:
                 - /usr/src/.venv/bin/python3
                 - -m
-                - wyoming_piper.health_check
+                - wyoming_faster_whisper.health_check
                 - --timeout
                 - '15'
             timeoutSeconds: 20
@@ -79,14 +90,14 @@ spec:
             periodSeconds: 30
             failureThreshold: 6
           volumeMounts:
-            - name: voices
+            - name: models
               mountPath: /data
             - name: tmp
               mountPath: /tmp
       volumes:
-        - name: voices
+        - name: models
           persistentVolumeClaim:
-            claimName: voices
+            claimName: whisper-models
         - name: tmp
           emptyDir:
             sizeLimit: 256Mi

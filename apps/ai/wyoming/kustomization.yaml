@@ -8,7 +8,10 @@ labels:
     includeSelectors: false
 resources:
   - namespace.yaml
-  - deployment.yaml
-  - storage.yaml
-  - service.yaml
   - network-policy.yaml
+  - piper/deployment.yaml
+  - piper/storage.yaml
+  - piper/service.yaml
+  - whisper/deployment.yaml
+  - whisper/storage.yaml
+  - whisper/service.yaml

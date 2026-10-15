@@ -27,6 +27,8 @@ spec:
       ports:
         - port: 10200
           protocol: TCP
+        - port: 10300
+          protocol: TCP
   egress:
     - to:
         - namespaceSelector:

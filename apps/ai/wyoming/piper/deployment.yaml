@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: piper
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: wyoming
+      component: piper
+  template:
+    metadata:
+      labels:
+        app: wyoming
+        component: piper
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: piper
+          image: rhasspy/wyoming-piper:2.5.2@sha256:7d39aafac409c2b6b09d999ed04d84c311d632e558b35baa60fad6aac722af7a
+          args:
+            - --voice
+            - en_US-lessac-high
+            - --download-dir
+            - /data
+          env:
+            - name: HOME
+              value: /tmp
+            - name: PYTHONDONTWRITEBYTECODE
+              value: '1'
+            - name: OMP_NUM_THREADS
+              value: '2'
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          ports:
+            - name: wyoming
+              containerPort: 10200
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: '2'
+              memory: 2Gi
+          # Describe/Info checks exercise the event loop, not only the socket.
+          # Synthesis can block that loop, so allow a generous response window.
+          startupProbe:
+            exec: &health-check
+              command:
+                - /usr/src/.venv/bin/python3
+                - -m
+                - wyoming_piper.health_check
+                - --timeout
+                - '15'
+            timeoutSeconds: 20
+            periodSeconds: 10
+            failureThreshold: 48
+          readinessProbe:
+            exec: *health-check
+            timeoutSeconds: 20
+            periodSeconds: 30
+            failureThreshold: 3
+          livenessProbe:
+            exec: *health-check
+            timeoutSeconds: 20
+            periodSeconds: 30
+            failureThreshold: 6
+          volumeMounts:
+            - name: voices
+              mountPath: /data
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: voices
+          persistentVolumeClaim:
+            claimName: voices
+        - name: tmp
+          emptyDir:
+            sizeLimit: 256Mi
