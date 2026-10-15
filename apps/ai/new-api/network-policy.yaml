@@ -13,7 +13,7 @@ spec:
             matchExpressions:
               - key: kubernetes.io/metadata.name
                 operator: In
-                values: [kube-system, hermes, mealie, home-assistant]
+                values: [kube-system, hermes, mealie, home-assistant, trek]
       ports:
         - port: 3000
           protocol: TCP
