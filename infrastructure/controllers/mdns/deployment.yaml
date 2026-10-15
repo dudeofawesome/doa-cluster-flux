@@ -29,7 +29,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: avahi2dns
-          image: ghcr.io/dudeofawesome/avahi2dns:0.2.1@sha256:1517ffa9f42b30e22d40a0f2a4c461dac684dd9ac67ff2a7768e00221bc2eb0a
+          image: ghcr.io/dudeofawesome/avahi2dns:0.2.1@sha256:74b34c981e40d0e2361bc2802420fd0a4a87d8e246a60fbe06ebb9b736b34e6d
           args:
             - --addr=0.0.0.0
             - --port=5354
