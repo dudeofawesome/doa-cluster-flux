@@ -8,6 +8,7 @@ resources:
   - storage.yaml
   - network-policy.yaml
   - models/llama-3.2-3b-instruct-q8.yaml
+  - models/whisper-base-en.yaml
   - models/qwen3.6-35b-a3b-iq4-xs.yaml
   - models/qwen3.6-35b-a3b-iq4-xs-v2.yaml
   - models/qwen3.8-27b-heretic-q4-k-m.yaml

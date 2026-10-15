@@ -1,0 +1,30 @@
+apiVersion: kubeai.org/v1
+kind: Model
+metadata:
+  name: whisper-base-en
+spec:
+  features: [SpeechToText]
+  engine: FasterWhisper
+  # Mount a dedicated writable cache at /model without using the GPU-model PVC.
+  url: pvc://whisper-models
+  # The stable 0.5.0 image puts its application under /root; this release has
+  # the non-root layout and the WHISPER__MODEL API expected by KubeAI 0.24.0.
+  image: fedirz/faster-whisper-server:0.6.0-rc.3-cpu@sha256:b9d6714f0a2ad53778c70da370586099fcf77e918447ca197b808f9492bcc29d
+  resourceProfile: whisper-cpu:1
+  # One warm pod; after first use the backend also retains its loaded model.
+  minReplicas: 1
+  maxReplicas: 1
+  targetRequests: 1
+  scaleDownDelaySeconds: 270
+  env:
+    # Override the engine's PVC-derived model name with the HF model to cache.
+    WHISPER__MODEL: Systran/faster-whisper-base.en
+    WHISPER__INFERENCE_DEVICE: cpu
+    WHISPER__COMPUTE_TYPE: int8
+    WHISPER__CPU_THREADS: '2'
+    WHISPER__TTL: '-1'
+    DEFAULT_LANGUAGE: en
+    HF_HOME: /model
+    HOME: /tmp
+    PYTHONDONTWRITEBYTECODE: '1'
+    LOG_LEVEL: info
