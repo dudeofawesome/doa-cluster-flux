@@ -10,10 +10,17 @@ resources:
   - storage.yaml
   - config.yaml
   - deployment.yaml
+  - api.yaml
+  - api-network-policy.yaml
   - ingress.yaml
   - secrets.yaml
   - oidc-client.yaml
   - ../../../services/forward-auth
+
+configMapGenerator:
+  - name: api-config
+    envs:
+      - config.env
 
 patches:
   - patch: |
