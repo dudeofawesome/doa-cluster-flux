@@ -1,0 +1,19 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: redkey-operator
+---
+apiVersion: olm.operatorframework.io/v1
+kind: ClusterExtension
+metadata:
+  name: redkey-operator
+spec:
+  namespace: redkey-operator
+  source:
+    sourceType: Catalog
+    catalog:
+      packageName: redkey-operator
+      channels: [stable]
+      # renovate: datasource=github-releases depName=InditexTech/redkey-operator extractVersion=^v?(?<version>\d+\.\d+\.\d+)$
+      version: '0.2.0'

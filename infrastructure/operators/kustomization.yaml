@@ -11,3 +11,4 @@ resources:
   - keycloak-resources.yaml
   - kubeai
   - mariadb.yaml
+  - redkey.yaml
