@@ -1,0 +1,146 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dawarich
+spec:
+  revisionHistoryLimit: 3
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      component: app
+  template:
+    metadata:
+      labels:
+        component: app
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      terminationGracePeriodSeconds: 60
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        # Preserve the image's database files while providing writable paths.
+        # fsGroup makes the volumes writable without a root/chown entrypoint.
+        - name: initialize-storage
+          image: freikin/dawarich:1.15.3@sha256:589e3606b11b61c3fa2d9661832cb73645a9b93a9cc7d807a071e2bc6c584498
+          command: [/bin/sh, -ec]
+          args:
+            - |
+              mkdir -p /data/public /data/storage /data/watched
+              cp -R /var/app/db/. /runtime-db/
+          securityContext: &securityContext
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              memory: 256Mi
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: db
+              mountPath: /runtime-db
+      containers:
+        - name: web
+          image: freikin/dawarich:1.15.3@sha256:589e3606b11b61c3fa2d9661832cb73645a9b93a9cc7d807a071e2bc6c584498
+          command: [web-entrypoint.sh]
+          args: [bin/rails, server, -p, '3000', -b, '0.0.0.0']
+          securityContext: *securityContext
+          envFrom: &envFrom
+            - configMapRef:
+                name: config
+            - secretRef:
+                name: dawarich
+          env: &databaseCredentials
+            - name: DATABASE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-app
+                  key: username
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-app
+                  key: password
+          ports:
+            - name: http
+              containerPort: 3000
+          startupProbe:
+            httpGet: &healthCheck
+              path: /api/v1/health
+              port: http
+              httpHeaders:
+                - name: X-Forwarded-Proto
+                  value: https
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 180
+          readinessProbe:
+            httpGet: *healthCheck
+            periodSeconds: 10
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet: *healthCheck
+            periodSeconds: 30
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: 250m
+              memory: 1Gi
+            limits:
+              memory: 3Gi
+          volumeMounts: &volumeMounts
+            - name: data
+              mountPath: /var/app/public
+              subPath: public
+            - name: data
+              mountPath: /var/app/storage
+              subPath: storage
+            - name: data
+              mountPath: /var/app/tmp/imports/watched
+              subPath: watched
+            - name: db
+              mountPath: /var/app/db
+            - name: log
+              mountPath: /var/app/log
+        - name: sidekiq
+          image: freikin/dawarich:1.15.3@sha256:589e3606b11b61c3fa2d9661832cb73645a9b93a9cc7d807a071e2bc6c584498
+          # Wait for migrations and seeds, not just a database TCP connection.
+          command: [/bin/sh, -ec]
+          args:
+            - |
+              until curl --fail --silent --max-time 5 \
+                -H 'X-Forwarded-Proto: https' \
+                http://127.0.0.1:3000/api/v1/health > /dev/null; do
+                sleep 5
+              done
+              exec sidekiq-entrypoint.sh
+          securityContext: *securityContext
+          envFrom: *envFrom
+          env: *databaseCredentials
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              memory: 2Gi
+          volumeMounts: *volumeMounts
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: data
+        - name: db
+          emptyDir: {}
+        - name: log
+          emptyDir: {}

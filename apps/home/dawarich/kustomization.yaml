@@ -1,0 +1,37 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: dawarich
+labels:
+  - pairs:
+      app: dawarich
+    includeSelectors: true
+resources:
+  - namespace.yaml
+  - database.yaml
+  - deployment.yaml
+  - redis.yaml
+  - storage.yaml
+  - ingress.yaml
+  - oidc-client.yaml
+  - secrets.yaml
+
+configMapGenerator:
+  - name: config
+    envs:
+      - config.env
+
+# Kustomize runs before Flux decrypts Secret resources. The encrypted MAC is
+# a revision marker, never a plaintext credential, and changes on SOPS edits.
+replacements:
+  - source:
+      kind: Secret
+      name: dawarich
+      fieldPath: sops.mac
+    targets:
+      - select:
+          kind: Deployment
+          name: dawarich
+        fieldPaths:
+          - spec.template.metadata.annotations.[config.orleans.io/secrets-revision]
+        options:
+          create: true

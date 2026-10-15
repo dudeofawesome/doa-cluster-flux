@@ -1,0 +1,30 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres
+spec:
+  imageName: ghcr.io/cloudnative-pg/postgis:17-3.5@sha256:4db9bca5c2ce024ccf297ce3ce879d1d93a936149badae045c1fd77c7c9adc08
+  instances: 1
+  # The CNPG PostGIS operand image is published for amd64 only.
+  affinity:
+    nodeSelector:
+      kubernetes.io/arch: amd64
+  bootstrap:
+    initdb:
+      database: dawarich
+      owner: dawarich
+      # Install as superuser before Rails runs migrations as the app owner.
+      postInitApplicationSQL:
+        - CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public
+        - CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public
+  storage:
+    size: 20Gi
+    storageClass: local-path
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 1Gi
+  monitoring:
+    enablePodMonitor: true

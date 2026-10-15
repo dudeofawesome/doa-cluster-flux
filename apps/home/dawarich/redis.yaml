@@ -1,0 +1,85 @@
+apiVersion: redkey.inditex.dev/v1beta1
+kind: Redkey
+metadata:
+  name: redis
+spec:
+  # Sidekiq and Rails use separate logical databases; Redis Cluster cannot.
+  mode: standalone
+  primaries: 1
+  replicasPerPrimary: 0
+  ephemeral: false
+  storage: 2Gi
+  storageClassName: local-path
+  accessModes:
+    - ReadWriteOnce
+  deletePVC: false
+  purgeKeysOnRebalance: false
+  image: valkey/valkey:8.1.10-alpine@sha256:081c2f5cb575efc901aa80ff9cdbd1ec6a301682fd35e1ebb4b0990a4a4a8507
+  # RedKey renders this native configuration and recycles the pod on changes.
+  config: |
+    appendonly yes
+    appendfsync everysec
+    maxmemory-policy noeviction
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      memory: 512Mi
+  override:
+    statefulSet:
+      spec:
+        template:
+          spec:
+            serviceAccountName: redis
+            securityContext:
+              runAsNonRoot: true
+              runAsUser: 999
+              runAsGroup: 1000
+              fsGroup: 1000
+              seccompProfile:
+                type: RuntimeDefault
+            containers:
+              - name: redis
+                # RedKey 0.2.0 defaults to redis-server; use Valkey's binary.
+                command: [valkey-server, /conf/redis.conf]
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  capabilities:
+                    drop:
+                      - ALL
+                startupProbe:
+                  exec:
+                    command: [valkey-cli, ping]
+                  failureThreshold: 60
+                  periodSeconds: 5
+  robin:
+    image: ghcr.io/inditextech/redkey-robin:0.2.0@sha256:d174bab6d680e834dbc04e3c48a7ac8a7adab3b6aef4e8e88e8b387ec175f4e2
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        memory: 256Mi
+    template:
+      spec:
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 10000
+          runAsGroup: 10000
+          seccompProfile:
+            type: RuntimeDefault
+        containers:
+          - name: robin
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop:
+                  - ALL
+---
+# Valkey needs no Kubernetes API access; Robin uses its own operator-managed SA.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: redis
+automountServiceAccountToken: false
