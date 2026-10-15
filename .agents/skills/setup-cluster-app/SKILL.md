@@ -33,11 +33,21 @@ Apply route restrictions only when required by the intended access policy and ve
 
 ## Protect runtime state
 
-For apps that support PostgreSQL, evaluate using a new CloudNativePG DB rather than deploying another database stack. Use operator-generated database credential references where available.
+Prefer PostgreSQL databases where available.
 
 Inspect the image entrypoint before selecting UID/GID and filesystem restrictions. Preserve init, working directory, required arguments, and initialization behavior when bypassing a root-only wrapper. Use suitable non-root execution, dropped capabilities, no privilege escalation, seccomp, and disabled service-account mounting when compatible. Add appropriate resource requests/limits and startup/readiness/liveness probes based on real endpoints and startup behavior.
 
 Keep operator-owned configuration declarative. Disable supported self-updaters or self-reconfiguration that would bypass pinned Git state when appropriate.
+
+## DRY
+
+Check for existing cluster operators and architecture when creating supporting services (like databases). Postgres, for example, should use the CloudNativePG operator.
+
+## App configuration
+
+App configuration should prefer native config files (rather than env vars) where there are no practical downsides.
+
+Pushing changes to the config (env var, or file-based) should trigger the deployment to pickup the changes (either via pod recreation or app-native file watcher).
 
 ## Validate and hand off
 
