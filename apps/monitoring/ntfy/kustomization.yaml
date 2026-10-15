@@ -20,3 +20,4 @@ configMapGenerator:
     files:
       - config/server.yml
       - config/flux.yml
+      - config/alertmanager.yml

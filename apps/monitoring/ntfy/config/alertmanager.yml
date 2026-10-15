@@ -1,0 +1,11 @@
+# Bound the rendered text so large alert groups fit ntfy's notification limits.
+title: |
+  {{ printf "[%s] %.40s" .status .groupLabels.alertname }}
+message: |
+  {{- $message := printf "Namespace: %s\n" .groupLabels.namespace -}}
+  {{- range .alerts -}}
+    {{- $message = printf "%s\n[%s] %s\n%s\n%s\n" $message .status .labels.alertname (.annotations.summary | default "") (.annotations.description | default "") -}}
+  {{- end -}}
+  {{ printf "%.900s" $message }}
+  {{ if gt (len $message) 900 }}Details abbreviated.{{ end }}
+  {{ if .truncatedAlerts }}Additional alerts omitted by Alertmanager: {{ .truncatedAlerts }}{{ end }}

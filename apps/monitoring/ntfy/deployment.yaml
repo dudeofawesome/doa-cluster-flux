@@ -112,6 +112,10 @@ spec:
               readOnly: true
             - name: tmp
               mountPath: /tmp
+            - name: config
+              mountPath: /etc/ntfy/templates/alertmanager.yml
+              subPath: alertmanager.yml
+              readOnly: true
       volumes:
         - name: config
           configMap:
