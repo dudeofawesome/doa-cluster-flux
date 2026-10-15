@@ -1,6 +1,6 @@
 ## Project Overview
 
-Kubernetes K3s cluster, managed with gitops via FluxCD, with Operator Lifecycle Manager v1, cert-manager, Traefik
+Kubernetes K3s cluster, managed with gitops via FluxCD, with OLM, cert-manager, Traefik, sops
 
 ## Rules
 
