@@ -6,7 +6,6 @@ resources:
   - service-account.yaml
   - database.yaml
   - deployment.yaml
-  - recover-sessions.yaml
   - ingress.yaml
   - network-policy.yaml
   - oidc-client.yaml
