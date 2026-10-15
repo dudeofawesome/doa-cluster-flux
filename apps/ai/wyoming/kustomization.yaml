@@ -4,7 +4,8 @@ namespace: wyoming
 labels:
   - pairs:
       app: wyoming
-    includeSelectors: true
+    # Preserve cross-namespace NetworkPolicy peer selectors (CoreDNS and HA).
+    includeSelectors: false
 resources:
   - namespace.yaml
   - deployment.yaml
