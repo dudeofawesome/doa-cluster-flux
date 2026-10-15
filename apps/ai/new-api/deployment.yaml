@@ -98,7 +98,7 @@ spec:
             - name: tmp
               mountPath: /tmp
         - name: config
-          image: python:3.13.9-alpine3.22
+          image: python:3.14.5-alpine3.22@sha256:6b91e66ab2a880ce9ca5a1b91c70f45963ff71ff68268df056336e1a657d5efd
           command: ['python', '-B', '/config/reconcile.py']
           securityContext:
             readOnlyRootFilesystem: true
