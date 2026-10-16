@@ -1,0 +1,57 @@
+apiVersion: kubeai.org/v1
+kind: Model
+metadata:
+  name: gemma-4-31b-it-qat-q4-0
+  labels:
+    inference.orleans.io/expose: 'true'
+  annotations:
+    # Reference metadata only; llama.cpp does not enforce this SHA-256.
+    inference.orleans.io/sha256: 179cfb99212709597eae5929112cfca677e1bbf566178b479ae1da0c4772874b
+    inference.orleans.io/size-bytes: '17651001568'
+spec:
+  features: [TextGeneration]
+  engine: LlamaCpp
+  url: pvc://inference-models?model=gemma-4-31b-it-qat-q4-0.gguf
+  resourceProfile: rtx3060:2
+  # Omit replicas: KubeAI owns it through the scale subresource.
+  minReplicas: 0
+  maxReplicas: 1
+  targetRequests: 2
+  scaleDownDelaySeconds: 270
+  env:
+    HOME: /tmp
+    # Google's quantization-aware-trained Q4_0 build (Apache-2.0).
+    LLAMA_ARG_MODEL_URL: https://huggingface.co/google/gemma-4-31B-it-qat-q4_0-gguf/resolve/59dde24573e7e61570dba08b18a2e1fe246955ed/gemma-4-31B_q4_0-it.gguf
+  args:
+    - --threads
+    - '4'
+    - --n-gpu-layers
+    - 'all'
+    - --jinja
+    # 50 of the 60 layers use a 1024-token sliding window, so only the 10
+    #   global layers grow with context: about 1.4 GiB of q8_0 KV at 32768
+    #   tokens, plus about 1.1 GiB for the two slots' sliding windows.
+    - --parallel
+    - '2'
+    - --kv-unified
+    - --ctx-size
+    - '32768'
+    - --split-mode
+    - 'layer'
+    # The last GPU also holds the tied 262k-token output embedding (1.16 GB,
+    #   Q6_K) and the logits buffer; shift a few layers to the first GPU.
+    - --tensor-split
+    - '6,5'
+    - --flash-attn
+    - 'on'
+    - --cache-type-k
+    - 'q8_0'
+    - --cache-type-v
+    - 'q8_0'
+    # Gemma 4 defaults from the GGUF metadata; requests may override them.
+    - --temp
+    - '1.0'
+    - --top-p
+    - '0.95'
+    - --top-k
+    - '64'

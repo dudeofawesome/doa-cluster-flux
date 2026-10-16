@@ -13,3 +13,4 @@ resources:
   - models/qwen3.6-35b-a3b-iq4-xs-v2.yaml
   - models/qwen3.8-27b-heretic-q4-k-m.yaml
   - models/qwen3.8-27b-heretic-iq4-xs-mtp.yaml
+  - models/gemma-4-31b-it-qat-q4-0.yaml
