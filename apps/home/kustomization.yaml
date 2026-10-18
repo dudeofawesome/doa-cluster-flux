@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - airprint
+  - atuin
+  - dawarich
+  - esphome
+  - filaman
+  - hermes
+  - home-assistant
+  - matter-server
+  - mealie
+  - mosquitto
+  - music-assistant
+  - sharetab
+  - teslamate
+  - trek
+  - zigbee2mqtt
+  - zone-configurator

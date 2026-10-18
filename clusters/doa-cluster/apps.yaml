@@ -78,7 +78,8 @@ spec:
   wait: true
   timeout: 5m0s
   retryInterval: 2m0s
-  prune: true
+  # Temporary ownership handoff protection; see docs/flaky-node-isolation.md.
+  prune: false
   sourceRef:
     kind: GitRepository
     name: flux-system
@@ -96,6 +97,29 @@ spec:
         kind: ConfigMap
         namespace: home-assistant
         name: config
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: apps-rtlamr2mqtt
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: apps-base
+    - name: infrastructure-generic-device-plugin
+  interval: 10m0s
+  wait: true
+  timeout: 5m0s
+  retryInterval: 2m0s
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./apps/home/rtlamr2mqtt
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
