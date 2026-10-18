@@ -25,6 +25,16 @@ spec:
     - from:
         - namespaceSelector:
             matchLabels:
+              kubernetes.io/metadata.name: uptime-kuma-operator
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: uptime-kuma-operator
+      ports:
+        - protocol: TCP
+          port: 3001
+    - from:
+        - namespaceSelector:
+            matchLabels:
               kubernetes.io/metadata.name: kube-system
       ports:
         - protocol: TCP

@@ -1,0 +1,96 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: uptime-kuma-operator
+spec:
+  interval: 30m
+  timeout: 5m
+  chart:
+    spec:
+      chart: uptime-kuma-operator
+      version: '0.2.0'
+      sourceRef:
+        kind: HelmRepository
+        name: uptime-kuma-operator
+        namespace: flux-system
+      interval: 12h
+  values:
+    fullnameOverride: uptime-kuma-operator
+    replicaCount: 1
+    kuma_load_all_ingress: false
+    uptimekuma:
+      enabled: false
+      host: http://uptime-kuma.uptime-kuma.svc.cluster.local
+      # Disable the chart's example password and generated credential Secret.
+      password: ''
+      password_secret_key: kuma-credentials
+      # Replaced with a secretKeyRef below; never store login details in values.
+      username: ''
+    image:
+      repository: ghcr.io/jasonrve/uptime-kuma-operator
+      tag: '0.2.0@sha256:bee89ea53976f2487594cfdcf8ea56fda519a82fec7199790b7be3fc8d550b2f'
+      pullPolicy: IfNotPresent
+    # The published 0.2.0 image is linux/amd64 only.
+    nodeSelector:
+      kubernetes.io/arch: amd64
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              group: apps
+              version: v1
+              kind: Deployment
+              name: uptime-kuma-operator
+            patch: |
+              apiVersion: apps/v1
+              kind: Deployment
+              metadata:
+                name: uptime-kuma-operator
+              spec:
+                revisionHistoryLimit: 3
+                strategy:
+                  type: Recreate
+                template:
+                  spec:
+                    securityContext:
+                      runAsNonRoot: true
+                      runAsUser: 1654
+                      runAsGroup: 1654
+                      fsGroup: 1654
+                      seccompProfile:
+                        type: RuntimeDefault
+                    containers:
+                      - name: uptime-kuma-operator
+                        env:
+                          # Upstream hard-codes uptimekuma_password; our Secret uses password.
+                          - name: kuma_password
+                            valueFrom:
+                              secretKeyRef:
+                                name: kuma-credentials
+                                key: password
+                          - name: kuma_username
+                            value: null
+                            valueFrom:
+                              secretKeyRef:
+                                name: kuma-credentials
+                                key: username
+                          - name: DOTNET_EnableDiagnostics
+                            value: '0'
+                        resources:
+                          requests:
+                            cpu: 25m
+                            memory: 64Mi
+                          limits:
+                            memory: 256Mi
+                        securityContext:
+                          allowPrivilegeEscalation: false
+                          readOnlyRootFilesystem: true
+                          capabilities:
+                            drop: [ALL]
+                        volumeMounts:
+                          - name: tmp
+                            mountPath: /tmp
+                    volumes:
+                      - name: tmp
+                        emptyDir:
+                          sizeLimit: 64Mi

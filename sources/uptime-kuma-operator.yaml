@@ -1,0 +1,9 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: uptime-kuma-operator
+  namespace: flux-system
+spec:
+  interval: 24h
+  # The README's helm-charts URL is stale; releases are published here.
+  url: https://jasonrve.github.io/uptime-kuma-operator/
