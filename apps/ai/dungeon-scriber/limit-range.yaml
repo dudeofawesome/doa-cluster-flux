@@ -18,4 +18,4 @@ spec:
         ephemeral-storage: 8Gi
       max:
         cpu: '16'
-        memory: 48Gi
+        memory: 32Gi

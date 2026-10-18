@@ -13,9 +13,9 @@ spec:
   storageClassName: local-path
   resources:
     requests:
-      # Intended budget for base models and adapters; local-path does not
-      #   enforce a disk quota.
-      storage: 200Gi
+      # A budget for base models and adapters, not a limit: local-path does
+      #   not enforce PVC sizes.
+      storage: 100Gi
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -30,5 +30,5 @@ spec:
   storageClassName: local-path
   resources:
     requests:
-      # Datasets, checkpoints and outputs; not enforced by local-path either.
-      storage: 300Gi
+      # Budget for datasets, checkpoints and outputs; also not enforced.
+      storage: 150Gi

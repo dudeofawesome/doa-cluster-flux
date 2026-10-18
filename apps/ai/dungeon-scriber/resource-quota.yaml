@@ -8,15 +8,15 @@ spec:
     # The RTX 3090 only. The RTX 3060s (nvidia.com/gpu) stay with KubeAI.
     requests.devic.es/rtx3090: '1'
     requests.nvidia.com/gpu: '0'
-    # One LoRA job on a 9B bf16 model (~32 GiB host RAM) plus a small helper,
-    #   leaving kings-canyon headroom for inference and the control plane.
-    requests.cpu: '16'
+    # One LoRA job on a 9B bf16 model, leaving kings-canyon headroom for
+    #   inference and the control plane.
+    requests.cpu: '8'
     limits.cpu: '16'
-    requests.memory: 40Gi
-    limits.memory: 48Gi
+    requests.memory: 24Gi
+    limits.memory: 32Gi
     requests.ephemeral-storage: 64Gi
     limits.ephemeral-storage: 128Gi
     pods: '8'
     # The models and work PVCs, plus room for a small scratch volume.
     persistentvolumeclaims: '4'
-    requests.storage: 512Gi
+    requests.storage: 256Gi
