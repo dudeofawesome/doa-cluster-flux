@@ -27,7 +27,7 @@ def failure(code, retry_after=None):
 
 class ClientTests(unittest.TestCase):
     def setUp(self):
-        self.client = Client("http://127.0.0.1:3000", "test-password")
+        self.client = Client("http://127.0.0.1:3000", "test-password", origin="https://inference.orleans.io")
 
     def test_login_captures_secure_refresh_cookie(self):
         with patch("reconcile.urllib.request.urlopen", side_effect=[
@@ -49,8 +49,10 @@ class ClientTests(unittest.TestCase):
         self.assertEqual([r.full_url.removeprefix(self.client.base_url) for r in requests],
                          ["/api/option/", "/api/setup", "/api/user/auth/refresh", "/api/option/"])
         self.assertEqual(requests[2].get_header("Cookie"), "new_api_refresh=refresh")
+        self.assertEqual(requests[2].get_header("Origin"), "https://inference.orleans.io")
         self.assertEqual(requests[3].get_header("Authorization"), "Bearer renewed")
         self.assertTrue(all(r.get_header("Cookie") is None for r in [requests[0], requests[1], requests[3]]))
+        self.assertTrue(all(r.get_header("Origin") is None for r in [requests[0], requests[1], requests[3]]))
         self.assertEqual(self.client.refresh_token, "rotated")
 
     def test_revoked_refresh_falls_back_to_login(self):

@@ -130,8 +130,8 @@ try:
         print(docker('logs', gateway)[-3000:])
         raise RuntimeError('New API not ready')
     print('PASS: non-root/read-only startup with PostgreSQL', flush=True)
-    client = module.Client(base, password)
     config = json.loads((repo / 'apps/ai/new-api/gateway.json').read_text())
+    client = module.Client(base, password, origin=config['public_url'])
     config['upstream_base_url'] = 'http://' + mock + ':8000'
     secret = secrets.token_urlsafe(48)
     mock_port = json.loads(docker('inspect', mock))[0]['NetworkSettings']['Ports']['8000/tcp'][0]['HostPort']

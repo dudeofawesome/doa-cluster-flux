@@ -30,7 +30,7 @@ class MetricsTests(unittest.TestCase):
     def test_only_complete_reconciliation_resets_freshness(self):
         metrics = Mock()
         with patch("reconcile.ReconciliationMetrics", return_value=metrics), \
-                patch("reconcile.Path.read_text", return_value="{}"), \
+                patch("reconcile.Path.read_text", return_value='{"public_url": "https://inference.orleans.io"}'), \
                 patch.dict("reconcile.os.environ", {"NEW_API_ROOT_PASSWORD": "test", "NEW_API_CLIENT_SECRET": "test"}), \
                 patch("reconcile.reconcile_discovered", side_effect=[DiscoveryError(), APIError("test"), None]), \
                 patch("reconcile.time.sleep", side_effect=[None, None, KeyboardInterrupt]), \

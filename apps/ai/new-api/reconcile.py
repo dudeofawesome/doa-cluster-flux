@@ -111,8 +111,9 @@ def reconcile_discovered(client, config, client_secret, discovery):
 
 
 class Client:
-    def __init__(self, base_url, password):
+    def __init__(self, base_url, password, origin=None):
         self.base_url = base_url.rstrip("/")
+        self.origin = (origin or self.base_url).rstrip("/")
         self.password = password
         self.token = None
         self.refresh_token = None
@@ -136,6 +137,9 @@ class Client:
             # Browser cookies remain Secure. This client talks only over localhost
             # and explicitly sends the refresh credential only to its auth route.
             headers["Cookie"] = "new_api_refresh=" + self.refresh_token
+            # Cookie-authenticated refresh requires the trusted public origin,
+            # even though the sidecar connects over localhost.
+            headers["Origin"] = self.origin
         request = urllib.request.Request(
             self.base_url + path,
             data=json.dumps(payload).encode() if payload is not None else None,
@@ -311,7 +315,7 @@ def main():
     metrics = ReconciliationMetrics()
     metrics.serve()
     config = json.loads(Path("/config/gateway.json").read_text())
-    client = Client("http://127.0.0.1:3000", os.environ["NEW_API_ROOT_PASSWORD"])
+    client = Client("http://127.0.0.1:3000", os.environ["NEW_API_ROOT_PASSWORD"], origin=config["public_url"])
     discovery = ModelDiscovery()
     while True:
         try:
