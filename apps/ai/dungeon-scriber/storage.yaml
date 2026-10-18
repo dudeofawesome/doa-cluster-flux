@@ -13,8 +13,8 @@ spec:
   storageClassName: local-path
   resources:
     requests:
-      # A budget for base models and adapters, not a limit: local-path does
-      #   not enforce PVC sizes.
+      # A budget for base models and adapters, not a reservation: local-path
+      #   neither reserves nor enforces PVC sizes.
       storage: 100Gi
 ---
 apiVersion: v1

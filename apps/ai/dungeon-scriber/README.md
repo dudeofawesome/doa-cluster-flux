@@ -115,9 +115,9 @@ Inside the container, `/run/devic.es/rtx3090/uevent` is a read-only view of the 
 
 ## Resources and storage
 
-The ResourceQuota fits one LoRA job on a 9B bf16 model: 8 CPUs requested with a 16 CPU limit, 24 GiB of requested memory with a 32 GiB limit, 128 GiB of ephemeral storage, 8 pods and 4 PVCs totalling 256 GiB. The LimitRange gives containers that don't set resources 250m CPU and 512 MiB requests and 2 CPU and 4 GiB limits, so real jobs should set their own resources.
+The ResourceQuota fits one LoRA job on a 9B bf16 model: 8 CPUs requested with a 16 CPU limit, 24 GiB of requested memory with a 32 GiB limit, 32 GiB of requested ephemeral storage with a 64 GiB limit, 8 pods and 4 PVCs totalling 256 GiB. The LimitRange gives containers that don't set resources 250m CPU and 512 MiB requests and 2 CPU and 4 GiB limits, so real jobs should set their own resources.
 
-The `models` (100 GiB) and `work` (150 GiB) PVCs use `local-path` on kings-canyon. They are provisioned when Flux creates them. Their sizes are budgets, because local-path doesn't enforce them. Pruning is disabled for the PVCs and the namespace, so deleting them is a manual step.
+The `models` (100 GiB) and `work` (150 GiB) PVCs use `local-path` on kings-canyon. They are provisioned when Flux creates them. Their sizes are budgets, not reservations: local-path neither reserves nor enforces them. Pruning is disabled for the PVCs and the namespace, so deleting them is a manual step.
 
 ## Network
 
