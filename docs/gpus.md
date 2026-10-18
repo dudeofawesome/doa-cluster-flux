@@ -62,7 +62,7 @@ Some details behind those rules:
 
 -   `envFrom` is banned in `inference` GPU pods because the policy can't see inside a ConfigMap or Secret, and one could carry `NVIDIA_VISIBLE_DEVICES`. Pods holding the 3090 may use `envFrom`, because their explicit `env` entry takes precedence over it.
 -   The device plugin's own value is added by kubelet after admission, so the policies never see it and never block it.
--   Both policies use `failurePolicy: Ignore`. `rtx3090-pinned` is evaluated for every pod in the cluster, and an evaluation error shouldn't block all of them. If a policy did fail to evaluate, the cost is limited to one pod on kings-canyon seeing more GPUs than it should. A namespace that needs a hard guarantee can add its own policy with `Fail`.
+-   Both policies use `failurePolicy: Ignore`. `rtx3090-pinned` is evaluated for every pod in the cluster, and an evaluation error shouldn't block all of them. If a policy did fail to evaluate, the cost is limited to one pod on kings-canyon seeing more GPUs than it should. A namespace that needs a hard guarantee adds its own policy with `Fail`, as [`dungeon-scriber`](../apps/ai/dungeon-scriber/README.md) does.
 
 What the policies don't cover:
 
@@ -101,7 +101,7 @@ On the first run of a new workload, check that `nvidia-smi -L` inside the contai
 
 ### Sharing
 
-There is exactly one `devic.es/rtx3090`, so the card is first come first served. Whichever pod is scheduled first holds it until the pod exits. Every other pod that wants it stays Pending, and nothing preempts. A KubeAI model releases it after its idle scale-down delay (about five minutes); a batch job holds it until it finishes.
+The card's two main users are KubeAI's `rtx3090` models and [Dungeon Scriber's batch jobs](../apps/ai/dungeon-scriber/README.md). There is exactly one `devic.es/rtx3090`, so the card is first come first served. Whichever pod is scheduled first holds it until the pod exits. Every other pod that wants it stays Pending, and nothing preempts. A KubeAI model releases it after its idle scale-down delay (about five minutes); a batch job holds it until it finishes.
 
 ## Host prerequisite: UUID names in the CDI spec
 
@@ -142,7 +142,7 @@ python3 infrastructure/config/gpu-admission/tests/run.py
 
 This starts a throwaway local API server from the Kubernetes envtest binaries, applies the policies from this repository, and submits the test pods in [`tests/cases.yaml`](../infrastructure/config/gpu-admission/tests/cases.yaml), checking that each is allowed or denied as expected. It never connects to the cluster. The first run downloads about 100 MB of binaries into `~/.cache/doa-cluster-flux/envtest`.
 
-To add a case, copy a pod in `cases.yaml` and set its `test.gpu-admission/expect` annotation to `allow` or to the name of the policy that must deny it.
+To add a case, copy a pod in `cases.yaml` and set its `test.gpu-admission/expect` annotation to `allow` or to the name of the policy that must deny it; the file's header explains every annotation. [`dungeon-scriber`](../apps/ai/dungeon-scriber/tests/gpu-admission.yaml) keeps its own cases, which run in the same suite.
 
 ## Possible improvements
 

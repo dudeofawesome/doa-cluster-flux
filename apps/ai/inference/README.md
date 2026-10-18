@@ -14,7 +14,7 @@ kings-canyon has two RTX 3060s and one RTX 3090. [docs/gpus.md](../../../docs/gp
 
 The `rtx3060` profile requests `nvidia.com/gpu`, which covers only the two RTX 3060s, so `rtx3060:2` always gets both of them. Models using this profile get their GPUs from the device plugin and must not set `NVIDIA_VISIBLE_DEVICES` or use `envFrom`. An admission policy rejects both, because either one could override the cards the device plugin allocated.
 
-The RTX 3090 is a single `devic.es/rtx3090` unit, shared first come first served with other GPU jobs on the cluster. Whichever pod is scheduled first holds the card until it exits, and the other stays Pending; neither preempts. A model releases the card after its idle scale-down delay.
+The RTX 3090 is a single `devic.es/rtx3090` unit, shared first come first served with other GPU jobs on the cluster, such as [Dungeon Scriber's](../dungeon-scriber/README.md). Whichever pod is scheduled first holds the card until it exits, and the other stays Pending; neither preempts. A model releases the card after its idle scale-down delay.
 
 A model opts in with the `rtx3090` profile. KubeAI profiles cannot set environment variables, so the model pins the card itself. The `rtx3090-pinned` admission policy rejects a model without these variables, because the CUDA image's default `NVIDIA_VISIBLE_DEVICES=all` would expose every GPU:
 

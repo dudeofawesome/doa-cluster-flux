@@ -12,7 +12,7 @@ spec:
   # This policy is evaluated for pods cluster-wide, so an evaluation error must
   #   not block every pod. The cost of failing open is limited to one pod on
   #   kings-canyon seeing extra GPUs. A namespace that needs a hard guarantee
-  #   can add its own policy with Fail.
+  #   adds its own policy with Fail, as apps/ai/dungeon-scriber does.
   failurePolicy: Ignore
   matchConstraints:
     resourceRules:
