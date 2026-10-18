@@ -7,3 +7,18 @@ devices:
           - vendor: '0bda'
             product: '2838'
             serial: '03938241'
+  # Scheduling token for the kings-canyon RTX 3090, which the NVIDIA device
+  #   plugin does not advertise. Pods select the GPU itself by UUID through
+  #   the nvidia RuntimeClass; see docs/gpus.md.
+  - name: rtx3090
+    groups:
+      - count: 1
+        paths:
+          # Keyed by PCI address, which stays fixed while the card stays in its
+          #   slot; /dev/nvidiaN minors follow probe order and could point at
+          #   another card. The runtime provides the device nodes, so mount only
+          #   this read-only identity file instead of injecting a device.
+          - path: /sys/bus/pci/devices/0000:82:00.0/uevent
+            type: Mount
+            readOnly: true
+            mountPath: /run/devic.es/rtx3090/uevent

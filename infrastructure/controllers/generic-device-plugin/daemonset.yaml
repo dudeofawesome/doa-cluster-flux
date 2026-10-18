@@ -14,7 +14,19 @@ spec:
       automountServiceAccountToken: false
       nodeSelector:
         kubernetes.io/os: linux
-        feature.node.kubernetes.io/water-meter-rtl-sdr.present: 'true'
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            # Terms are ORed: run wherever a configured device is present.
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: feature.node.kubernetes.io/water-meter-rtl-sdr.present
+                    operator: In
+                    values: ['true']
+              - matchExpressions:
+                  - key: feature.node.kubernetes.io/rtx3090.present
+                    operator: In
+                    values: ['true']
       tolerations:
         - operator: Exists
           effect: NoSchedule
