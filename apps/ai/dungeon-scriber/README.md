@@ -1,16 +1,18 @@
 # Dungeon Scriber GPU jobs
 
-Dungeon Scriber batch jobs (fine-tuning, transcription and evaluation) run in the `dungeon-scriber` namespace on the RTX 3090 in kings-canyon. The two RTX 3060s stay with KubeAI ([shared model inference](../inference/README.md)).
+Dungeon Scriber batch jobs (fine-tuning, transcription and evaluation) run in the `dungeon-scriber` namespace on the RTX 3090 in kings-canyon. The two RTX 3060s stay with KubeAI ([shared model inference](../inference/README.md)), which can also use the RTX 3090 through its opt-in `rtx3090` profile.
 
 ## GPU split
 
-| GPU      | PCI address      | UUID                                       | Kubernetes resource | Used by         |
-| -------- | ---------------- | ------------------------------------------ | ------------------- | --------------- |
-| RTX 3060 | 00000000:81:00.0 | `GPU-0e5f94ee-b735-84ad-6e2f-61ab731b442f` | `nvidia.com/gpu`    | KubeAI          |
-| RTX 3090 | 00000000:82:00.0 | `GPU-6dda6c74-00cd-a40f-442e-e952e7c54db1` | `devic.es/rtx3090`  | dungeon-scriber |
-| RTX 3060 | 00000000:C2:00.0 | `GPU-8b0b486f-fe4e-78fc-597f-2eaa9ec0b7a3` | `nvidia.com/gpu`    | KubeAI          |
+| GPU      | PCI address      | UUID                                       | Kubernetes resource | Used by |
+| -------- | ---------------- | ------------------------------------------ | ------------------- | ------- |
+| RTX 3060 | 00000000:81:00.0 | `GPU-0e5f94ee-b735-84ad-6e2f-61ab731b442f` | `nvidia.com/gpu`    | KubeAI  |
+| RTX 3090 | 00000000:82:00.0 | `GPU-6dda6c74-00cd-a40f-442e-e952e7c54db1` | `devic.es/rtx3090`  | shared  |
+| RTX 3060 | 00000000:C2:00.0 | `GPU-8b0b486f-fe4e-78fc-597f-2eaa9ec0b7a3` | `nvidia.com/gpu`    | KubeAI  |
 
 The NVIDIA device plugin only sees the RTX 3060s. generic-device-plugin advertises a single `devic.es/rtx3090` on kings-canyon. It is a scheduling token and doesn't attach the GPU. The nvidia RuntimeClass attaches the card by UUID. UUIDs stay stable, while GPU indexes and `/dev/nvidiaN` numbers can change when cards are added or moved.
+
+The RTX 3090 is first come first served between these jobs and KubeAI's `rtx3090` models. Whichever pod is scheduled first holds the single unit until it exits, and the other stays Pending; nothing preempts. An idle model releases it after its scale-down delay.
 
 UUID selection needs the node's CDI specification to list UUID device names. kings-canyon's NixOS configuration (`dudeofawesome/nix-config`, `hosts/nixos/kings-canyon/k3s-gpu.nix`) must generate them:
 
@@ -18,7 +20,7 @@ UUID selection needs the node's CDI specification to list UUID device names. kin
 hardware.nvidia-container-toolkit.extraArgs = [ "--device-name-strategy" "uuid" ];
 ```
 
-`nvidia-ctk cdi generate` writes every device once per strategy, so the existing index names stay.
+`nvidia-ctk cdi generate` writes every device once per strategy, so the existing index names stay ([dudeofawesome/nix-config#108](https://github.com/dudeofawesome/nix-config/pull/108)).
 
 ## Job contract
 
@@ -31,7 +33,7 @@ A GPU pod in this namespace must:
 -   use the `jobs` ServiceAccount, which mounts no API token;
 -   meet the restricted Pod Security Standard: non-root, `RuntimeDefault` seccomp, no privilege escalation and all capabilities dropped.
 
-The `dungeon-scriber-rtx3090` ValidatingAdmissionPolicy enforces the GPU rules. It rejects:
+The `dungeon-scriber-rtx3090` ValidatingAdmissionPolicy enforces the GPU rules here, on top of the cluster-wide `rtx3090-pinned` policy in [gpu-admission](../../../infrastructure/config/gpu-admission/). It rejects:
 
 -   pods that use the nvidia RuntimeClass without the request;
 -   pods that use the nvidia RuntimeClass with any other `NVIDIA_VISIBLE_DEVICES` value;
@@ -64,12 +66,16 @@ spec:
           type: RuntimeDefault
       containers:
         - name: train
-          image: ghcr.io/edgarsaldivar/<image>@sha256:<digest>
+          # A public base image pinned by digest; code and venv live on the PVC.
+          image: docker.io/vllm/vllm-openai@sha256:<digest>
+          command: [/work/venv/bin/python, /work/src/train.py]
           env:
             - name: NVIDIA_VISIBLE_DEVICES
               value: GPU-6dda6c74-00cd-a40f-442e-e952e7c54db1
             - name: NVIDIA_DRIVER_CAPABILITIES
               value: compute,utility
+            - name: HOME
+              value: /work/home
             - name: HF_HOME
               value: /models/huggingface
           securityContext:
@@ -117,6 +123,6 @@ The `models` (200 GiB) and `work` (300 GiB) PVCs use `local-path` on kings-canyo
 
 Nothing can connect to pods in this namespace. Pods can reach CoreDNS and TCP 443 on public addresses, which covers Hugging Face and its CDN. They can't reach cluster services, the Kubernetes API, the tailnet or private ranges. The node pulls images, so this policy doesn't affect image pulls.
 
-## Private images
+## Images
 
-The `jobs` ServiceAccount references a `ghcr-pull` image pull secret for private `ghcr.io` images. Add it as a SOPS-encrypted `kubernetes.io/dockerconfigjson` secret in `secrets.yaml` and list that file in the kustomization. Until the secret exists, kubelet logs a warning, public images still pull and private images fail to pull.
+Jobs use public base images pinned by digest. The job's code and a pinned virtual environment live on the `work` PVC, so no image pull secret is needed. Containers run as UID 1000 with `HOME` on a PVC or under `/tmp`.

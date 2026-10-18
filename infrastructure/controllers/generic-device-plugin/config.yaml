@@ -9,7 +9,7 @@ devices:
             serial: '03938241'
   # Scheduling token for the kings-canyon RTX 3090, which the NVIDIA device
   #   plugin does not advertise. Pods select the GPU itself by UUID through
-  #   the nvidia RuntimeClass; see apps/ai/dungeon-scriber/README.md.
+  #   the nvidia RuntimeClass; see infrastructure/config/gpu-admission.
   - name: rtx3090
     groups:
       - count: 1
