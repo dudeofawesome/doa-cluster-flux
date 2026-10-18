@@ -1,0 +1,79 @@
+# The ResourceQuota counts GPU requests, but a container actually sees the GPUs
+#   named by NVIDIA_VISIBLE_DEVICES (CUDA images default it to `all`) or by
+#   CDI annotations. In this namespace the only GPU is the RTX 3090, pinned by
+#   UUID. See docs/gpus.md.
+#
+# The cluster-wide rtx3090-pinned policy already checks the pin, but it fails
+#   open (failurePolicy: Ignore) so an error can't block every pod. This policy
+#   repeats the pin with Fail, so jobs here never run with extra GPUs. Keep both.
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: dungeon-scriber-rtx3090
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups: ['']
+        apiVersions: [v1]
+        operations: [CREATE, UPDATE]
+        resources: [pods, pods/ephemeralcontainers]
+  variables:
+    - name: rtx3090
+      expression: "'GPU-6dda6c74-00cd-a40f-442e-e952e7c54db1'"
+    - name: nvidiaRuntime
+      expression: |-
+        has(object.spec.runtimeClassName) &&
+        object.spec.runtimeClassName == 'nvidia'
+    - name: containers
+      expression: |-
+        object.spec.containers +
+        (has(object.spec.initContainers) ? object.spec.initContainers : [])
+    - name: requestsRtx3090
+      expression: |-
+        variables.containers.exists(c,
+          has(c.resources.limits) && 'devic.es/rtx3090' in c.resources.limits)
+    # The env list of every container, including ephemeral debug containers.
+    - name: envs
+      expression: |-
+        variables.containers.map(c, has(c.env) ? c.env : []) +
+        (has(object.spec.ephemeralContainers)
+          ? object.spec.ephemeralContainers.map(c, has(c.env) ? c.env : [])
+          : [])
+  validations:
+    # kings-canyon's default runtime (runc) attaches no GPUs.
+    - expression: |-
+        !has(object.spec.runtimeClassName) || variables.nvidiaRuntime
+      message: Only the default and nvidia RuntimeClasses are allowed.
+    - expression: |-
+        !has(object.metadata.annotations) ||
+        !object.metadata.annotations.exists(k, k.startsWith('cdi.k8s.io/'))
+      message: CDI device annotations are not allowed; request devic.es/rtx3090.
+    # The nvidia runtime without the token would see the image's `all`; the
+    #   token without the nvidia runtime would hold the card and get no GPU.
+    - expression: variables.nvidiaRuntime == variables.requestsRtx3090
+      message: >-
+        Pods using the nvidia RuntimeClass must request devic.es/rtx3090, and
+        pods requesting devic.es/rtx3090 must use the nvidia RuntimeClass.
+    - expression: |-
+        !variables.nvidiaRuntime ||
+        variables.envs.all(env,
+          env.exists(e, e.name == 'NVIDIA_VISIBLE_DEVICES') &&
+          env.all(e, e.name != 'NVIDIA_VISIBLE_DEVICES' ||
+            (has(e.value) && e.value == variables.rtx3090)))
+      message: >-
+        Every container using the nvidia RuntimeClass must set
+        NVIDIA_VISIBLE_DEVICES to the RTX 3090 UUID
+        (GPU-6dda6c74-00cd-a40f-442e-e952e7c54db1).
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: dungeon-scriber-rtx3090
+spec:
+  policyName: dungeon-scriber-rtx3090
+  validationActions: [Deny]
+  matchResources:
+    namespaceSelector:
+      matchLabels:
+        kubernetes.io/metadata.name: dungeon-scriber
