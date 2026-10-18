@@ -1,0 +1,72 @@
+# KubeAI's rtx3060 models get their GPUs from the NVIDIA device plugin, which
+#   sets NVIDIA_VISIBLE_DEVICES to the allocated cards. kubelet adds that value
+#   after admission, and anything the pod spec sets (env or envFrom) comes later
+#   and wins, so a model could replace its allocation with a card another model
+#   holds. A pod with no GPU request would see the image default (`all`).
+#   rtx3090 models are covered by rtx3090-pinned instead. See docs/gpus.md.
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: inference-device-plugin-gpus
+spec:
+  # Fail open on evaluation errors rather than blocking model pods.
+  failurePolicy: Ignore
+  matchConstraints:
+    resourceRules:
+      - apiGroups: ['']
+        apiVersions: [v1]
+        operations: [CREATE, UPDATE]
+        resources: [pods, pods/ephemeralcontainers]
+  matchConditions:
+    - name: nvidia-runtime-without-rtx3090
+      expression: |-
+        has(object.spec.runtimeClassName) &&
+        object.spec.runtimeClassName == 'nvidia' &&
+        !(object.spec.containers +
+          (has(object.spec.initContainers) ? object.spec.initContainers : []))
+        .exists(c,
+          has(c.resources.limits) && 'devic.es/rtx3090' in c.resources.limits)
+  variables:
+    - name: containers
+      expression: |-
+        object.spec.containers +
+        (has(object.spec.initContainers) ? object.spec.initContainers : [])
+    # Every container, including ephemeral debug containers.
+    - name: allContainers
+      expression: |-
+        variables.containers +
+        (has(object.spec.ephemeralContainers)
+          ? object.spec.ephemeralContainers
+          : [])
+  validations:
+    - expression: |-
+        variables.containers.exists(c,
+          has(c.resources.limits) && 'nvidia.com/gpu' in c.resources.limits)
+      message: >-
+        Pods using the nvidia RuntimeClass must request nvidia.com/gpu or
+        devic.es/rtx3090.
+    - expression: |-
+        variables.allContainers.all(c,
+          !has(c.env) || !c.env.exists(e, e.name == 'NVIDIA_VISIBLE_DEVICES'))
+      message: >-
+        NVIDIA_VISIBLE_DEVICES comes from the device plugin; setting it would
+        override the allocated GPUs.
+    # The policy can't see inside a ConfigMap or Secret, and one could carry
+    #   NVIDIA_VISIBLE_DEVICES. No model uses envFrom today.
+    - expression: |-
+        variables.allContainers.all(c, !has(c.envFrom) || size(c.envFrom) == 0)
+      message: >-
+        GPU pods in inference cannot use envFrom, because it could override the
+        GPUs the device plugin allocated; set variables in env instead.
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: inference-device-plugin-gpus
+spec:
+  policyName: inference-device-plugin-gpus
+  validationActions: [Deny]
+  matchResources:
+    namespaceSelector:
+      matchLabels:
+        kubernetes.io/metadata.name: inference

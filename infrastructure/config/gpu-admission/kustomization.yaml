@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# With the nvidia RuntimeClass, the GPUs a container sees come from
+#   NVIDIA_VISIBLE_DEVICES: the pod spec's value wins over the device plugin's
+#   (kubelet appends it later and the runtime keeps the last one), which wins
+#   over the image's (CUDA images default to `all`). See docs/gpus.md.
+# tests/ is deliberately not listed; it holds fixtures for tests/run.py.
+resources:
+  - rtx3090.yaml
+  - inference.yaml
