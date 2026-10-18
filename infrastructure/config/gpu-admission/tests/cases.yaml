@@ -1,10 +1,15 @@
 # Test pods for run.py. Never applied to the cluster: the gpu-admission
 #   kustomization doesn't list this directory.
 #
-# Each pod carries two annotations:
-#   test.gpu-admission/expect    `allow`, or the name of the policy that must
-#                                deny it
+# Each pod carries these annotations:
+#   test.gpu-admission/expect    `allow`, the name of the policy that must
+#                                deny it, or `pod-security` for a Pod Security
+#                                denial
 #   test.gpu-admission/describe  what the case checks, in plain words
+#   test.gpu-admission/without   optional: policies to switch off for this
+#                                case, comma-separated. The API server reports
+#                                only the first denial, so this is how a policy
+#                                that repeats another's checks is tested alone.
 #
 # A pod with ephemeralContainers is created without them first, then they are
 #   added the way `kubectl debug` does, and the expectation applies to that

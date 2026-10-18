@@ -44,18 +44,23 @@ envtest_sha512 = {
 setup = [
     repo / 'infrastructure/controllers/nvidia-device-plugin/runtime-class.yaml',
     Path(__file__).parent / 'setup.yaml',
+    repo / 'apps/ai/dungeon-scriber/namespace.yaml',
+    repo / 'apps/ai/dungeon-scriber/service-account.yaml',
 ]
 # Kustomizations or files holding the policies under test.
 policies = [
     repo / 'infrastructure/config/gpu-admission',
+    repo / 'apps/ai/dungeon-scriber/gpu-admission-policy.yaml',
 ]
 # Pod fixtures; the header of cases.yaml explains the annotations.
 cases = [
     Path(__file__).parent / 'cases.yaml',
+    repo / 'apps/ai/dungeon-scriber/tests/gpu-admission.yaml',
 ]
 
 expect_annotation = 'test.gpu-admission/expect'
 describe_annotation = 'test.gpu-admission/describe'
+without_annotation = 'test.gpu-admission/without'
 
 
 def envtest_assets():
@@ -256,9 +261,30 @@ def outcome(pod, result):
         return 'expected allow, got:\n' + result.stderr.strip()
     if result.returncode == 0:
         return f'expected a denial from {expect}, but it was allowed'
+    if expect == 'pod-security' and 'violates PodSecurity' in result.stderr:
+        return None
     if f"ValidatingAdmissionPolicy '{expect}'" in result.stderr:
         return None
     return f'expected a denial from {expect}, got:\n' + result.stderr.strip()
+
+
+def wait_until_effective(cluster, pods):
+    """Retry a denial case until the current policy set is in effect.
+
+    Policy and binding changes take a moment to reach the admission plugin.
+    No controller manager runs here, so policy status (type-checking) is never
+    filled in; a policy that fails to evaluate is ignored (failurePolicy:
+    Ignore), which the denial cases catch.
+    """
+    sentinel = next((
+        p for p in pods if 'ephemeralContainers' not in p['spec']
+        and p['metadata']['annotations'][expect_annotation] != 'allow'), None)
+    if sentinel is None:
+        return
+    deadline = time.monotonic() + 30
+    while outcome(sentinel, submit(cluster, json.loads(json.dumps(
+            sentinel)))) and time.monotonic() < deadline:
+        time.sleep(0.5)
 
 
 def main():
@@ -269,8 +295,9 @@ def main():
         cluster.start()
         for path in setup:
             apply(cluster, manifests(cluster, path))
-        apply(cluster, [o for path in policies
-                        for o in manifests(cluster, path)])
+        policy_objects = [o for path in policies
+                          for o in manifests(cluster, path)]
+        apply(cluster, policy_objects)
 
         pods = [o for path in cases for o in manifests(cluster, path)]
         namespaces = sorted({p['metadata'].get('namespace', 'default')
@@ -283,30 +310,39 @@ def main():
             cluster.kubectl('create', 'serviceaccount', 'default',
                             '-n', namespace)
 
-        # Policies take a moment to reach the admission plugin; retry the
-        #   first denial until it lands. No controller manager runs here, so
-        #   policy status (type-checking) is never filled in. A policy that
-        #   fails to evaluate is ignored (failurePolicy: Ignore), which the
-        #   denial cases catch.
-        first_denial = next(
-            p for p in pods if 'ephemeralContainers' not in p['spec']
-            and p['metadata']['annotations'][expect_annotation] != 'allow')
-        deadline = time.monotonic() + 30
-        while outcome(first_denial, submit(cluster, json.loads(
-                json.dumps(first_denial)))) and time.monotonic() < deadline:
-            time.sleep(0.5)
+        # Group the cases by the policies they switch off; the API server
+        #   reports only the first denial, so a policy that repeats another's
+        #   checks can only be observed on its own.
+        groups = {}
+        for pod in pods:
+            without = pod['metadata']['annotations'].get(without_annotation, '')
+            key = tuple(sorted(n.strip() for n in without.split(',') if n))
+            groups.setdefault(key, []).append(pod)
 
         failures = 0
-        for pod in pods:
-            meta = pod['metadata']
-            label = f'{meta.get("namespace", "default")}/{meta["name"]}'
-            reason = outcome(pod, submit(cluster, pod))
-            if reason:
-                failures += 1
-                print(f'FAIL {label}: {meta["annotations"][describe_annotation]}')
-                print('     ' + reason.replace('\n', '\n     '))
-            else:
-                print(f'ok   {label}')
+        for without, group in sorted(groups.items()):
+            bindings = [o for o in policy_objects
+                        if o['kind'] == 'ValidatingAdmissionPolicyBinding'
+                        and o['spec']['policyName'] in without]
+            for binding in bindings:
+                cluster.must('delete', 'validatingadmissionpolicybinding',
+                             binding['metadata']['name'])
+            if without:
+                print(f'\nWithout {", ".join(without)}:')
+            wait_until_effective(cluster, group)
+            for pod in group:
+                meta = pod['metadata']
+                label = f'{meta.get("namespace", "default")}/{meta["name"]}'
+                reason = outcome(pod, submit(cluster, pod))
+                if reason:
+                    failures += 1
+                    print(f'FAIL {label}: '
+                          + meta['annotations'][describe_annotation])
+                    print('     ' + reason.replace('\n', '\n     '))
+                else:
+                    print(f'ok   {label}')
+            if bindings:
+                apply(cluster, bindings)
         print(f'\n{len(pods) - failures} passed, {failures} failed')
         return 1 if failures else 0
     finally:

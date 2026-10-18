@@ -1,0 +1,338 @@
+# Test pods for infrastructure/config/gpu-admission/tests/run.py; the header of
+#   that directory's cases.yaml explains the annotations. Never applied to the
+#   cluster: this directory's kustomization doesn't list tests/.
+#
+# The namespace's real Pod Security labels apply, so every pod here meets the
+#   restricted standard unless the case is about Pod Security.
+#
+# dungeon-scriber-rtx3090 repeats rtx3090-pinned's checks so they fail closed
+#   here. The API server reports only the first denial, so the cases for those
+#   repeated checks switch rtx3090-pinned off to test the namespace policy on
+#   its own.
+
+# The example Job's pod from README.md.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: readme-example
+  namespace: dungeon-scriber
+  annotations:
+    test.gpu-admission/expect: allow
+    test.gpu-admission/describe: The README's example Job is admitted.
+spec:
+  serviceAccountName: jobs
+  runtimeClassName: nvidia
+  restartPolicy: Never
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000
+    fsGroupChangePolicy: OnRootMismatch
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+    - name: train
+      image: docker.io/vllm/vllm-openai:latest
+      command: [/work/venv/bin/python, /work/src/train.py]
+      env:
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: GPU-6dda6c74-00cd-a40f-442e-e952e7c54db1
+        - name: NVIDIA_DRIVER_CAPABILITIES
+          value: compute,utility
+        - name: HOME
+          value: /work/home
+        - name: HF_HOME
+          value: /models/huggingface
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: [ALL]
+      resources:
+        requests:
+          cpu: '8'
+          memory: 24Gi
+        limits:
+          cpu: '16'
+          memory: 32Gi
+          devic.es/rtx3090: '1'
+      volumeMounts:
+        - name: models
+          mountPath: /models
+        - name: work
+          mountPath: /work
+        - name: shm
+          mountPath: /dev/shm
+  volumes:
+    - name: models
+      persistentVolumeClaim:
+        claimName: models
+    - name: work
+      persistentVolumeClaim:
+        claimName: work
+    - name: shm
+      emptyDir:
+        medium: Memory
+        sizeLimit: 8Gi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cpu-helper
+  namespace: dungeon-scriber
+  annotations:
+    test.gpu-admission/expect: allow
+    test.gpu-admission/describe: A CPU-only pod on the default runtime needs no GPU settings.
+spec:
+  serviceAccountName: jobs
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    seccompProfile: { type: RuntimeDefault }
+  containers:
+    - name: prepare
+      image: docker.io/library/python:3.13
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities: { drop: [ALL] }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: runs-as-root
+  namespace: dungeon-scriber
+  annotations:
+    test.gpu-admission/expect: pod-security
+    test.gpu-admission/describe: The namespace enforces the restricted Pod Security Standard.
+spec:
+  serviceAccountName: jobs
+  containers:
+    - name: prepare
+      image: docker.io/library/python:3.13
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nvidia-runtime-without-rtx3090
+  namespace: dungeon-scriber
+  annotations:
+    test.gpu-admission/expect: dungeon-scriber-rtx3090
+    test.gpu-admission/describe: The nvidia runtime without the 3090 request would see the image's `all`.
+spec:
+  serviceAccountName: jobs
+  runtimeClassName: nvidia
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    seccompProfile: { type: RuntimeDefault }
+  containers:
+    - name: train
+      image: docker.io/vllm/vllm-openai:latest
+      env:
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: GPU-6dda6c74-00cd-a40f-442e-e952e7c54db1
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities: { drop: [ALL] }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rtx3090-default-runtime
+  namespace: dungeon-scriber
+  annotations:
+    test.gpu-admission/expect: dungeon-scriber-rtx3090
+    test.gpu-admission/without: rtx3090-pinned
+    test.gpu-admission/describe: Requesting the 3090 without the nvidia runtime would hold the card and get no GPU.
+spec:
+  serviceAccountName: jobs
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    seccompProfile: { type: RuntimeDefault }
+  containers:
+    - name: train
+      image: docker.io/vllm/vllm-openai:latest
+      env:
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: GPU-6dda6c74-00cd-a40f-442e-e952e7c54db1
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities: { drop: [ALL] }
+      resources:
+        limits: { devic.es/rtx3090: '1' }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: other-runtime
+  namespace: dungeon-scriber
+  annotations:
+    test.gpu-admission/expect: dungeon-scriber-rtx3090
+    test.gpu-admission/describe: Only the default and nvidia RuntimeClasses are allowed.
+spec:
+  serviceAccountName: jobs
+  runtimeClassName: other
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    seccompProfile: { type: RuntimeDefault }
+  containers:
+    - name: prepare
+      image: docker.io/library/python:3.13
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities: { drop: [ALL] }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cdi-annotation
+  namespace: dungeon-scriber
+  annotations:
+    test.gpu-admission/expect: dungeon-scriber-rtx3090
+    test.gpu-admission/describe: CDI annotations are a second way to attach a GPU, so they're rejected.
+    cdi.k8s.io/gpu: nvidia.com/gpu=all
+spec:
+  serviceAccountName: jobs
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    seccompProfile: { type: RuntimeDefault }
+  containers:
+    - name: prepare
+      image: docker.io/library/python:3.13
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities: { drop: [ALL] }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rtx3090-sets-all
+  namespace: dungeon-scriber
+  annotations:
+    test.gpu-admission/expect: dungeon-scriber-rtx3090
+    test.gpu-admission/without: rtx3090-pinned
+    test.gpu-admission/describe: A job can't widen its view to `all`.
+spec:
+  serviceAccountName: jobs
+  runtimeClassName: nvidia
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    seccompProfile: { type: RuntimeDefault }
+  containers:
+    - name: train
+      image: docker.io/vllm/vllm-openai:latest
+      env:
+        - { name: NVIDIA_VISIBLE_DEVICES, value: all }
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities: { drop: [ALL] }
+      resources:
+        limits: { devic.es/rtx3090: '1' }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rtx3090-init-container-unpinned
+  namespace: dungeon-scriber
+  annotations:
+    test.gpu-admission/expect: dungeon-scriber-rtx3090
+    test.gpu-admission/without: rtx3090-pinned
+    test.gpu-admission/describe: Init containers must pin the card as well.
+spec:
+  serviceAccountName: jobs
+  runtimeClassName: nvidia
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    seccompProfile: { type: RuntimeDefault }
+  initContainers:
+    - name: download
+      image: docker.io/library/python:3.13
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities: { drop: [ALL] }
+  containers:
+    - name: train
+      image: docker.io/vllm/vllm-openai:latest
+      env:
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: GPU-6dda6c74-00cd-a40f-442e-e952e7c54db1
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities: { drop: [ALL] }
+      resources:
+        limits: { devic.es/rtx3090: '1' }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rtx3090-debug-container-unpinned
+  namespace: dungeon-scriber
+  annotations:
+    test.gpu-admission/expect: dungeon-scriber-rtx3090
+    test.gpu-admission/without: rtx3090-pinned
+    test.gpu-admission/describe: A debug container in a job must pin the card too.
+spec:
+  serviceAccountName: jobs
+  runtimeClassName: nvidia
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    seccompProfile: { type: RuntimeDefault }
+  containers:
+    - name: train
+      image: docker.io/vllm/vllm-openai:latest
+      env:
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: GPU-6dda6c74-00cd-a40f-442e-e952e7c54db1
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities: { drop: [ALL] }
+      resources:
+        limits: { devic.es/rtx3090: '1' }
+  ephemeralContainers:
+    - name: debug
+      image: docker.io/library/busybox:1.37
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities: { drop: [ALL] }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rtx3090-debug-container-pinned
+  namespace: dungeon-scriber
+  annotations:
+    test.gpu-admission/expect: allow
+    test.gpu-admission/describe: A debug container that pins the 3090 is fine.
+spec:
+  serviceAccountName: jobs
+  runtimeClassName: nvidia
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    seccompProfile: { type: RuntimeDefault }
+  containers:
+    - name: train
+      image: docker.io/vllm/vllm-openai:latest
+      env:
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: GPU-6dda6c74-00cd-a40f-442e-e952e7c54db1
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities: { drop: [ALL] }
+      resources:
+        limits: { devic.es/rtx3090: '1' }
+  ephemeralContainers:
+    - name: debug
+      image: docker.io/library/busybox:1.37
+      env:
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: GPU-6dda6c74-00cd-a40f-442e-e952e7c54db1
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities: { drop: [ALL] }
