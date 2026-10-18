@@ -1,0 +1,60 @@
+# In every namespace, pods holding the devic.es/rtx3090 token must pin the RTX
+#   3090 by UUID in each container; the token itself attaches no GPU, and a
+#   missing value falls back to the image default (`all`).
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: rtx3090-pinned
+spec:
+  # Matches pods cluster-wide; fail open on evaluation errors rather than
+  #   blocking every pod.
+  failurePolicy: Ignore
+  matchConstraints:
+    resourceRules:
+      - apiGroups: ['']
+        apiVersions: [v1]
+        operations: [CREATE, UPDATE]
+        resources: [pods, pods/ephemeralcontainers]
+  matchConditions:
+    - name: requests-rtx3090
+      expression: |-
+        (object.spec.containers +
+          (has(object.spec.initContainers) ? object.spec.initContainers : []))
+        .exists(c,
+          has(c.resources.limits) && 'devic.es/rtx3090' in c.resources.limits)
+  variables:
+    - name: rtx3090
+      expression: "'GPU-6dda6c74-00cd-a40f-442e-e952e7c54db1'"
+    - name: containers
+      expression: |-
+        object.spec.containers +
+        (has(object.spec.initContainers) ? object.spec.initContainers : [])
+    # The env list of every container, including ephemeral debug containers.
+    - name: envs
+      expression: |-
+        variables.containers.map(c, has(c.env) ? c.env : []) +
+        (has(object.spec.ephemeralContainers)
+          ? object.spec.ephemeralContainers.map(c, has(c.env) ? c.env : [])
+          : [])
+  validations:
+    - expression: |-
+        variables.envs.all(env,
+          env.exists(e, e.name == 'NVIDIA_VISIBLE_DEVICES') &&
+          env.all(e, e.name != 'NVIDIA_VISIBLE_DEVICES' ||
+            (has(e.value) && e.value == variables.rtx3090)))
+      message: >-
+        Pods requesting devic.es/rtx3090 must set NVIDIA_VISIBLE_DEVICES to
+        GPU-6dda6c74-00cd-a40f-442e-e952e7c54db1 in every container.
+    # That value would override the RTX 3060s the device plugin allocated.
+    - expression: |-
+        !variables.containers.exists(c,
+          has(c.resources.limits) && 'nvidia.com/gpu' in c.resources.limits)
+      message: Pods requesting devic.es/rtx3090 cannot also request nvidia.com/gpu.
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: rtx3090-pinned
+spec:
+  policyName: rtx3090-pinned
+  validationActions: [Deny]
