@@ -7,7 +7,7 @@ spec:
   provider:
     name: github
   # No discovery filters: the GitHub App installation controls repository scope.
-  image: ghcr.io/renovatebot/renovate:44.161.2@sha256:30cb7c1222bfd2f75d883ef81b28a71bb9730c5e71cefbd852c0c79eb7f7e00f
+  image: ghcr.io/renovatebot/renovate:44.171.1@sha256:6fffb26e606488bf674f2d9400fc3fc6b2a0243a0c22a4a4d22e422ee44934c5
   parallelism: 2
   githubAppReference:
     secretName: github-app-credentials
