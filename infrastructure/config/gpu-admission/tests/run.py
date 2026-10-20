@@ -11,7 +11,7 @@ when the run ends.
 The first run downloads the envtest binaries (about 100 MB) into
 ~/.cache/doa-cluster-flux/envtest and checks their SHA-512. Set
 KUBEBUILDER_ASSETS to a directory holding etcd, kube-apiserver and kubectl to
-use your own instead. See docs/gpus.md for what the policies do.
+use your own instead.
 """
 
 import hashlib

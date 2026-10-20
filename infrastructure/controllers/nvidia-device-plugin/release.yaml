@@ -27,8 +27,8 @@ spec:
     deviceListStrategy: envvar
     # The plugin only sees the GPUs listed in the patch below, and NVML numbers
     #   them from 0 inside its container, so indexes would name the wrong host
-    #   GPUs. UUIDs need kings-canyon's CDI spec to include UUID device names;
-    #   see docs/gpus.md.
+    #   GPUs. UUIDs need kings-canyon's CDI spec to include UUID device names
+    #   (nix-config hosts/nixos/kings-canyon/k3s-gpu.nix).
     deviceIDStrategy: uuid
     migStrategy: none
     failOnInitError: true

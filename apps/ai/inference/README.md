@@ -10,7 +10,7 @@ Configure callers with a 30-second timeout and disable automatic retries when a 
 
 ## GPUs
 
-kings-canyon has two RTX 3060s and one RTX 3090. [docs/gpus.md](../../../docs/gpus.md) explains how they are split and why.
+kings-canyon has two RTX 3060s and one RTX 3090. The 3060s are `nvidia.com/gpu`; the 3090 is `devic.es/rtx3090`.
 
 The `rtx3060` profile requests `nvidia.com/gpu`, which covers only the two RTX 3060s, so `rtx3060:2` always gets both of them. Models using this profile get their GPUs from the device plugin and must not set `NVIDIA_VISIBLE_DEVICES` or use `envFrom`. An admission policy rejects both, because either one could override the cards the device plugin allocated.
 
