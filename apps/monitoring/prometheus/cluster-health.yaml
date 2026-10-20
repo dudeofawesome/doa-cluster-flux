@@ -1,0 +1,30 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cluster-health
+  labels:
+    release: monitoring
+spec:
+  groups:
+    - name: cluster-health
+      interval: 30s
+      rules:
+        # A missing or stale Watchdog must not look like a healthy cluster.
+        # Kuma separately checks this recording rule's own sample freshness.
+        - record: cluster:health:ok
+          expr: |
+            (
+              (count(ALERTS{
+                alertstate="firing",
+                severity="critical",
+                alertname!~"Watchdog|InfoInhibitor"
+              }) or vector(0)) == bool 0
+            )
+            *
+            (
+              (count(
+                ALERTS{alertname="Watchdog", alertstate="firing"}
+                and
+                (time() - timestamp(ALERTS{alertname="Watchdog", alertstate="firing"}) < 120)
+              ) or vector(0)) > bool 0
+            )
