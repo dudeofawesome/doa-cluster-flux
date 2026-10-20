@@ -1,7 +1,7 @@
 # The ResourceQuota counts GPU requests, but a container actually sees the GPUs
 #   named by NVIDIA_VISIBLE_DEVICES (CUDA images default it to `all`) or by
 #   CDI annotations. In this namespace the only GPU is the RTX 3090, pinned by
-#   UUID. See docs/gpus.md.
+#   UUID.
 #
 # The cluster-wide rtx3090-pinned policy already checks the pin, but it fails
 #   open (failurePolicy: Ignore) so an error can't block every pod. This policy

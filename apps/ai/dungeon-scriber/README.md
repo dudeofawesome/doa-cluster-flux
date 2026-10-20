@@ -1,6 +1,6 @@
 # Dungeon Scriber GPU jobs
 
-Dungeon Scriber's batch jobs (LoRA fine-tuning, transcription and evaluation) run in the `dungeon-scriber` namespace, on kings-canyon's RTX 3090. The two RTX 3060s belong to KubeAI. [docs/gpus.md](../../../docs/gpus.md) explains how the cards are split and why a pod has to name its GPU explicitly.
+Dungeon Scriber's batch jobs (LoRA fine-tuning, transcription and evaluation) run in the `dungeon-scriber` namespace, on kings-canyon's RTX 3090. The two RTX 3060s belong to KubeAI.
 
 The RTX 3090 is shared, first come first served, with KubeAI models that use the `rtx3090` profile. Whichever pod is scheduled first holds the card until it exits, and the other waits in Pending; nothing preempts. An idle model releases the card after about five minutes. A job holds it until the job finishes, so long jobs delay models that want the 3090.
 
@@ -136,7 +136,7 @@ Jobs use public base images pinned by digest. The job's code and a pinned virtua
 
 ## Testing
 
-The GPU admission tests ([docs/gpus.md](../../../docs/gpus.md#testing-the-admission-policies)) include this namespace's policy and Pod Security settings. [`tests/gpu-admission.yaml`](tests/gpu-admission.yaml) holds its cases, including the example Job above:
+The GPU admission tests include this namespace's policy and Pod Security settings. [`tests/gpu-admission.yaml`](tests/gpu-admission.yaml) holds its cases, including the example Job above:
 
 ```sh
 python3 infrastructure/config/gpu-admission/tests/run.py
