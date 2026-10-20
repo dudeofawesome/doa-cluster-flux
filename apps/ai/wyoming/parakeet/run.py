@@ -27,7 +27,8 @@ async def serve(model_path):
 def main():
     from wyoming_parakeet.download import download_model
 
-    parser = argparse.ArgumentParser(add_help=False)
+    # Leave upstream options such as --mode intact; it prefixes --model.
+    parser = argparse.ArgumentParser(add_help=False, allow_abbrev=False)
     parser.add_argument("--model", required=True)
     parser.add_argument("--data-dir", required=True)
     args, _ = parser.parse_known_args()

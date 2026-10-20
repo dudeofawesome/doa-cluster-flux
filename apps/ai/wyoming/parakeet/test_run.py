@@ -50,21 +50,24 @@ class NativeLibrary:
 
 class StartupTests(unittest.TestCase):
     def test_download_once_and_reuse_cached_model(self):
-        from wyoming_parakeet import download
+        from wyoming_parakeet.download import MODEL_REPO
 
         with tempfile.TemporaryDirectory() as directory:
             model = Path(directory) / "realtime_eou_120m-v1-f16.gguf"
             arguments = [
                 "run.py", "--model", model.stem, "--data-dir", directory,
+                "--mode", "streaming",
                 "--device", "cpu", "--uri", "tcp://0.0.0.0:10300",
             ]
 
-            def fetch(name, destination):
-                self.assertEqual(name, model.stem)
-                self.assertEqual(destination, directory)
+            def fetch(*, repo_id, filename, local_dir, token):
+                self.assertEqual(repo_id, MODEL_REPO)
+                self.assertEqual(filename, model.name)
+                self.assertEqual(local_dir, Path(directory))
+                self.assertIsNone(token)
                 model.write_bytes(b"downloaded model")
 
-            with patch.object(download, "download_model", side_effect=fetch) as fetch_model, patch.object(
+            with patch("huggingface_hub.hf_hub_download", side_effect=fetch) as fetch_model, patch.object(
                 run, "serve", new_callable=AsyncMock
             ) as serve, patch.object(run.sys, "argv", arguments):
                 run.main()
