@@ -4,7 +4,7 @@ kind: Kustomization
 # Renovate needs Sequoia at startup. Its separate Flux Kustomization waits for
 # apps-base; including it here would create a bootstrap dependency cycle.
 # Uptime Kuma's operator also has a separate Flux Kustomization: it needs the
-# existing app and credentials, and is staged pending upstream v2 fixes.
+# existing app and credentials.
 resources:
   - namespace.yaml
   - cloudnative-pg.yaml

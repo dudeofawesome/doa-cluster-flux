@@ -4,8 +4,6 @@ metadata:
   name: uptime-kuma-operator
   namespace: flux-system
 spec:
-  # Prepared only: supply credentials and resolve the upstream v2 issues first.
-  suspend: true
   dependsOn:
     - name: sources
     - name: apps-monitoring

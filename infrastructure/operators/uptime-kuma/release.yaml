@@ -5,92 +5,90 @@ metadata:
 spec:
   interval: 30m
   timeout: 5m
+  install:
+    crds: CreateReplace
+    strategy:
+      name: RetryOnFailure
+      retryInterval: 5m
+  upgrade:
+    crds: CreateReplace
+    strategy:
+      name: RetryOnFailure
+      retryInterval: 5m
   chart:
     spec:
       chart: uptime-kuma-operator
-      version: '0.2.0'
+      version: '0.5.0'
       sourceRef:
         kind: HelmRepository
         name: uptime-kuma-operator
         namespace: flux-system
       interval: 12h
   values:
-    fullnameOverride: uptime-kuma-operator
     replicaCount: 1
-    kuma_load_all_ingress: false
-    uptimekuma:
-      enabled: false
-      host: http://uptime-kuma.uptime-kuma.svc.cluster.local
-      # Disable the chart's example password and generated credential Secret.
-      password: ''
-      password_secret_key: kuma-credentials
-      # Replaced with a secretKeyRef below; never store login details in values.
-      username: ''
     image:
-      repository: ghcr.io/jasonrve/uptime-kuma-operator
-      tag: '0.2.0@sha256:bee89ea53976f2487594cfdcf8ea56fda519a82fec7199790b7be3fc8d550b2f'
+      repository: ghcr.io/roxxas96/uptime-kuma-operator
+      tag: '0.5.0@sha256:bbc2ecbe1e35a990c3d8c26652333d69ab83d1cf50441f1663a27686154dc26b'
       pullPolicy: IfNotPresent
-    # The published 0.2.0 image is linux/amd64 only.
+    # The published release contains a linux/amd64 image.
     nodeSelector:
       kubernetes.io/arch: amd64
-  postRenderers:
-    - kustomize:
-        patches:
-          - target:
-              group: apps
-              version: v1
-              kind: Deployment
-              name: uptime-kuma-operator
-            patch: |
-              apiVersion: apps/v1
-              kind: Deployment
-              metadata:
-                name: uptime-kuma-operator
-              spec:
-                revisionHistoryLimit: 3
-                strategy:
-                  type: Recreate
-                template:
-                  spec:
-                    securityContext:
-                      runAsNonRoot: true
-                      runAsUser: 1654
-                      runAsGroup: 1654
-                      fsGroup: 1654
-                      seccompProfile:
-                        type: RuntimeDefault
-                    containers:
-                      - name: uptime-kuma-operator
-                        env:
-                          # Upstream hard-codes uptimekuma_password; our Secret uses password.
-                          - name: kuma_password
-                            valueFrom:
-                              secretKeyRef:
-                                name: kuma-credentials
-                                key: password
-                          - name: kuma_username
-                            value: null
-                            valueFrom:
-                              secretKeyRef:
-                                name: kuma-credentials
-                                key: username
-                          - name: DOTNET_EnableDiagnostics
-                            value: '0'
-                        resources:
-                          requests:
-                            cpu: 25m
-                            memory: 64Mi
-                          limits:
-                            memory: 256Mi
-                        securityContext:
-                          allowPrivilegeEscalation: false
-                          readOnlyRootFilesystem: true
-                          capabilities:
-                            drop: [ALL]
-                        volumeMounts:
-                          - name: tmp
-                            mountPath: /tmp
-                    volumes:
-                      - name: tmp
-                        emptyDir:
-                          sizeLimit: 64Mi
+    kuma:
+      url: http://uptime-kuma.uptime-kuma.svc.cluster.local
+      existingSecret: kuma-credentials
+    # Namespace scope and opt-in are independent. Do not import unannotated routes.
+    watchAll: false
+    watchNamespaces:
+      - uptime-kuma
+      - grafana
+    optInByDefault: false
+    driftCheckInterval: 30s
+    logLevel: info
+    podSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 65532
+      runAsGroup: 65532
+      seccompProfile:
+        type: RuntimeDefault
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop: [ALL]
+    resources:
+      requests:
+        cpu: 25m
+        memory: 64Mi
+      limits:
+        memory: 256Mi
+    service:
+      enabled: true
+    serviceMonitor:
+      enabled: true
+      labels:
+        release: monitoring
+    networkPolicy:
+      enabled: true
+      extraEgress:
+        - to:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: uptime-kuma
+              podSelector:
+                matchLabels:
+                  app: uptime-kuma
+                  component: app
+          ports:
+            - protocol: TCP
+              port: 3001
+      extraIngress:
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: monitoring
+              podSelector:
+                matchLabels:
+                  app.kubernetes.io/name: prometheus
+          ports:
+            - protocol: TCP
+              port: 8080

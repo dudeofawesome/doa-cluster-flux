@@ -4,6 +4,6 @@ metadata:
   name: uptime-kuma-operator
   namespace: flux-system
 spec:
+  type: oci
   interval: 24h
-  # The README's helm-charts URL is stale; releases are published here.
-  url: https://jasonrve.github.io/uptime-kuma-operator/
+  url: oci://ghcr.io/roxxas96/uptime-kuma-operator/charts
