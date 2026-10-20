@@ -422,27 +422,6 @@ spec:
 apiVersion: uptime-kuma.io/v1alpha1
 kind: Monitor
 metadata:
-  name: uptime-kuma
-spec:
-  name: uptime-kuma
-  type: HTTP
-  interval: 60
-  retryInterval: 60
-  retries: 2
-  resendInterval: 0
-  notifications: []
-  http:
-    url: https://status.orleans.io/
-    method: GET
-    timeout: 10
-    # Check the ingress response without following SSO to Keycloak.
-    maxRedirects: 0
-    acceptedStatusCodes: ['200-399']
-    ignoreTLS: false
----
-apiVersion: uptime-kuma.io/v1alpha1
-kind: Monitor
-metadata:
   name: zigbee2mqtt
 spec:
   name: zigbee2mqtt
