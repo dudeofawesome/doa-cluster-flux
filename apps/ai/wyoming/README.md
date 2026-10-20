@@ -1,19 +1,21 @@
 # Wyoming
 
-[Wyoming Piper](https://github.com/OHF-Voice/wyoming-piper/) provides text-to-speech and [Wyoming Faster Whisper](https://github.com/OHF-Voice/wyoming-faster-whisper/) provides speech-to-text for Home Assistant over the Wyoming TCP protocol.
+[Wyoming Piper](https://github.com/OHF-Voice/wyoming-piper/) provides text-to-speech. [Wyoming Parakeet](https://github.com/albe873/wyoming-parakeet) provides streaming speech recognition using Parakeet Realtime EOU 120M on CPU; [Wyoming Faster Whisper](https://github.com/OHF-Voice/wyoming-faster-whisper/) remains available for comparison. These services use the Wyoming TCP protocol directly with Home Assistant.
 
 | Function       | Service host                        | TCP port | Model               |
 | -------------- | ----------------------------------- | -------- | ------------------- |
 | Text-to-speech | `piper.wyoming.svc.cluster.local`   | 10200    | `en_US-lessac-high` |
+| Streaming speech-to-text | `parakeet.wyoming.svc.cluster.local` | 10300 | `realtime_eou_120m-v1-f16` |
 | Speech-to-text | `whisper.wyoming.svc.cluster.local` | 10300    | `base.en`           |
 
 ## Home Assistant setup after deployment
 
 1. Open **Settings → Devices & services → Add integration → Wyoming Protocol**.
 2. Enter host `piper.wyoming.svc.cluster.local` and port `10200`.
-3. Add another **Wyoming Protocol** integration with host `whisper.wyoming.svc.cluster.local` and port `10300`.
-4. In the Assist voice assistant settings, select Piper for text-to-speech and choose `en_US-lessac-high`, and Whisper for speech-to-text.
-5. Test a spoken command; if accuracy or latency is unsuitable, tune the Whisper model and resources after measuring actual usage.
+3. Add another **Wyoming Protocol** integration with host `parakeet.wyoming.svc.cluster.local` and port `10300`.
+4. In **Settings → Voice assistants**, edit the assistant used by your microphone/satellite. Select the Wyoming Parakeet provider for speech-to-text and English as its language. Select Piper for text-to-speech and choose `en_US-lessac-high`.
+5. The existing OpenAI Whisper Cloud integration can remain installed, but select the Wyoming provider in this assistant to use incremental audio processing. Other assistants can continue using the shared API.
+6. Test several actual voice commands, including entity names, pauses, and background noise. Compare accuracy and time from the end of speech to the final transcript against Whisper using the same microphone. Select the old provider again to roll back.
 
 ## Piper performance
 

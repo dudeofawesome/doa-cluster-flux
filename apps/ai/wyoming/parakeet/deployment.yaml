@@ -1,0 +1,115 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: parakeet
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: wyoming
+      component: parakeet
+  template:
+    metadata:
+      labels:
+        app: wyoming
+        component: parakeet
+    spec:
+      automountServiceAccountToken: false
+      # The published image is linux/amd64 only; CPU inference needs no GPU.
+      nodeSelector:
+        kubernetes.io/arch: amd64
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: parakeet
+          # Pin a dated upstream build and its inspected digest.
+          image: franc2002/wyoming-parakeet:vulkan-2026-09-09@sha256:ba3d0f51ae0e6c96b6a3828e221f55d9fa9715975e88f4dfc81d8fb52f865936
+          command: [python3, /startup/run.py]
+          args:
+            - --uri
+            - tcp://0.0.0.0:10300
+            - --data-dir
+            - /data
+            - --model
+            - realtime_eou_120m-v1-f16
+            - --mode
+            - streaming
+            - --language
+            - en
+            - --device
+            - cpu
+          env:
+            - name: PARAKEET_DEVICE
+              value: cpu
+            - name: HOME
+              value: /tmp
+            - name: HF_HOME
+              value: /data/.huggingface
+            - name: HF_HUB_DISABLE_TELEMETRY
+              value: '1'
+            - name: PYTHONDONTWRITEBYTECODE
+              value: '1'
+            - name: LD_LIBRARY_PATH
+              value: /usr/local/lib
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          ports:
+            - name: wyoming
+              containerPort: 10300
+              protocol: TCP
+          resources:
+            requests:
+              cpu: '2'
+              memory: 1Gi
+            limits:
+              cpu: '2'
+              memory: 4Gi
+          # The listener opens after downloading and loading weights.
+          startupProbe:
+            tcpSocket:
+              port: wyoming
+            timeoutSeconds: 10
+            periodSeconds: 10
+            failureThreshold: 48
+          readinessProbe:
+            tcpSocket:
+              port: wyoming
+            timeoutSeconds: 10
+            periodSeconds: 30
+            failureThreshold: 3
+          livenessProbe:
+            tcpSocket:
+              port: wyoming
+            timeoutSeconds: 10
+            periodSeconds: 30
+            failureThreshold: 6
+          volumeMounts:
+            - name: startup
+              mountPath: /startup
+              readOnly: true
+            - name: models
+              mountPath: /data
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: startup
+          configMap:
+            name: parakeet-startup
+        - name: models
+          persistentVolumeClaim:
+            claimName: parakeet-models
+        - name: tmp
+          emptyDir:
+            sizeLimit: 256Mi

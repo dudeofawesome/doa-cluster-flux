@@ -7,12 +7,18 @@ labels:
     # Preserve cross-namespace NetworkPolicy peer selectors (CoreDNS and HA).
     includeSelectors: false
 configMapGenerator:
+  - name: parakeet-startup
+    files:
+      - run.py=parakeet/run.py
   - name: piper-startup
     files:
       - run.py=piper/run.py
 resources:
   - namespace.yaml
   - network-policy.yaml
+  - parakeet/deployment.yaml
+  - parakeet/storage.yaml
+  - parakeet/service.yaml
   - piper/deployment.yaml
   - piper/storage.yaml
   - piper/service.yaml
