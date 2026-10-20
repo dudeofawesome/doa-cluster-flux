@@ -5,7 +5,7 @@ description: Set up new applications / deployment and their integrations. Use fo
 
 # Set up a cluster app
 
-Produce reviewable GitOps configuration, validate it, and document any first-login or external setup that cannot be represented in Git.
+Produce reviewable GitOps configuration, validate it, and document any first-login or external setup that cannot be represented in Git in `{app}/docs/install.md`
 
 ## Establish the application contract
 
