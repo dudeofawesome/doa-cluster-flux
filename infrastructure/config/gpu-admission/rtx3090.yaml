@@ -3,7 +3,6 @@
 #   attaches nothing. The card is attached by the nvidia RuntimeClass, from
 #   each container's NVIDIA_VISIBLE_DEVICES. Without a value, CUDA images fall
 #   back to `all` and the container would see the RTX 3060s too.
-#   See docs/gpus.md.
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingAdmissionPolicy
 metadata:

@@ -3,7 +3,7 @@
 #   after admission, and anything the pod spec sets (env or envFrom) comes later
 #   and wins, so a model could replace its allocation with a card another model
 #   holds. A pod with no GPU request would see the image default (`all`).
-#   rtx3090 models are covered by rtx3090-pinned instead. See docs/gpus.md.
+#   rtx3090 models are covered by rtx3090-pinned instead.
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingAdmissionPolicy
 metadata:
