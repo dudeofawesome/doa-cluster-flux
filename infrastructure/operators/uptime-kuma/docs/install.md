@@ -18,6 +18,10 @@ The chart source is the OCI HelmRepository in `sources/uptime-kuma-operator.yaml
 
 The operator Kustomization permits reconciliation. The separate `uptime-kuma-monitors` Kustomization remains suspended. Once the explicit monitor batch is ready, remove its `suspend: true` in Git. Grafana's annotation is in its app manifests and is independent of that monitor-batch suspension.
 
+## Adding an explicit monitor
+
+Add the Monitor to `apps/monitoring/uptime-kuma/monitors/ingresses.yaml`. The adjacent Kustomization deploys it into `uptime-kuma`. Keep these resources out of the monitored apps' Kustomizations: the separate collection preserves CRD/controller ordering and avoids a bootstrap cycle. Keeping Monitor CRs in `uptime-kuma` also avoids widening the operator's watch namespaces and Secret-read permissions for each monitored app.
+
 Preparing these files does not deploy them. Deployment requires explicit `deploy changes` authorization, and deployed resource changes must go through Git.
 
 ## Local validation

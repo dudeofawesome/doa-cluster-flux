@@ -1,0 +1,483 @@
+# Explicit opt-in monitors for Traefik IngressRoutes; Grafana uses Ingress annotations.
+apiVersion: uptime-kuma.io/v1alpha1
+kind: Monitor
+metadata:
+  name: atuin
+spec:
+  name: atuin
+  type: HTTP
+  interval: 60
+  retryInterval: 60
+  retries: 2
+  resendInterval: 0
+  notifications: []
+  http:
+    url: https://atuin.orleans.io/
+    method: GET
+    timeout: 10
+    # Check the ingress response without following SSO to Keycloak.
+    maxRedirects: 0
+    acceptedStatusCodes: ['200-399']
+    ignoreTLS: false
+---
+apiVersion: uptime-kuma.io/v1alpha1
+kind: Monitor
+metadata:
+  name: dawarich
+spec:
+  name: dawarich
+  type: HTTP
+  interval: 60
+  retryInterval: 60
+  retries: 2
+  resendInterval: 0
+  notifications: []
+  http:
+    url: https://dawarich.orleans.io/api/v1/health
+    method: GET
+    timeout: 10
+    # Check the ingress response without following SSO to Keycloak.
+    maxRedirects: 0
+    acceptedStatusCodes: ['200-399']
+    ignoreTLS: false
+---
+apiVersion: uptime-kuma.io/v1alpha1
+kind: Monitor
+metadata:
+  name: esphome
+spec:
+  name: esphome
+  type: HTTP
+  interval: 60
+  retryInterval: 60
+  retries: 2
+  resendInterval: 0
+  notifications: []
+  http:
+    url: https://esp.red.orleans.io/
+    method: GET
+    timeout: 10
+    # Check the ingress response without following SSO to Keycloak.
+    maxRedirects: 0
+    acceptedStatusCodes: ['200-399']
+    ignoreTLS: false
+---
+apiVersion: uptime-kuma.io/v1alpha1
+kind: Monitor
+metadata:
+  name: filaman
+spec:
+  name: filaman
+  type: HTTP
+  interval: 60
+  retryInterval: 60
+  retries: 2
+  resendInterval: 0
+  notifications: []
+  http:
+    url: https://filaman.orleans.io/
+    method: GET
+    timeout: 10
+    # Check the ingress response without following SSO to Keycloak.
+    maxRedirects: 0
+    acceptedStatusCodes: ['200-399']
+    ignoreTLS: false
+---
+apiVersion: uptime-kuma.io/v1alpha1
+kind: Monitor
+metadata:
+  name: forgejo
+spec:
+  name: forgejo
+  type: HTTP
+  interval: 60
+  retryInterval: 60
+  retries: 2
+  resendInterval: 0
+  notifications: []
+  http:
+    url: https://git.orleans.io/
+    method: GET
+    timeout: 10
+    # Check the ingress response without following SSO to Keycloak.
+    maxRedirects: 0
+    acceptedStatusCodes: ['200-399']
+    ignoreTLS: false
+---
+apiVersion: uptime-kuma.io/v1alpha1
+kind: Monitor
+metadata:
+  name: hermes
+spec:
+  name: hermes
+  type: HTTP
+  interval: 60
+  retryInterval: 60
+  retries: 2
+  resendInterval: 0
+  notifications: []
+  http:
+    url: https://hermes.orleans.io/
+    method: GET
+    timeout: 10
+    # Check the ingress response without following SSO to Keycloak.
+    maxRedirects: 0
+    acceptedStatusCodes: ['200-399']
+    ignoreTLS: false
+---
+apiVersion: uptime-kuma.io/v1alpha1
+kind: Monitor
+metadata:
+  name: home-assistant
+spec:
+  name: home-assistant
+  type: HTTP
+  interval: 60
+  retryInterval: 60
+  retries: 2
+  resendInterval: 0
+  notifications: []
+  http:
+    url: https://hass.red.orleans.io/
+    method: GET
+    timeout: 10
+    # Check the ingress response without following SSO to Keycloak.
+    maxRedirects: 0
+    acceptedStatusCodes: ['200-399']
+    ignoreTLS: false
+---
+apiVersion: uptime-kuma.io/v1alpha1
+kind: Monitor
+metadata:
+  name: inference
+spec:
+  name: inference
+  type: HTTP
+  interval: 60
+  retryInterval: 60
+  retries: 2
+  resendInterval: 0
+  notifications: []
+  http:
+    url: https://inference.orleans.io/api/status
+    method: GET
+    timeout: 10
+    # Check the ingress response without following SSO to Keycloak.
+    maxRedirects: 0
+    acceptedStatusCodes: ['200-399']
+    ignoreTLS: false
+---
+apiVersion: uptime-kuma.io/v1alpha1
+kind: Monitor
+metadata:
+  name: keycloak
+spec:
+  name: keycloak
+  type: HTTP
+  interval: 60
+  retryInterval: 60
+  retries: 2
+  resendInterval: 0
+  notifications: []
+  http:
+    url: https://auth.orleans.io/realms/master/.well-known/openid-configuration
+    method: GET
+    timeout: 10
+    # Check the ingress response without following SSO to Keycloak.
+    maxRedirects: 0
+    acceptedStatusCodes: ['200-399']
+    ignoreTLS: false
+---
+apiVersion: uptime-kuma.io/v1alpha1
+kind: Monitor
+metadata:
+  name: mealie
+spec:
+  name: mealie
+  type: HTTP
+  interval: 60
+  retryInterval: 60
+  retries: 2
+  resendInterval: 0
+  notifications: []
+  http:
+    url: https://recipes.orleans.io/
+    method: GET
+    timeout: 10
+    # Check the ingress response without following SSO to Keycloak.
+    maxRedirects: 0
+    acceptedStatusCodes: ['200-399']
+    ignoreTLS: false
+---
+apiVersion: uptime-kuma.io/v1alpha1
+kind: Monitor
+metadata:
+  name: music-assistant
+spec:
+  name: music-assistant
+  type: HTTP
+  interval: 60
+  retryInterval: 60
+  retries: 2
+  resendInterval: 0
+  notifications: []
+  http:
+    url: https://mass.red.orleans.io/
+    method: GET
+    timeout: 10
+    # Check the ingress response without following SSO to Keycloak.
+    maxRedirects: 0
+    acceptedStatusCodes: ['200-399']
+    ignoreTLS: false
+---
+apiVersion: uptime-kuma.io/v1alpha1
+kind: Monitor
+metadata:
+  name: ntfy
+spec:
+  name: ntfy
+  type: HTTP
+  interval: 60
+  retryInterval: 60
+  retries: 2
+  resendInterval: 0
+  notifications: []
+  http:
+    url: https://notify.orleans.io/v1/health
+    method: GET
+    timeout: 10
+    # Check the ingress response without following SSO to Keycloak.
+    maxRedirects: 0
+    acceptedStatusCodes: ['200-399']
+    ignoreTLS: false
+---
+apiVersion: uptime-kuma.io/v1alpha1
+kind: Monitor
+metadata:
+  name: renovate
+spec:
+  name: renovate
+  type: HTTP
+  interval: 60
+  retryInterval: 60
+  retries: 2
+  resendInterval: 0
+  notifications: []
+  http:
+    url: https://renovate.orleans.io/
+    method: GET
+    timeout: 10
+    # Check the ingress response without following SSO to Keycloak.
+    maxRedirects: 0
+    acceptedStatusCodes: ['200-399']
+    ignoreTLS: false
+---
+apiVersion: uptime-kuma.io/v1alpha1
+kind: Monitor
+metadata:
+  name: scrutiny
+spec:
+  name: scrutiny
+  type: HTTP
+  interval: 60
+  retryInterval: 60
+  retries: 2
+  resendInterval: 0
+  notifications: []
+  http:
+    url: https://scrutiny.orleans.io/
+    method: GET
+    timeout: 10
+    # Check the ingress response without following SSO to Keycloak.
+    maxRedirects: 0
+    acceptedStatusCodes: ['200-399']
+    ignoreTLS: false
+---
+apiVersion: uptime-kuma.io/v1alpha1
+kind: Monitor
+metadata:
+  name: scrutiny-api
+spec:
+  name: scrutiny-api
+  type: HTTP
+  interval: 60
+  retryInterval: 60
+  retries: 2
+  resendInterval: 0
+  notifications: []
+  http:
+    url: https://scrutiny-api.orleans.io/api/health
+    method: GET
+    timeout: 10
+    # Check the ingress response without following SSO to Keycloak.
+    maxRedirects: 0
+    acceptedStatusCodes: ['401']
+    ignoreTLS: false
+---
+apiVersion: uptime-kuma.io/v1alpha1
+kind: Monitor
+metadata:
+  name: scrutiny-db
+spec:
+  name: scrutiny-db
+  type: HTTP
+  interval: 60
+  retryInterval: 60
+  retries: 2
+  resendInterval: 0
+  notifications: []
+  http:
+    url: https://scrutiny-db.orleans.io/health
+    method: GET
+    timeout: 10
+    # Check the ingress response without following SSO to Keycloak.
+    maxRedirects: 0
+    acceptedStatusCodes: ['200-399']
+    ignoreTLS: false
+---
+apiVersion: uptime-kuma.io/v1alpha1
+kind: Monitor
+metadata:
+  name: sharetab
+spec:
+  name: sharetab
+  type: HTTP
+  interval: 60
+  retryInterval: 60
+  retries: 2
+  resendInterval: 0
+  notifications: []
+  http:
+    url: https://sharetab.orleans.io/
+    method: GET
+    timeout: 10
+    # Check the ingress response without following SSO to Keycloak.
+    maxRedirects: 0
+    acceptedStatusCodes: ['200-399']
+    ignoreTLS: false
+---
+apiVersion: uptime-kuma.io/v1alpha1
+kind: Monitor
+metadata:
+  name: teslamate
+spec:
+  name: teslamate
+  type: HTTP
+  interval: 60
+  retryInterval: 60
+  retries: 2
+  resendInterval: 0
+  notifications: []
+  http:
+    url: https://teslamate.red.orleans.io/
+    method: GET
+    timeout: 10
+    # Check the ingress response without following SSO to Keycloak.
+    maxRedirects: 0
+    acceptedStatusCodes: ['200-399']
+    ignoreTLS: false
+---
+apiVersion: uptime-kuma.io/v1alpha1
+kind: Monitor
+metadata:
+  name: traefik
+spec:
+  name: traefik
+  type: HTTP
+  interval: 60
+  retryInterval: 60
+  retries: 2
+  resendInterval: 0
+  notifications: []
+  http:
+    url: https://traefik.orleans.io/dashboard/
+    method: GET
+    timeout: 10
+    # Check the ingress response without following SSO to Keycloak.
+    maxRedirects: 0
+    acceptedStatusCodes: ['200-399']
+    ignoreTLS: false
+---
+apiVersion: uptime-kuma.io/v1alpha1
+kind: Monitor
+metadata:
+  name: trek
+spec:
+  name: trek
+  type: HTTP
+  interval: 60
+  retryInterval: 60
+  retries: 2
+  resendInterval: 0
+  notifications: []
+  http:
+    url: https://trek.orleans.io/api/health
+    method: GET
+    timeout: 10
+    # Check the ingress response without following SSO to Keycloak.
+    maxRedirects: 0
+    acceptedStatusCodes: ['200-399']
+    ignoreTLS: false
+---
+apiVersion: uptime-kuma.io/v1alpha1
+kind: Monitor
+metadata:
+  name: uptime-kuma
+spec:
+  name: uptime-kuma
+  type: HTTP
+  interval: 60
+  retryInterval: 60
+  retries: 2
+  resendInterval: 0
+  notifications: []
+  http:
+    url: https://status.orleans.io/
+    method: GET
+    timeout: 10
+    # Check the ingress response without following SSO to Keycloak.
+    maxRedirects: 0
+    acceptedStatusCodes: ['200-399']
+    ignoreTLS: false
+---
+apiVersion: uptime-kuma.io/v1alpha1
+kind: Monitor
+metadata:
+  name: zigbee2mqtt
+spec:
+  name: zigbee2mqtt
+  type: HTTP
+  interval: 60
+  retryInterval: 60
+  retries: 2
+  resendInterval: 0
+  notifications: []
+  http:
+    url: https://z2m.red.orleans.io/
+    method: GET
+    timeout: 10
+    # Check the ingress response without following SSO to Keycloak.
+    maxRedirects: 0
+    acceptedStatusCodes: ['200-399']
+    ignoreTLS: false
+---
+apiVersion: uptime-kuma.io/v1alpha1
+kind: Monitor
+metadata:
+  name: zone-configurator
+spec:
+  name: zone-configurator
+  type: HTTP
+  interval: 60
+  retryInterval: 60
+  retries: 2
+  resendInterval: 0
+  notifications: []
+  http:
+    url: https://presence.red.orleans.io/
+    method: GET
+    timeout: 10
+    # Check the ingress response without following SSO to Keycloak.
+    maxRedirects: 0
+    acceptedStatusCodes: ['200-399']
+    ignoreTLS: false

@@ -2,6 +2,14 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: grafana
+  annotations:
+    uptime-kuma.io/enabled: 'true'
+    uptime-kuma.io/name: grafana
+    uptime-kuma.io/interval: '60'
+    uptime-kuma.io/max-retries: '2'
+    http.uptime-kuma.io/timeout: '10'
+    http.uptime-kuma.io/max-redirects: '0'
+    http.uptime-kuma.io/accepted-statuscodes: '200-399'
 spec:
   ingressClassName: traefik
   rules:
