@@ -27,7 +27,7 @@ Grafana's standard Ingress uses `uptime-kuma.io/enabled: 'true'` and related mon
 
 The [monitor collection](../../../apps/monitoring/uptime-kuma/monitors/kustomization.yaml) deploys the central Monitor definitions into `uptime-kuma`, within the operator's watch scope. They are intentionally excluded from the app Kustomizations: including them there would make the app builds require the operator's CRD before the apps needed by the operator can start.
 
-The operator Flux Kustomization depends on `apps-monitoring`, which supplies the existing Kuma app and Prometheus Operator CRDs. The separate monitor Kustomization depends on the operator and remains suspended until the monitor batch is ready for activation. Keeping the operator outside the shared `infrastructure-operators` build avoids a dependency cycle through `apps-base`.
+The operator Flux Kustomization depends on `apps-monitoring`, which supplies the existing Kuma app and Prometheus Operator CRDs. The separate monitor Kustomization reconciles after the operator is ready through its `dependsOn` dependency. Keeping the operator outside the shared `infrastructure-operators` build avoids a dependency cycle through `apps-base`.
 
 The chart provides HTTP readiness/liveness probes, non-root security settings, and a single-replica Recreate strategy. Its metrics Service and ServiceMonitor integrate with Prometheus. Network policies permit the operator's Kubernetes API and DNS access, its connection to Kuma, and Prometheus scraping.
 

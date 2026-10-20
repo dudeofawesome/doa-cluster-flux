@@ -16,7 +16,7 @@ Credentials are read from environment variables at startup. After changing the e
 
 The chart source is the OCI HelmRepository in `sources/uptime-kuma-operator.yaml`. The operator Flux Kustomization in `clusters/doa-cluster/uptime-kuma.yaml` supplies its namespace, encrypted credentials and HelmRelease. Its dependency on `apps-monitoring` ensures Kuma and the Prometheus Operator CRDs are available first. The chart installs the Monitor CRD, and Flux's HelmRelease CRD policy permits schema updates during upgrades.
 
-The operator Kustomization permits reconciliation. The separate `uptime-kuma-monitors` Kustomization remains suspended. Once the explicit monitor batch is ready, remove its `suspend: true` in Git. Grafana's annotation is in its app manifests and is independent of that monitor-batch suspension.
+Both operator and monitor Kustomizations permit reconciliation. The separate `uptime-kuma-monitors` Kustomization waits for the operator through `dependsOn` before applying explicit monitors. Grafana's annotation is in its app manifests and is reconciled independently by the operator.
 
 ## Adding an explicit monitor
 

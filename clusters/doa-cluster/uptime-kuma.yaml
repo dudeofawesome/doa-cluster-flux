@@ -27,7 +27,6 @@ metadata:
   name: uptime-kuma-monitors
   namespace: flux-system
 spec:
-  suspend: true
   dependsOn:
     - name: uptime-kuma-operator
   interval: 10m
