@@ -11,7 +11,7 @@ metadata:
   namespace: games
 spec:
   dependsOn:
-    - name: apps-base
+    - name: infrastructure-config
       namespace: flux-system
   interval: 10m0s
   wait: true
