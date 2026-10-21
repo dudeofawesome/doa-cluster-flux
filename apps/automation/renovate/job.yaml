@@ -9,6 +9,18 @@ spec:
   # No discovery filters: the GitHub App installation controls repository scope.
   image: ghcr.io/renovatebot/renovate:44.171.1@sha256:6fffb26e606488bf674f2d9400fc3fc6b2a0243a0c22a4a4d22e422ee44934c5
   parallelism: 2
+  renovateConfig:
+    fileName: config.json
+    inline: |
+      {
+        "allowedCommands": ["^node scripts/renovate-nix-packages-update[.]mjs$"]
+      }
+  extraEnv:
+    # Nix runs inside an unprivileged Kubernetes container.
+    - name: NIX_CONFIG
+      value: |
+        experimental-features = nix-command flakes
+        sandbox = false
   githubAppReference:
     secretName: github-app-credentials
     appIdSecretKey: APP_ID
