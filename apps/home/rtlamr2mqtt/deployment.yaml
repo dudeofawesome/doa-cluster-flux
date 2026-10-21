@@ -22,7 +22,7 @@ spec:
       terminationGracePeriodSeconds: 30
       containers:
         - name: rtlamr2mqtt
-          image: docker.io/allangood/rtlamr2mqtt:2026.5.9@sha256:0c2f49d3106f3c5b0e6cb3c1d79ae5af547519a694b026b2b8f6565fbb0ee8eb
+          image: docker.io/allangood/rtlamr2mqtt:2026.10.15@sha256:6e7315df0b06f8293504077a7c0d751d36cc0421366db44c7cdf85fd9f06ef30
           securityContext:
             # The device plugin grants access only to the allocated receiver.
             privileged: false
