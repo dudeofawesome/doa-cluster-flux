@@ -9,6 +9,10 @@ spec:
   # No discovery filters: the GitHub App installation controls repository scope.
   image: ghcr.io/renovatebot/renovate:44.171.1@sha256:6fffb26e606488bf674f2d9400fc3fc6b2a0243a0c22a4a4d22e422ee44934c5
   parallelism: 2
+  extraEnv:
+    # Include tool installation output when artifact generation fails.
+    - name: LOG_LEVEL
+      value: debug
   renovateConfig:
     fileName: config.json
     inline: |
