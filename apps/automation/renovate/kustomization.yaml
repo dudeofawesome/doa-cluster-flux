@@ -4,3 +4,10 @@ namespace: renovate-operator
 
 resources:
   - job.yaml
+
+configMapGenerator:
+  - name: renovate-nix-config
+    files:
+      - nix.conf
+    options:
+      disableNameSuffixHash: true

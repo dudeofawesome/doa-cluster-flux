@@ -15,12 +15,16 @@ spec:
       {
         "allowedCommands": ["^node scripts/renovate-nix-packages-update[.]mjs$"]
       }
-  extraEnv:
-    # Nix runs inside an unprivileged Kubernetes container.
-    - name: NIX_CONFIG
-      value: |
-        experimental-features = nix-command flakes
-        sandbox = false
+  extraVolumes:
+    - name: nix-config
+      configMap:
+        name: renovate-nix-config
+  extraVolumeMounts:
+    # Containerbase overrides NIX_CONF_DIR; use the user's configuration instead.
+    - name: nix-config
+      mountPath: /home/ubuntu/.config/nix/nix.conf
+      subPath: nix.conf
+      readOnly: true
   githubAppReference:
     secretName: github-app-credentials
     appIdSecretKey: APP_ID
