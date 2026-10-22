@@ -20,10 +20,15 @@ spec:
         "allowedCommands": ["^node scripts/renovate-nix-packages-update[.]mjs$"]
       }
   extraVolumes:
+    - name: containerbase-tmp
+      emptyDir: {}
     - name: nix-config
       configMap:
         name: renovate-nix-config
   extraVolumeMounts:
+    # The pod's fsGroup makes Containerbase's initialization directory writable.
+    - name: containerbase-tmp
+      mountPath: /tmp/containerbase
     # Containerbase overrides NIX_CONF_DIR; use the user's configuration instead.
     - name: nix-config
       mountPath: /home/ubuntu/.config/nix/nix.conf
