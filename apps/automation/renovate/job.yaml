@@ -23,12 +23,18 @@ spec:
         }
       }
   extraVolumes:
+    - name: nix-store
+      emptyDir:
+        sizeLimit: 10Gi
     - name: containerbase-tmp
       emptyDir: {}
     - name: nix-config
       configMap:
         name: renovate-nix-config
   extraVolumeMounts:
+    # Keep the standard store prefix for binary-cache compatibility.
+    - name: nix-store
+      mountPath: /nix
     # The pod's fsGroup makes Containerbase's initialization directory writable.
     - name: containerbase-tmp
       mountPath: /tmp/containerbase
