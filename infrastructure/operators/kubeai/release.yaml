@@ -59,8 +59,7 @@ spec:
       LlamaCpp:
         images:
           # Shared image pin for all llama.cpp models using the GPU profile.
-          # TODO: Add Renovate extraction for this key, restricting updates to
-          # server-cuda13-b* tags and tracking digests; validate newer builds.
+          # renovate: datasource=docker depName=ghcr.io/ggml-org/llama.cpp versioning=regex:^server-cuda13-b(?<patch>[0-9]+)$
           nvidia-gpu: ghcr.io/ggml-org/llama.cpp:server-cuda13-b11552@sha256:48f87d72fb1d226ac6064e7c7ef9068ac305dc5014b7dc9251fa62e7f9f6ddc4
     resourceProfiles:
       whisper-cpu:

@@ -15,14 +15,17 @@
       versioningTemplate: 'docker',
     },
     {
-      description: 'annotated image reference in Grafana operator',
+      description: 'annotated image references in nonstandard YAML fields',
       customType: 'regex',
-      managerFilePatterns: ['/^apps/monitoring/grafana/grafana\\.ya?ml$/'],
+      managerFilePatterns: [
+        '/^apps/monitoring/grafana/grafana\\.ya?ml$/',
+        '/^infrastructure/operators/kubeai/release\\.ya?ml$/',
+      ],
       matchStrings: [
-        '# renovate: datasource=docker depName=(?<depName>\\S+)\\r?\\n\\s*version: [\'"]?[^\\s@\'"]+:(?<currentValue>[^\\s@\'"]+)(?:@(?<currentDigest>sha256:[a-f0-9]+))?[\'"]?(?:\\r?\\n|$)',
+        '# renovate: datasource=docker depName=(?<depName>\\S+)(?: versioning=(?<versioning>\\S+))?\\r?\\n\\s*[\\w-]+: [\'"]?[^\\s@\'"]+:(?<currentValue>[^\\s@\'"]+)(?:@(?<currentDigest>sha256:[a-f0-9]+))?[\'"]?(?:\\r?\\n|$)',
       ],
       datasourceTemplate: 'docker',
-      versioningTemplate: 'docker',
+      versioningTemplate: '{{#if versioning}}{{{versioning}}}{{else}}docker{{/if}}',
     },
     {
       description: 'annotated operator version channels',
