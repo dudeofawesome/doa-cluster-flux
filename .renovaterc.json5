@@ -5,6 +5,16 @@
 
   customManagers: [
     {
+      description: 'Hermes agent image tag and digest',
+      customType: 'regex',
+      managerFilePatterns: ['/^apps/home/hermes/instance\\.ya?ml$/'],
+      matchStrings: [
+        'image:\\s*\\r?\\n[ \\t]+repository: [\'"]?(?<depName>[^\\s\'"]+)[\'"]?\\r?\\n[ \\t]+tag: [\'"]?(?<currentValue>[^\\s\'"]+)[\'"]?\\r?\\n[ \\t]+digest: [\'"]?(?<currentDigest>sha256:[a-f0-9]+)[\'"]?',
+      ],
+      datasourceTemplate: 'docker',
+      versioningTemplate: 'docker',
+    },
+    {
       description: 'annotated image reference in Grafana operator',
       customType: 'regex',
       managerFilePatterns: ['/^apps/monitoring/grafana/grafana\\.ya?ml$/'],
