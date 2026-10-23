@@ -19,10 +19,11 @@
       customType: 'regex',
       managerFilePatterns: [
         '/^apps/monitoring/grafana/grafana\\.ya?ml$/',
+        '/^infrastructure/controllers/nfd/release\\.ya?ml$/',
         '/^infrastructure/operators/kubeai/release\\.ya?ml$/',
       ],
       matchStrings: [
-        '# renovate: datasource=docker depName=(?<depName>\\S+)(?: versioning=(?<versioning>\\S+))?\\r?\\n\\s*[\\w-]+: [\'"]?[^\\s@\'"]+:(?<currentValue>[^\\s@\'"]+)(?:@(?<currentDigest>sha256:[a-f0-9]+))?[\'"]?(?:\\r?\\n|$)',
+        '# renovate: datasource=docker depName=(?<depName>\\S+)(?: versioning=(?<versioning>\\S+))?\\r?\\n\\s*[\\w-]+: [\'"]?(?:[^\\s@\'"]+:)?(?<currentValue>[^\\s@:\'"]+)(?:@(?<currentDigest>sha256:[a-f0-9]+))?[\'"]?(?:\\r?\\n|$)',
       ],
       datasourceTemplate: 'docker',
       versioningTemplate: '{{#if versioning}}{{{versioning}}}{{else}}docker{{/if}}',
