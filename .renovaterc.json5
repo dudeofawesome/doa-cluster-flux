@@ -5,6 +5,18 @@
 
   customManagers: [
     {
+      description: 'Sharetab upstream main branch commit',
+      customType: 'regex',
+      managerFilePatterns: ['/^\\.github/workflows/build-sharetab\\.ya?ml$/'],
+      matchStrings: [
+        'SHARETAB_COMMIT: (?<currentDigest>[a-f0-9]{40})(?:\\r?\\n|$)',
+      ],
+      depNameTemplate: 'sw-carlos-cristobal/sharetab',
+      packageNameTemplate: 'https://github.com/sw-carlos-cristobal/sharetab.git',
+      datasourceTemplate: 'git-refs',
+      currentValueTemplate: 'main',
+    },
+    {
       description: 'avahi2dns source release',
       customType: 'regex',
       managerFilePatterns: ['/^images/avahi2dns/Containerfile$/'],
