@@ -17,7 +17,10 @@ spec:
     fileName: config.json
     inline: |
       {
-        "allowedCommands": ["^node scripts/renovate-nix-packages-update[.]mjs$"],
+        "allowedCommands": [
+          "^node scripts/renovate-nix-packages-update[.]mjs$",
+          "^node scripts/renovate-avahi2dns-checksum[.]mjs$"
+        ],
         "customEnvVariables": {
           "NIX_USER_CONF_FILES": "/etc/renovate-nix/nix.conf"
         }

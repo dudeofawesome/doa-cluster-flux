@@ -5,6 +5,18 @@
 
   customManagers: [
     {
+      description: 'avahi2dns source release',
+      customType: 'regex',
+      managerFilePatterns: ['/^images/avahi2dns/Containerfile$/'],
+      matchStrings: [
+        'ARG AVAHI2DNS_VERSION=(?<currentValue>[0-9]+[.][0-9]+[.][0-9]+)(?:\\r?\\n|$)',
+      ],
+      depNameTemplate: 'LouisBrunner/avahi2dns',
+      packageNameTemplate: 'https://github.com/LouisBrunner/avahi2dns.git',
+      datasourceTemplate: 'git-tags',
+      versioningTemplate: 'semver',
+    },
+    {
       description: 'Forgejo runner label image tags and digests',
       customType: 'regex',
       managerFilePatterns: ['/^apps/forgejo/runner/config\\.ya?ml$/'],
@@ -100,6 +112,15 @@
   },
 
   packageRules: [
+    {
+      description: 'Refresh the avahi2dns source archive checksum after source updates',
+      matchManagers: ['custom.regex'],
+      matchDepNames: ['LouisBrunner/avahi2dns'],
+      postUpgradeTasks: {
+        commands: ['node scripts/renovate-avahi2dns-checksum.mjs'],
+        fileFilters: ['images/avahi2dns/Containerfile'],
+      },
+    },
     {
       description: 'Group Zigbee2MQTT image and schema updates',
       matchDepNames: ['docker.io/koenkk/zigbee2mqtt', 'Koenkk/zigbee2mqtt'],
