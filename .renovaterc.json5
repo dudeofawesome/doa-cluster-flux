@@ -5,6 +5,16 @@
 
   customManagers: [
     {
+      description: 'Forgejo runner label image tags and digests',
+      customType: 'regex',
+      managerFilePatterns: ['/^apps/forgejo/runner/config\\.ya?ml$/'],
+      matchStrings: [
+        '[ \\t]+- [^\\s:]+:docker://(?<depName>[^\\s@]+):(?<currentValue>[^\\s@:]+)(?:@(?<currentDigest>sha256:[a-f0-9]+))?(?:\\r?\\n|$)',
+      ],
+      datasourceTemplate: 'docker',
+      versioningTemplate: 'docker',
+    },
+    {
       description: 'Hermes agent image tag and digest',
       customType: 'regex',
       managerFilePatterns: ['/^apps/home/hermes/instance\\.ya?ml$/'],
