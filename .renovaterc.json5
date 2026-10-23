@@ -5,6 +5,17 @@
 
   customManagers: [
     {
+      description: 'annotated image reference in Grafana operator',
+      customType: 'regex',
+      managerFilePatterns: ['/^apps/monitoring/grafana/grafana\\.ya?ml$/'],
+      matchStrings: [
+        '# renovate: datasource=docker depName=(?<depName>\\S+)\\r?\\n\\s*version: [\'"]?[^\\s@\'"]+:(?<currentValue>[^\\s@\'"]+)(?:@(?<currentDigest>sha256:[a-f0-9]+))?[\'"]?(?:\\r?\\n|$)',
+      ],
+      datasourceTemplate: 'docker',
+      versioningTemplate: 'docker',
+    },
+    {
+      description: 'annotated operator version channels',
       customType: 'regex',
       managerFilePatterns: ['/^infrastructure/operators/.+[.]ya?ml$/'],
       matchStrings: [
@@ -13,6 +24,7 @@
       versioningTemplate: '{{{versioning}}}',
     },
     {
+      description: 'Zigbee2MQTT configuration file schema version',
       customType: 'regex',
       managerFilePatterns: [
         '/^apps/home/zigbee2mqtt/z2m-configuration\\.ya?ml$/',
@@ -23,6 +35,7 @@
       versioningTemplate: '{{#if versioning}}{{{versioning}}}{{else}}semver-coerced{{/if}}',
     },
     {
+      description: 'annotated operator versions',
       customType: 'regex',
       managerFilePatterns: ['/^infrastructure/operators/.+\\.ya?ml$/'],
       matchStrings: [
@@ -31,6 +44,7 @@
       versioningTemplate: '{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}',
     },
     {
+      description: 'OLM catalog digests',
       customType: 'regex',
       managerFilePatterns: ['/^olm/catalogs\\.ya?ml$/'],
       matchStrings: [
@@ -64,10 +78,7 @@
   packageRules: [
     {
       description: 'Group Zigbee2MQTT image and schema updates',
-      matchDepNames: [
-        'docker.io/koenkk/zigbee2mqtt',
-        'Koenkk/zigbee2mqtt',
-      ],
+      matchDepNames: ['docker.io/koenkk/zigbee2mqtt', 'Koenkk/zigbee2mqtt'],
       groupName: 'Zigbee2MQTT',
     },
     {

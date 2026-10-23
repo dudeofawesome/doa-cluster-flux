@@ -5,6 +5,7 @@ metadata:
   labels:
     dashboards: grafana
 spec:
+  # renovate: datasource=docker depName=docker.io/grafana/grafana
   version: docker.io/grafana/grafana:13.2.1-distroless
   disableDefaultAdminSecret: true
   config:
