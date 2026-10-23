@@ -30,7 +30,7 @@
       kubeContextOverlay = pkgs.writeText "doa-cluster-flux-kubeconfig-overlay" ''
         apiVersion: v1
         kind: Config
-        current-context: doa-admin
+        current-context: doa
       '';
     in
     "${kubeContextOverlay}:${builtins.getEnv "HOME"}/.kube/config";
