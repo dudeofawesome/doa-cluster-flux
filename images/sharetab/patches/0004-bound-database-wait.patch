@@ -1,0 +1,22 @@
+--- a/docker/entrypoint.sh
++++ b/docker/entrypoint.sh
+@@ -17,10 +17,16 @@
+ export UPLOAD_DIR="${UPLOAD_DIR:-/data/uploads}"
+ mkdir -p "$UPLOAD_DIR/receipts"
+ 
+-# Wait for the external PostgreSQL database to be ready
++export PGCONNECT_TIMEOUT=2
++# Bound startup waiting so failed credentials/database connectivity are visible.
++attempt=0
+ until psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c 'SELECT 1' >/dev/null 2>&1; do
+-  echo "Waiting for PostgreSQL..."
+-  sleep 1
++  attempt=$((attempt + 1))
++  if [ "$attempt" -ge 60 ]; then
++    echo "External PostgreSQL was not available after 60 attempts" >&2
++    exit 1
++  fi
++  sleep 2
+ done
+ 
+ # ── Run Migrations ──────────────────────────────────────────

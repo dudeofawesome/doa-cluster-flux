@@ -1,0 +1,84 @@
+--- a/docker/Dockerfile
++++ b/docker/Dockerfile
+@@ -23,14 +23,15 @@
+ FROM base AS runner
+ WORKDIR /app
+ ENV NODE_ENV=production
++ENV HOME=/home/nextjs
+ 
+ # Install PostgreSQL client utilities
+ # hadolint ignore=DL3018
+-RUN apk add --no-cache postgresql16-client su-exec
++RUN apk add --no-cache postgresql16-client
+ 
+ # Create users
+ RUN addgroup --system --gid 1001 nodejs && \
+-    adduser --system --uid 1001 nextjs
++    adduser --system --uid 1001 --ingroup nodejs nextjs
+ 
+ # Copy app
+ COPY --from=builder /app/public ./public
+@@ -53,11 +54,13 @@
+ COPY docker/claude /usr/local/bin/claude
+ 
+ # Create directories
+-RUN mkdir -p /app/uploads/receipts /app/chatgpt && \
++RUN mkdir -p /app/uploads/receipts /app/chatgpt /home/nextjs /app/.next/cache && \
+     chown -R nextjs:nodejs /app/uploads && \
+     chown -R nextjs:nodejs /app/chatgpt && \
++    chown -R nextjs:nodejs /home/nextjs /app/.next/cache && \
+     chmod +x /app/entrypoint.sh /usr/local/bin/claude
+ 
++USER 1001:1001
+ EXPOSE 3000
+ ENV PORT=3000
+ ENV HOSTNAME="0.0.0.0"
+--- a/docker/entrypoint.sh
++++ b/docker/entrypoint.sh
+@@ -16,7 +16,6 @@
+ # Ensure uploads directory exists and is writable by the app user (needed for host bind-mounts)
+ UPLOAD_DIR="${UPLOAD_DIR:-/app/uploads}"
+ mkdir -p "$UPLOAD_DIR/receipts"
+-chown -R nextjs:nodejs "$UPLOAD_DIR"
+ 
+ # Wait for the external PostgreSQL database to be ready
+ until psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c 'SELECT 1' >/dev/null 2>&1; do
+@@ -41,15 +40,11 @@
+ # ── Claude credentials: persistent shared dir for meridian provider ──
+ export CLAUDE_DIR="${CLAUDE_DIR:-/app/claude}"
+ mkdir -p "$CLAUDE_DIR"
+-chown nextjs:nodejs "$CLAUDE_DIR"
+-rm -rf /home/nextjs/.claude
+-ln -sfn "$CLAUDE_DIR" /home/nextjs/.claude
+-chown -h nextjs:nodejs /home/nextjs/.claude
++ln -sfn "$CLAUDE_DIR" "$HOME/.claude"
+ 
+ # ── ChatGPT OAuth credentials: persistent shared dir for openai-codex provider ──
+ OPENAI_CODEX_DIR="${OPENAI_CODEX_DIR:-/app/chatgpt}"
+ mkdir -p "$OPENAI_CODEX_DIR"
+-chown nextjs:nodejs "$OPENAI_CODEX_DIR"
+ 
+ # ── Print config summary ────────────────────────────────────
+ 
+@@ -155,20 +150,5 @@
+ # ── Start App ───────────────────────────────────────────────
+ 
+ echo "Starting ShareTab..."
+-export HOME=/home/nextjs
+ 
+-shutdown() {
+-  echo "Received stop signal, shutting down..."
+-  if [ -n "$APP_PID" ]; then
+-    kill -TERM "$APP_PID" 2>/dev/null || true
+-    wait "$APP_PID" 2>/dev/null || true
+-  fi
+-  exit 0
+-}
+-trap shutdown TERM INT
+-
+-su-exec nextjs node server.js &
+-APP_PID=$!
+-APP_EXIT=0
+-wait "$APP_PID" || APP_EXIT=$?
+-exit "$APP_EXIT"
++exec node server.js

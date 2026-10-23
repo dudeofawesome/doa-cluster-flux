@@ -1,0 +1,15 @@
+--- a/docker/Dockerfile
++++ b/docker/Dockerfile
+@@ -46,8 +46,11 @@
+ COPY --from=builder /app/node_modules/@anthropic-ai/claude-agent-sdk ./node_modules/@anthropic-ai/claude-agent-sdk
+ # Install Prisma CLI in isolated dir to avoid conflict with standalone node_modules
+ WORKDIR /prisma-cli
++COPY --from=builder /app/node_modules/prisma/package.json /tmp/prisma-package.json
+ RUN npm init -y && \
+-    npm install --legacy-peer-deps prisma@7.6.0 dotenv@17.3.1
++    npm install --legacy-peer-deps \
++      "prisma@$(node -p 'require("/tmp/prisma-package.json").version')" \
++      dotenv@17.3.1
+ WORKDIR /app
+ 
+ COPY docker/entrypoint.sh /app/entrypoint.sh

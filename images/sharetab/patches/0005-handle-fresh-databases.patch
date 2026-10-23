@@ -1,0 +1,15 @@
+--- a/docker/entrypoint.sh
++++ b/docker/entrypoint.sh
+@@ -32,7 +32,11 @@
+ # ── Run Migrations ──────────────────────────────────────────
+ 
+ # Run manual SQL migrations (for changes prisma db push can't handle, e.g. enum conversions)
+-if [ -d "/app/prisma/migrations" ]; then
++# The pinned upstream SQL migration upgrades GuestSplit, and assumes that table
++# exists. On a fresh database Prisma creates the current schema directly.
++has_guest_split=$(psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -Atc \
++  "SELECT to_regclass('\"GuestSplit\"') IS NOT NULL")
++if [ "$has_guest_split" = t ]; then
+   for sqlfile in /app/prisma/migrations/*.sql; do
+     [ -f "$sqlfile" ] || continue
+     echo "Running migration: $(basename "$sqlfile")..."

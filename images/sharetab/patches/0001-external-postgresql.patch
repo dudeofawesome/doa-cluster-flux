@@ -1,0 +1,148 @@
+--- a/docker/Dockerfile
++++ b/docker/Dockerfile
+@@ -24,9 +24,9 @@
+ WORKDIR /app
+ ENV NODE_ENV=production
+ 
+-# Install PostgreSQL
++# Install PostgreSQL client utilities
+ # hadolint ignore=DL3018
+-RUN apk add --no-cache postgresql16 postgresql16-contrib su-exec
++RUN apk add --no-cache postgresql16-client su-exec
+ 
+ # Create users
+ RUN addgroup --system --gid 1001 nodejs && \
+@@ -53,20 +53,18 @@
+ COPY docker/claude /usr/local/bin/claude
+ 
+ # Create directories
+-RUN mkdir -p /app/uploads/receipts /app/chatgpt /var/lib/postgresql/data /run/postgresql && \
++RUN mkdir -p /app/uploads/receipts /app/chatgpt && \
+     chown -R nextjs:nodejs /app/uploads && \
+     chown -R nextjs:nodejs /app/chatgpt && \
+-    chown -R postgres:postgres /var/lib/postgresql/data /run/postgresql && \
+     chmod +x /app/entrypoint.sh /usr/local/bin/claude
+ 
+ EXPOSE 3000
+ ENV PORT=3000
+ ENV HOSTNAME="0.0.0.0"
+-ENV PGDATA=/var/lib/postgresql/data
+ 
+-VOLUME ["/var/lib/postgresql/data", "/app/uploads", "/app/claude", "/app/chatgpt"]
++VOLUME ["/app/uploads", "/app/claude", "/app/chatgpt"]
+ 
+-# start-period covers first-boot initdb + user creation + schema push
++# start-period covers database readiness and schema push
+ HEALTHCHECK --interval=30s --timeout=10s --retries=3 --start-period=60s \
+   CMD wget -qO- http://127.0.0.1:3000/api/health || exit 1
+ 
+--- a/docker/entrypoint.sh
++++ b/docker/entrypoint.sh
+@@ -11,66 +11,18 @@
+   exit 1
+ fi
+ 
+-PGDATA="${PGDATA:-/var/lib/postgresql/data}"
+-DB_USER="${DB_USER:-sharetab}"
+-DB_PASSWORD="${DB_PASSWORD:-sharetab}"
+-DB_NAME="${DB_NAME:-sharetab}"
+-
+-# ── Start PostgreSQL ────────────────────────────────────────
+-
+-# Ensure data directory exists and is owned by postgres (needed for host bind-mounts)
+-mkdir -p "$PGDATA"
+-chown postgres:postgres "$PGDATA"
+-chmod 700 "$PGDATA"
++: "${DATABASE_URL:?DATABASE_URL must point to the external PostgreSQL database}"
+ 
+ # Ensure uploads directory exists and is writable by the app user (needed for host bind-mounts)
+ UPLOAD_DIR="${UPLOAD_DIR:-/app/uploads}"
+ mkdir -p "$UPLOAD_DIR/receipts"
+ chown -R nextjs:nodejs "$UPLOAD_DIR"
+ 
+-# Initialize database if needed
+-if [ ! -s "$PGDATA/PG_VERSION" ]; then
+-  echo "Initializing PostgreSQL database..."
+-  su-exec postgres initdb -D "$PGDATA" --auth-local=trust --auth-host=md5
+-
+-  # Allow local connections
+-  echo "host all all 127.0.0.1/32 md5" >> "$PGDATA/pg_hba.conf"
+-  echo "host all all ::1/128 md5" >> "$PGDATA/pg_hba.conf"
+-
+-  # Listen only on localhost (internal use only)
+-  sed -i "s/#listen_addresses = 'localhost'/listen_addresses = 'localhost'/" "$PGDATA/postgresql.conf"
+-
+-  # Start temporarily to create user and database
+-  su-exec postgres pg_ctl -D "$PGDATA" -w start -o "-k /run/postgresql"
+-
+-  # Use psql variable quoting (:"ident" / :'literal') so credentials containing
+-  # quotes can't break or inject into the bootstrap SQL
+-  su-exec postgres psql -h /run/postgresql -v ON_ERROR_STOP=1 \
+-    -v db_user="$DB_USER" -v db_password="$DB_PASSWORD" -v db_name="$DB_NAME" <<'EOSQL'
+-CREATE USER :"db_user" WITH PASSWORD :'db_password';
+-CREATE DATABASE :"db_name" OWNER :"db_user";
+-GRANT ALL PRIVILEGES ON DATABASE :"db_name" TO :"db_user";
+-EOSQL
+-
+-  su-exec postgres pg_ctl -D "$PGDATA" -w stop
+-  echo "PostgreSQL initialized."
+-fi
+-
+-echo "Starting PostgreSQL..."
+-# Remove stale PID file left behind by unclean container restarts
+-rm -f "$PGDATA/postmaster.pid"
+-su-exec postgres pg_ctl -D "$PGDATA" -w start -o "-k /run/postgresql"
+-
+-# Wait for PostgreSQL to be ready
+-until su-exec postgres pg_isready -h localhost -q; do
++# Wait for the external PostgreSQL database to be ready
++until psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c 'SELECT 1' >/dev/null 2>&1; do
+   echo "Waiting for PostgreSQL..."
+   sleep 1
+ done
+-echo "PostgreSQL is ready."
+-
+-# ── Set DATABASE_URL if not already pointing externally ─────
+-
+-export DATABASE_URL="${DATABASE_URL:-postgresql://$DB_USER:$DB_PASSWORD@localhost:5432/$DB_NAME}"
+ 
+ # ── Run Migrations ──────────────────────────────────────────
+ 
+@@ -79,7 +31,7 @@
+   for sqlfile in /app/prisma/migrations/*.sql; do
+     [ -f "$sqlfile" ] || continue
+     echo "Running migration: $(basename "$sqlfile")..."
+-    su-exec postgres psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$sqlfile" 2>&1
++    psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$sqlfile" 2>&1
+   done
+ fi
+ 
+@@ -205,22 +157,12 @@
+ echo "Starting ShareTab..."
+ export HOME=/home/nextjs
+ 
+-# Run Node in the background so this script (PID 1) can forward signals.
+-# 'docker stop' must reach Postgres too — otherwise it gets SIGKILLed when
+-# the grace period expires and is forced into crash recovery on every
+-# restart (the stale postmaster.pid this script used to clean up).
+-stop_postgres() {
+-  echo "Stopping PostgreSQL..."
+-  su-exec postgres pg_ctl -D "$PGDATA" -m fast -w stop || true
+-}
+-
+ shutdown() {
+   echo "Received stop signal, shutting down..."
+   if [ -n "$APP_PID" ]; then
+     kill -TERM "$APP_PID" 2>/dev/null || true
+     wait "$APP_PID" 2>/dev/null || true
+   fi
+-  stop_postgres
+   exit 0
+ }
+ trap shutdown TERM INT
+@@ -229,5 +171,4 @@
+ APP_PID=$!
+ APP_EXIT=0
+ wait "$APP_PID" || APP_EXIT=$?
+-stop_postgres
+ exit "$APP_EXIT"
