@@ -25,6 +25,23 @@ spec:
         namespace: flux-system
       interval: 12h
   values:
+    prometheus-node-exporter:
+      # Set orleans.io/maintenance=true on nodes excluded during maintenance.
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: orleans.io/maintenance
+                    operator: NotIn
+                    values: ['true']
+                  - key: eks.amazonaws.com/compute-type
+                    operator: NotIn
+                    values: [fargate]
+                  - key: type
+                    operator: NotIn
+                    values: [virtual-kubelet]
+
     # K3s embeds these components; the standalone endpoint discovery in the
     # upstream chart does not apply. Keep API server and kubelet monitoring.
     kubeControllerManager:

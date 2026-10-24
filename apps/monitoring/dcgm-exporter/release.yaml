@@ -18,6 +18,15 @@ spec:
         namespace: flux-system
       interval: 12h
   values:
+    # Set orleans.io/maintenance=true on nodes excluded during maintenance.
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: orleans.io/maintenance
+                  operator: NotIn
+                  values: ['true']
     runtimeClassName: nvidia
     nodeSelector:
       feature.node.kubernetes.io/nvidia-runtime.configured: 'true'

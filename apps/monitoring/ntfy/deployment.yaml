@@ -7,7 +7,11 @@ spec:
   replicas: 1
   revisionHistoryLimit: 3
   strategy:
-    type: Recreate
+    # State is in PostgreSQL; an unreachable old pod must not block replacement.
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       component: app

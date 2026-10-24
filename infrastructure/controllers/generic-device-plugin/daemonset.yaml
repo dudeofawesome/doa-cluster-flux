@@ -11,6 +11,15 @@ spec:
       labels:
         component: app
     spec:
+      # Set orleans.io/maintenance=true on nodes excluded during maintenance.
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: orleans.io/maintenance
+                    operator: NotIn
+                    values: ['true']
       automountServiceAccountToken: false
       nodeSelector:
         kubernetes.io/os: linux
