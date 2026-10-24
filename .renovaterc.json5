@@ -158,6 +158,14 @@
       },
     },
     {
+      description: 'Group NFD chart and image updates',
+      matchDepNames: [
+        'node-feature-discovery',
+        'registry.k8s.io/nfd/node-feature-discovery',
+      ],
+      groupName: 'Node Feature Discovery',
+    },
+    {
       description: 'Group Zigbee2MQTT image and schema updates',
       matchDepNames: ['docker.io/koenkk/zigbee2mqtt', 'Koenkk/zigbee2mqtt'],
       groupName: 'Zigbee2MQTT',
