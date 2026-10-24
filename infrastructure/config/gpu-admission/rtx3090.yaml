@@ -1,0 +1,74 @@
+# Applies in every namespace, but only to pods that request devic.es/rtx3090.
+#   That resource is only a scheduling token: it reserves the RTX 3090 and
+#   attaches nothing. The card is attached by the nvidia RuntimeClass, from
+#   each container's NVIDIA_VISIBLE_DEVICES. Without a value, CUDA images fall
+#   back to `all` and the container would see the RTX 3060s too.
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: rtx3090-pinned
+spec:
+  # This policy is evaluated for pods cluster-wide, so an evaluation error must
+  #   not block every pod. The cost of failing open is limited to one pod on
+  #   kings-canyon seeing extra GPUs. A namespace that needs a hard guarantee
+  #   adds its own policy with Fail, as apps/ai/dungeon-scriber does.
+  failurePolicy: Ignore
+  matchConstraints:
+    resourceRules:
+      - apiGroups: ['']
+        apiVersions: [v1]
+        operations: [CREATE, UPDATE]
+        resources: [pods, pods/ephemeralcontainers]
+  matchConditions:
+    # Extended resources must appear in limits (requests are optional and
+    #   must match), so checking limits finds every request.
+    - name: requests-rtx3090
+      expression: |-
+        (object.spec.containers +
+          (has(object.spec.initContainers) ? object.spec.initContainers : []))
+        .exists(c,
+          has(c.resources.limits) && 'devic.es/rtx3090' in c.resources.limits)
+  variables:
+    - name: rtx3090
+      expression: "'GPU-6dda6c74-00cd-a40f-442e-e952e7c54db1'"
+    - name: containers
+      expression: |-
+        object.spec.containers +
+        (has(object.spec.initContainers) ? object.spec.initContainers : [])
+    # The env list of every container, including ephemeral debug containers.
+    - name: envs
+      expression: |-
+        variables.containers.map(c, has(c.env) ? c.env : []) +
+        (has(object.spec.ephemeralContainers)
+          ? object.spec.ephemeralContainers.map(c, has(c.env) ? c.env : [])
+          : [])
+  validations:
+    # Any other runtime attaches no GPU, so the pod would hold the card while
+    #   nothing can use it.
+    - expression: |-
+        has(object.spec.runtimeClassName) &&
+        object.spec.runtimeClassName == 'nvidia'
+      message: Pods requesting devic.es/rtx3090 must use the nvidia RuntimeClass.
+    # An explicit env entry beats envFrom and the image default, so requiring
+    #   a literal value in every container is enough.
+    - expression: |-
+        variables.envs.all(env,
+          env.exists(e, e.name == 'NVIDIA_VISIBLE_DEVICES') &&
+          env.all(e, e.name != 'NVIDIA_VISIBLE_DEVICES' ||
+            (has(e.value) && e.value == variables.rtx3090)))
+      message: >-
+        Pods requesting devic.es/rtx3090 must set NVIDIA_VISIBLE_DEVICES to
+        GPU-6dda6c74-00cd-a40f-442e-e952e7c54db1 in every container.
+    # The pinned value would replace the RTX 3060s the device plugin allocated.
+    - expression: |-
+        !variables.containers.exists(c,
+          has(c.resources.limits) && 'nvidia.com/gpu' in c.resources.limits)
+      message: Pods requesting devic.es/rtx3090 cannot also request nvidia.com/gpu.
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: rtx3090-pinned
+spec:
+  policyName: rtx3090-pinned
+  validationActions: [Deny]
