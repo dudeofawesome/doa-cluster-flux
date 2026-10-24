@@ -6,7 +6,7 @@ Kubernetes K3s cluster, managed with gitops via FluxCD, with OLM, cert-manager, 
 
 **Do not** modify cluster state without explicit permission (explicit command "deploy changes"). Updates to deployed resources must always go through git
 
-Run non-basic commands from inside the devenv (`devenv shell --quiet -- {command}`), which will not work in a sandbox.
+Run non-basic commands from inside the devenv (`devenv shell --quiet -- {command}`), which will not work in a sandbox. When showing me commands, you can assume I'll be in devenv already.
 
 sops-encrypted files must have this header at the top
 
