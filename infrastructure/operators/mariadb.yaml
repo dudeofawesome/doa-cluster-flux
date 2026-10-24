@@ -11,4 +11,4 @@ spec:
       packageName: mariadb-operator
       channels: [alpha]
       # renovate: datasource=github-releases depName=mariadb-operator/mariadb-operator extractVersion=^(?<version>\d+\.\d+\.\d+)$
-      version: '26.6.0'
+      version: '26.10.1'
