@@ -56,9 +56,13 @@
         '/^infrastructure/controllers/nfd/release\\.ya?ml$/',
         '/^infrastructure/operators/kubeai/release\\.ya?ml$/',
       ],
+      // Replace only the tag and digest within each annotated definition.
+      matchStringsStrategy: 'recursive',
       matchStrings: [
-        '# renovate: datasource=docker depName=(?<depName>\\S+)(?: versioning=(?<versioning>\\S+))?\\r?\\n\\s*[\\w-]+: [\'"]?(?:[^\\s@\'"]+:)?(?<currentValue>[^\\s@:\'"]+)(?:@(?<currentDigest>sha256:[a-f0-9]+))?[\'"]?(?:\\r?\\n|$)',
+        '# renovate: datasource=docker depName=(?<depName>\\S+)(?: versioning=(?<versioning>\\S+))?\\r?\\n[ \\t]*[\\w-]+: [\'"]?(?:[^\\s@\'"]+:)?[^\\s@:\'"]+(?:@sha256:[a-f0-9]+)?',
+        '(?<currentValue>[^\\s@:\'"]+)(?:@(?<currentDigest>sha256:[a-f0-9]+))?$',
       ],
+      autoReplaceStringTemplate: '{{{newValue}}}{{#if newDigest}}@{{{newDigest}}}{{else}}{{#if currentDigest}}@{{{currentDigest}}}{{/if}}{{/if}}',
       datasourceTemplate: 'docker',
       versioningTemplate: '{{#if versioning}}{{{versioning}}}{{else}}docker{{/if}}',
     },
