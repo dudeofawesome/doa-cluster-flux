@@ -9,6 +9,9 @@ spec:
   routes:
     - match: Host(`hermes.orleans.io`)
       kind: Rule
+      middlewares:
+        - name: forward-auth
+          namespace: hermes
       services:
         - name: hermes
           port: 9119

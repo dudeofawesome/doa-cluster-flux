@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: forward-auth
+spec:
+  revisionHistoryLimit: 3
+  template:
+    spec:
+      automountServiceAccountToken: false
+      nodeSelector:
+        kubernetes.io/arch: amd64
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: forward-auth
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65532
+            runAsGroup: 65532
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          env:
+            - name: LOG_LEVEL
+              value: info
+            - name: SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: ingress-auth
+                  key: cookie_secret
+            - name: PROVIDERS_OIDC_ISSUER_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: ingress-oidc
+                  key: issuer_url
+            - name: PROVIDERS_OIDC_CLIENT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: ingress-oidc
+                  key: client_id
+            - name: PROVIDERS_OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: ingress-auth
+                  key: client_secret
+          readinessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 300m
+              memory: 128Mi

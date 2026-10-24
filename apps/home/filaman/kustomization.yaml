@@ -11,6 +11,9 @@ resources:
   - ingress.yaml
   - oidc-client.yaml
   - secrets.yaml
+  - forward-auth.yaml
+  - ingress-auth/secrets.yaml
+  - ../../../services/forward-auth
 
 configMapGenerator:
   - name: config
@@ -20,3 +23,13 @@ configMapGenerator:
     files:
       - startup.py
       - uv.toml
+
+patches:
+  - path: forward-auth-patch.yaml
+  - target:
+      kind: Middleware
+      name: forward-auth
+    patch: |
+      - op: replace
+        path: /spec/forwardAuth/address
+        value: http://forward-auth.filaman.svc.cluster.local:4181

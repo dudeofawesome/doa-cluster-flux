@@ -16,3 +16,16 @@ resources:
   - inference-network-policy.yaml
   - oidc-client.yaml
   - ingress.yaml
+  - forward-auth.yaml
+  - ingress-auth/secrets.yaml
+  - ../../../services/forward-auth
+
+patches:
+  - path: forward-auth-patch.yaml
+  - target:
+      kind: Middleware
+      name: forward-auth
+    patch: |
+      - op: replace
+        path: /spec/forwardAuth/address
+        value: http://forward-auth.hermes.svc.cluster.local:4181

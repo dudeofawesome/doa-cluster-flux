@@ -1,0 +1,51 @@
+# Keep ingress authentication separate from the application's OIDC client.
+apiVersion: v1.edp.epam.com/v1
+kind: KeycloakClient
+metadata:
+  name: ingress-auth
+spec:
+  clientId: filaman-ingress
+  name: Filaman ingress
+  protocol: openid-connect
+  enabled: true
+  standardFlowEnabled: true
+  implicitFlowEnabled: false
+  directAccess: false
+  public: false
+  consentRequired: false
+  fullScopeAllowed: false
+  bearerOnly: false
+  clientAuthenticatorType: client-secret
+  authorizationServicesEnabled: false
+  realmRef:
+    kind: ClusterKeycloakRealm
+    name: sequoia
+  secret: '$ingress-auth:client_secret'
+  webUrl: https://filaman.orleans.io
+  redirectUris:
+    - https://filaman.orleans.io/_oauth
+  webOrigins:
+    - https://filaman.orleans.io
+  defaultClientScopes:
+    - profile
+    - email
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ingress-oidc
+data:
+  issuer_url: https://auth.orleans.io/realms/sequoia
+  client_id: filaman-ingress
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: forward-auth
+data:
+  config.ini: |
+    default-action = auth
+    lifetime = 43200
+    cookie-name = _filaman_ingress_auth
+    csrf-cookie-name = _filaman_ingress_auth_csrf
+    logout-redirect = https://filaman.orleans.io

@@ -1,0 +1,51 @@
+# Keep ingress authentication separate from the application's OIDC client.
+apiVersion: v1.edp.epam.com/v1
+kind: KeycloakClient
+metadata:
+  name: ingress-auth
+spec:
+  clientId: hermes-ingress
+  name: Hermes ingress
+  protocol: openid-connect
+  enabled: true
+  standardFlowEnabled: true
+  implicitFlowEnabled: false
+  directAccess: false
+  public: false
+  consentRequired: false
+  fullScopeAllowed: false
+  bearerOnly: false
+  clientAuthenticatorType: client-secret
+  authorizationServicesEnabled: false
+  realmRef:
+    kind: ClusterKeycloakRealm
+    name: sequoia
+  secret: '$ingress-auth:client_secret'
+  webUrl: https://hermes.orleans.io
+  redirectUris:
+    - https://hermes.orleans.io/_oauth
+  webOrigins:
+    - https://hermes.orleans.io
+  defaultClientScopes:
+    - profile
+    - email
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ingress-oidc
+data:
+  issuer_url: https://auth.orleans.io/realms/sequoia
+  client_id: hermes-ingress
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: forward-auth
+data:
+  config.ini: |
+    default-action = auth
+    lifetime = 43200
+    cookie-name = _hermes_ingress_auth
+    csrf-cookie-name = _hermes_ingress_auth_csrf
+    logout-redirect = https://hermes.orleans.io

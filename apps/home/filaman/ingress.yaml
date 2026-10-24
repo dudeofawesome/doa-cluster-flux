@@ -8,6 +8,9 @@ spec:
   routes:
     - match: Host(`filaman.orleans.io`)
       kind: Rule
+      middlewares:
+        - name: forward-auth
+          namespace: filaman
       services:
         - name: filaman
           port: 8000
