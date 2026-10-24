@@ -125,6 +125,17 @@
 
   packageRules: [
     {
+      description: 'Refresh Helm indexes when chart updates merge',
+      matchManagers: ['flux'],
+      matchDatasources: ['helm'],
+      postUpgradeTasks: {
+        commands: ['node scripts/renovate-helm-source-refresh.mjs'],
+        dataFileTemplate: '{{{toJSON upgrades}}}',
+        executionMode: 'branch',
+        fileFilters: ['sources/*.yaml'],
+      },
+    },
+    {
       description: 'Refresh the avahi2dns source archive checksum after source updates',
       matchManagers: ['custom.regex'],
       matchDepNames: ['LouisBrunner/avahi2dns'],

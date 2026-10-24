@@ -24,7 +24,8 @@ spec:
       {
         "allowedCommands": [
           "^node scripts/renovate-nix-packages-update[.]mjs$",
-          "^node scripts/renovate-avahi2dns-checksum[.]mjs$"
+          "^node scripts/renovate-avahi2dns-checksum[.]mjs$",
+          "^node scripts/renovate-helm-source-refresh[.]mjs$"
         ],
         "customEnvVariables": {
           "NIX_USER_CONF_FILES": "/etc/renovate-nix/nix.conf"
