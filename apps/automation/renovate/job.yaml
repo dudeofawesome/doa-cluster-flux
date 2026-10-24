@@ -13,6 +13,11 @@ spec:
     # Include tool installation output when artifact generation fails.
     - name: LOG_LEVEL
       value: debug
+    - name: RENOVATE_HOST_RULES
+      valueFrom:
+        secretKeyRef:
+          name: renovate-host-credentials
+          key: RENOVATE_HOST_RULES
   renovateConfig:
     fileName: config.json
     inline: |

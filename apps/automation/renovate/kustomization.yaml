@@ -4,6 +4,7 @@ namespace: renovate-operator
 
 resources:
   - job.yaml
+  - secrets.yaml
 
 configMapGenerator:
   - name: renovate-nix-config
