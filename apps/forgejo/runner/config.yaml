@@ -44,9 +44,9 @@ data:
       fetch_timeout: 5s
       fetch_interval: 2s
       labels:
-        - docker:docker://docker.io/library/node:22.23.2-bookworm@sha256:8a34c4ab3ea2c5cd194f07e317b2a8f09461d3c8b05c4e34c8ccd56d56024c4d
-        - ubuntu-latest:docker://docker.io/library/node:22.23.2-bookworm@sha256:8a34c4ab3ea2c5cd194f07e317b2a8f09461d3c8b05c4e34c8ccd56d56024c4d
-        - self-hosted:docker://docker.io/library/node:22.23.2-bookworm@sha256:8a34c4ab3ea2c5cd194f07e317b2a8f09461d3c8b05c4e34c8ccd56d56024c4d
+        - docker:docker://docker.io/library/node:22.23.2-bookworm@sha256:dd5847a04b0deee391fa145f1f4c6d214196668b6bcc7988ebed67249f226844
+        - ubuntu-latest:docker://docker.io/library/node:22.23.2-bookworm@sha256:dd5847a04b0deee391fa145f1f4c6d214196668b6bcc7988ebed67249f226844
+        - self-hosted:docker://docker.io/library/node:22.23.2-bookworm@sha256:dd5847a04b0deee391fa145f1f4c6d214196668b6bcc7988ebed67249f226844
       envs:
         DOCKER_HOST: tcp://dind.internal:2375
     cache:
