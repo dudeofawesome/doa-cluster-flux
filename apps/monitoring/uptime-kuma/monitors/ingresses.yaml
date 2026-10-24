@@ -327,10 +327,9 @@ spec:
   resendInterval: 0
   notifications: []
   http:
-    url: https://scrutiny-db.orleans.io/health
+    url: http://influxdb-influxdb2.scrutiny.svc.cluster.local/health
     method: GET
     timeout: 10
-    # Check the ingress response without following SSO to Keycloak.
     maxRedirects: 0
     acceptedStatusCodes: ['200-399']
     ignoreTLS: false

@@ -39,19 +39,3 @@ metadata:
 data:
   config.ini: |
     logout-redirect = https://scrutiny.orleans.io
----
-apiVersion: traefik.io/v1alpha1
-kind: IngressRoute
-metadata:
-  name: influxdb
-spec:
-  entryPoints:
-    - websecure
-  routes:
-    - match: 'Host(`scrutiny-db.orleans.io`)'
-      kind: Rule
-      services:
-        - name: influxdb-influxdb2
-          port: 80
-  tls:
-    secretName: wildcard-orleans-io
