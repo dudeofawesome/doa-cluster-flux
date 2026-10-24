@@ -26,7 +26,7 @@ spec:
       terminationGracePeriodSeconds: 60
       containers:
         - name: sharetab
-          image: ghcr.io/dudeofawesome/sharetab:4e776d64abd3283f1b3142a7da9bef4b2db8ad84-app1
+          image: ghcr.io/dudeofawesome/sharetab:4e776d64abd3283f1b3142a7da9bef4b2db8ad84-app1@sha256:f7e6a2679b3be9a9afc9b83716f546910ee6b5d3ba443ca2ff035d294d512655
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
