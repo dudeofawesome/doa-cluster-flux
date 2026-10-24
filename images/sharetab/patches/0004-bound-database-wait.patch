@@ -1,6 +1,6 @@
 --- a/docker/entrypoint.sh
 +++ b/docker/entrypoint.sh
-@@ -17,10 +17,16 @@
+@@ -27,10 +27,16 @@
  export UPLOAD_DIR="${UPLOAD_DIR:-/data/uploads}"
  mkdir -p "$UPLOAD_DIR/receipts"
  

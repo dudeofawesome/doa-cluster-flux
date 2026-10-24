@@ -1,6 +1,6 @@
 --- a/docker/Dockerfile
 +++ b/docker/Dockerfile
-@@ -23,14 +23,15 @@
+@@ -35,14 +35,15 @@
  FROM base AS runner
  WORKDIR /app
  ENV NODE_ENV=production
@@ -18,7 +18,7 @@
  
  # Copy app
  COPY --from=builder /app/public ./public
-@@ -53,11 +54,13 @@
+@@ -64,11 +65,15 @@
  COPY docker/claude /usr/local/bin/claude
  
  # Create directories
@@ -27,6 +27,8 @@
      chown -R nextjs:nodejs /app/uploads && \
      chown -R nextjs:nodejs /app/chatgpt && \
 +    chown -R nextjs:nodejs /home/nextjs /app/.next/cache && \
++    touch /etc/machine-id && \
++    chown nextjs:nodejs /etc/machine-id && \
      chmod +x /app/entrypoint.sh /usr/local/bin/claude
  
 +USER 1001:1001
@@ -35,7 +37,7 @@
  ENV HOSTNAME="0.0.0.0"
 --- a/docker/entrypoint.sh
 +++ b/docker/entrypoint.sh
-@@ -16,7 +16,6 @@
+@@ -26,7 +26,6 @@
  # Ensure uploads directory exists and is writable by the app user (needed for host bind-mounts)
  UPLOAD_DIR="${UPLOAD_DIR:-/app/uploads}"
  mkdir -p "$UPLOAD_DIR/receipts"
@@ -43,7 +45,7 @@
  
  # Wait for the external PostgreSQL database to be ready
  until psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c 'SELECT 1' >/dev/null 2>&1; do
-@@ -41,15 +40,11 @@
+@@ -64,15 +63,11 @@
  # ── Claude credentials: persistent shared dir for meridian provider ──
  export CLAUDE_DIR="${CLAUDE_DIR:-/app/claude}"
  mkdir -p "$CLAUDE_DIR"
@@ -60,7 +62,7 @@
  
  # ── Print config summary ────────────────────────────────────
  
-@@ -155,20 +150,5 @@
+@@ -182,20 +177,5 @@
  # ── Start App ───────────────────────────────────────────────
  
  echo "Starting ShareTab..."

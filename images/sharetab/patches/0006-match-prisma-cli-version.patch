@@ -1,7 +1,7 @@
 --- a/docker/Dockerfile
 +++ b/docker/Dockerfile
-@@ -46,8 +46,11 @@
- COPY --from=builder /app/node_modules/@anthropic-ai/claude-agent-sdk ./node_modules/@anthropic-ai/claude-agent-sdk
+@@ -57,8 +57,11 @@
+ COPY --from=builder /runtime-deps/node_modules ./node_modules
  # Install Prisma CLI in isolated dir to avoid conflict with standalone node_modules
  WORKDIR /prisma-cli
 +COPY --from=builder /app/node_modules/prisma/package.json /tmp/prisma-package.json
