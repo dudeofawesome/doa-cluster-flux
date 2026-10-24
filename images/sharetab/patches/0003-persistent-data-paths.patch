@@ -1,6 +1,6 @@
 --- a/docker/Dockerfile
 +++ b/docker/Dockerfile
-@@ -54,9 +54,8 @@
+@@ -65,9 +65,8 @@
  COPY docker/claude /usr/local/bin/claude
  
  # Create directories
@@ -10,9 +10,9 @@
 +RUN mkdir -p /data /home/nextjs /app/.next/cache && \
 +    chown -R nextjs:nodejs /data && \
      chown -R nextjs:nodejs /home/nextjs /app/.next/cache && \
-     chmod +x /app/entrypoint.sh /usr/local/bin/claude
- 
-@@ -65,8 +64,6 @@
+     touch /etc/machine-id && \
+     chown nextjs:nodejs /etc/machine-id && \
+@@ -78,8 +77,6 @@
  ENV PORT=3000
  ENV HOSTNAME="0.0.0.0"
  
@@ -23,7 +23,7 @@
    CMD wget -qO- http://127.0.0.1:3000/api/health || exit 1
 --- a/docker/entrypoint.sh
 +++ b/docker/entrypoint.sh
-@@ -14,7 +14,7 @@
+@@ -24,7 +24,7 @@
  : "${DATABASE_URL:?DATABASE_URL must point to the external PostgreSQL database}"
  
  # Ensure uploads directory exists and is writable by the app user (needed for host bind-mounts)
@@ -32,8 +32,8 @@
  mkdir -p "$UPLOAD_DIR/receipts"
  
  # Wait for the external PostgreSQL database to be ready
-@@ -38,12 +38,12 @@
- NODE_PATH=/prisma-cli/node_modules node /prisma-cli/node_modules/prisma/build/index.js db push
+@@ -61,12 +61,12 @@
+ fi
  
  # ── Claude credentials: persistent shared dir for meridian provider ──
 -export CLAUDE_DIR="${CLAUDE_DIR:-/app/claude}"
@@ -47,7 +47,7 @@
  mkdir -p "$OPENAI_CODEX_DIR"
  
  # ── Print config summary ────────────────────────────────────
-@@ -87,8 +87,8 @@
+@@ -110,8 +110,8 @@
    case ",${AI_PROVIDER_PRIORITY}," in
      *,meridian,*)
      echo "  Meridian Port:  ${MERIDIAN_PORT:-3457}"
@@ -58,10 +58,10 @@
        echo "  Claude Login:   detected"
      else
        echo "  Claude Login:   missing (complete OAuth from /admin)"
-@@ -101,8 +101,8 @@
+@@ -124,8 +124,8 @@
  case ",${AI_PROVIDER_PRIORITY}," in
    *,openai-codex,*)
-   echo "  OpenAI Codex Model: ${OPENAI_CODEX_MODEL:-gpt-5.4}"
+   echo "  OpenAI Codex Model: ${OPENAI_CODEX_MODEL:-gpt-5.5}"
 -  echo "  ChatGPT Data:   ${OPENAI_CODEX_DIR:-/app/chatgpt}"
 -  if [ -f "${OPENAI_CODEX_DIR:-/app/chatgpt}/auth.json" ]; then
 +  echo "  ChatGPT Data:   ${OPENAI_CODEX_DIR:-/data/chatgpt}"
@@ -69,7 +69,7 @@
      echo "  ChatGPT Login:  detected"
    else
      echo "  ChatGPT Login:  missing (complete OAuth from /admin)"
-@@ -117,7 +117,7 @@
+@@ -140,7 +140,7 @@
    ;;
  esac
  echo "  Admin Email:    ${ADMIN_EMAIL:-not set}"

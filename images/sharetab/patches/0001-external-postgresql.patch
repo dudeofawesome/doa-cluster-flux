@@ -1,6 +1,6 @@
 --- a/docker/Dockerfile
 +++ b/docker/Dockerfile
-@@ -24,9 +24,9 @@
+@@ -36,9 +36,9 @@
  WORKDIR /app
  ENV NODE_ENV=production
  
@@ -12,7 +12,7 @@
  
  # Create users
  RUN addgroup --system --gid 1001 nodejs && \
-@@ -53,20 +53,18 @@
+@@ -64,20 +64,18 @@
  COPY docker/claude /usr/local/bin/claude
  
  # Create directories
@@ -38,8 +38,8 @@
  
 --- a/docker/entrypoint.sh
 +++ b/docker/entrypoint.sh
-@@ -11,66 +11,18 @@
-   exit 1
+@@ -21,66 +21,18 @@
+   fi
  fi
  
 -PGDATA="${PGDATA:-/var/lib/postgresql/data}"
@@ -108,7 +108,7 @@
  
  # ── Run Migrations ──────────────────────────────────────────
  
-@@ -79,7 +31,7 @@
+@@ -91,7 +43,7 @@
    for sqlfile in /app/prisma/migrations/*.sql; do
      [ -f "$sqlfile" ] || continue
      echo "Running migration: $(basename "$sqlfile")..."
@@ -117,7 +117,16 @@
    done
  fi
  
-@@ -205,22 +157,12 @@
+@@ -105,7 +57,7 @@
+   for sqlfile in /app/prisma/after-push/*.sql; do
+     [ -f "$sqlfile" ] || continue
+     echo "Running post-schema SQL: $(basename "$sqlfile")..."
+-    su-exec postgres psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$sqlfile" 2>&1
++    psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$sqlfile" 2>&1
+   done
+ fi
+ 
+@@ -232,22 +184,12 @@
  echo "Starting ShareTab..."
  export HOME=/home/nextjs
  
@@ -140,7 +149,7 @@
    exit 0
  }
  trap shutdown TERM INT
-@@ -229,5 +171,4 @@
+@@ -256,5 +198,4 @@
  APP_PID=$!
  APP_EXIT=0
  wait "$APP_PID" || APP_EXIT=$?
