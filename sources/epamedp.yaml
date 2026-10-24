@@ -4,5 +4,5 @@ metadata:
   name: epamedp
   namespace: flux-system
 spec:
-  interval: 24h
+  interval: 1h
   url: https://epam.github.io/edp-helm-charts/stable

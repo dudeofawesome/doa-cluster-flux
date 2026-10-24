@@ -4,5 +4,5 @@ metadata:
   name: nvidia-device-plugin
   namespace: flux-system
 spec:
-  interval: 24h
+  interval: 1h
   url: https://nvidia.github.io/k8s-device-plugin
