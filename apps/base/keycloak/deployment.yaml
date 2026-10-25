@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: 'keycloak'
-          image: 'ghcr.io/dudeofawesome/keycloak:26.8.1@sha256:4532d86cd4d9cb00e782f17e1f0ca3bf3c5e4570c033a9cdd54f1800d86a76fc'
+          image: 'ghcr.io/dudeofawesome/keycloak:26.8.1@sha256:840caaf9c5a731542296c1db627381c3bfc9feeb66fe5ed32a2fc3ec581c6339'
           args: ['start', '--optimized']
           env:
             - name: KEYCLOAK_ADMIN
