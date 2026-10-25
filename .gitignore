@@ -15,8 +15,9 @@ node_modules/
 .devenv/
 .venv/
 
-# Optional npm cache directory
-.npm
+# caches
+.npm/
+__pycache__/
 
 # Secrets
 *.bin
@@ -28,4 +29,5 @@ node_modules/
 *.env
 # Non-secret settings consumed by Kustomize.
 !config.env
+!apps/games/valheim/valheimone.env
 .decrypted~*
