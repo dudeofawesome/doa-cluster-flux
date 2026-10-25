@@ -1,8 +1,8 @@
 --- a/docker/Dockerfile
 +++ b/docker/Dockerfile
-@@ -65,9 +65,8 @@
+@@ -62,9 +62,8 @@
  COPY docker/claude /usr/local/bin/claude
- 
+
  # Create directories
 -RUN mkdir -p /app/uploads/receipts /app/chatgpt /home/nextjs /app/.next/cache && \
 -    chown -R nextjs:nodejs /app/uploads && \
@@ -12,42 +12,42 @@
      chown -R nextjs:nodejs /home/nextjs /app/.next/cache && \
      touch /etc/machine-id && \
      chown nextjs:nodejs /etc/machine-id && \
-@@ -78,8 +77,6 @@
+@@ -75,8 +74,6 @@
  ENV PORT=3000
  ENV HOSTNAME="0.0.0.0"
- 
+
 -VOLUME ["/app/uploads", "/app/claude", "/app/chatgpt"]
 -
- # start-period covers database readiness and schema push
+ # start-period covers database readiness and schema push; a long
+ # wait for an external database (DB_WAIT_SECONDS) can run past it
  HEALTHCHECK --interval=30s --timeout=10s --retries=3 --start-period=60s \
-   CMD wget -qO- http://127.0.0.1:3000/api/health || exit 1
 --- a/docker/entrypoint.sh
 +++ b/docker/entrypoint.sh
-@@ -24,7 +24,7 @@
- : "${DATABASE_URL:?DATABASE_URL must point to the external PostgreSQL database}"
- 
+@@ -55,7 +55,7 @@
+ }
+
  # Ensure uploads directory exists and is writable by the app user (needed for host bind-mounts)
 -UPLOAD_DIR="${UPLOAD_DIR:-/app/uploads}"
 +export UPLOAD_DIR="${UPLOAD_DIR:-/data/uploads}"
  mkdir -p "$UPLOAD_DIR/receipts"
- 
- # Wait for the external PostgreSQL database to be ready
-@@ -61,12 +61,12 @@
- fi
- 
+
+ # Use upstream's bounded wait, URL validation and schema safety checks.
+@@ -86,12 +86,12 @@
+ done
+
  # ── Claude credentials: persistent shared dir for meridian provider ──
 -export CLAUDE_DIR="${CLAUDE_DIR:-/app/claude}"
 +export CLAUDE_DIR="${CLAUDE_DIR:-/data/claude}"
  mkdir -p "$CLAUDE_DIR"
  ln -sfn "$CLAUDE_DIR" "$HOME/.claude"
- 
+
  # ── ChatGPT OAuth credentials: persistent shared dir for openai-codex provider ──
 -OPENAI_CODEX_DIR="${OPENAI_CODEX_DIR:-/app/chatgpt}"
 +export OPENAI_CODEX_DIR="${OPENAI_CODEX_DIR:-/data/chatgpt}"
  mkdir -p "$OPENAI_CODEX_DIR"
- 
+
  # ── Print config summary ────────────────────────────────────
-@@ -110,8 +110,8 @@
+@@ -133,8 +133,8 @@
    case ",${AI_PROVIDER_PRIORITY}," in
      *,meridian,*)
      echo "  Meridian Port:  ${MERIDIAN_PORT:-3457}"
@@ -58,7 +58,7 @@
        echo "  Claude Login:   detected"
      else
        echo "  Claude Login:   missing (complete OAuth from /admin)"
-@@ -124,8 +124,8 @@
+@@ -147,8 +147,8 @@
  case ",${AI_PROVIDER_PRIORITY}," in
    *,openai-codex,*)
    echo "  OpenAI Codex Model: ${OPENAI_CODEX_MODEL:-gpt-5.5}"
@@ -69,7 +69,7 @@
      echo "  ChatGPT Login:  detected"
    else
      echo "  ChatGPT Login:  missing (complete OAuth from /admin)"
-@@ -140,7 +140,7 @@
+@@ -163,7 +163,7 @@
    ;;
  esac
  echo "  Admin Email:    ${ADMIN_EMAIL:-not set}"
