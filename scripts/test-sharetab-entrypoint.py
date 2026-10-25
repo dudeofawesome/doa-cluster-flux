@@ -91,6 +91,7 @@ if os.environ.get('FAIL_STEP') in args:
         })
         self.assertTrue((self.root / 'data/uploads/receipts').is_dir())
         self.assertEqual((self.home / '.claude').resolve(), self.root / 'data/claude')
+        self.assertTrue((self.root / 'data/postgresql/.sharetab-external-database').is_file())
 
     def test_database_url_required(self):
         process, output, events = self.run_entrypoint(DATABASE_URL='')
@@ -105,6 +106,7 @@ if os.environ.get('FAIL_STEP') in args:
                 process, output, events = self.run_entrypoint(FAIL_STEP=step)
                 self.assertEqual(process.returncode, 23, output)
                 self.assertNotIn(['server.js'], [event['args'] for event in events])
+                self.assertFalse((self.root / 'data/postgresql/.sharetab-external-database').exists())
 
 
 if __name__ == '__main__':

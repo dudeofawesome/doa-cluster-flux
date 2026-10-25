@@ -1,39 +1,51 @@
 --- a/docker/Dockerfile
 +++ b/docker/Dockerfile
-@@ -62,9 +62,8 @@
+@@ -66,9 +66,8 @@
  COPY docker/claude /usr/local/bin/claude
 
  # Create directories
--RUN mkdir -p /app/uploads/receipts /app/chatgpt /home/nextjs /app/.next/cache && \
+-RUN mkdir -p /app/uploads/receipts /app/chatgpt /home/nextjs /app/.next/cache /var/lib/postgresql/data /run/postgresql && \
 -    chown -R nextjs:nodejs /app/uploads && \
 -    chown -R nextjs:nodejs /app/chatgpt && \
-+RUN mkdir -p /data /home/nextjs /app/.next/cache && \
++RUN mkdir -p /data /home/nextjs /app/.next/cache /var/lib/postgresql/data /run/postgresql && \
 +    chown -R nextjs:nodejs /data && \
+     chown -R postgres:postgres /var/lib/postgresql/data /run/postgresql && \
      chown -R nextjs:nodejs /home/nextjs /app/.next/cache && \
      touch /etc/machine-id && \
-     chown nextjs:nodejs /etc/machine-id && \
-@@ -75,8 +74,6 @@
+@@ -79,9 +78,8 @@
+ EXPOSE 3000
  ENV PORT=3000
  ENV HOSTNAME="0.0.0.0"
-
--VOLUME ["/app/uploads", "/app/claude", "/app/chatgpt"]
+-ENV PGDATA=/var/lib/postgresql/data
 -
- # start-period covers database readiness and schema push; a long
+-VOLUME ["/var/lib/postgresql/data", "/app/uploads", "/app/claude", "/app/chatgpt"]
++# Upstream records external database use here; keep the marker on our writable volume.
++ENV PGDATA=/data/postgresql
+
+ # start-period covers first-boot initdb + user creation + schema push; a long
  # wait for an external database (DB_WAIT_SECONDS) can run past it
- HEALTHCHECK --interval=30s --timeout=10s --retries=3 --start-period=60s \
 --- a/docker/entrypoint.sh
 +++ b/docker/entrypoint.sh
-@@ -55,7 +55,7 @@
- }
+@@ -24,7 +24,7 @@
+ # This image runs without privileges and requires an external database.
+ : "${DATABASE_URL:?DATABASE_URL must point to the external PostgreSQL database}"
+
+-PGDATA="${PGDATA:-/var/lib/postgresql/data}"
++PGDATA="${PGDATA:-/data/postgresql}"
+ DB_USER="${DB_USER:-sharetab}"
+ DB_PASSWORD="${DB_PASSWORD:-sharetab}"
+ DB_NAME="${DB_NAME:-sharetab}"
+@@ -116,7 +116,7 @@
+ fi
 
  # Ensure uploads directory exists and is writable by the app user (needed for host bind-mounts)
 -UPLOAD_DIR="${UPLOAD_DIR:-/app/uploads}"
 +export UPLOAD_DIR="${UPLOAD_DIR:-/data/uploads}"
  mkdir -p "$UPLOAD_DIR/receipts"
 
- # Use upstream's bounded wait, URL validation and schema safety checks.
-@@ -86,12 +86,12 @@
- done
+ # ── Start PostgreSQL (bundled mode) ─────────────────────────
+@@ -251,12 +251,12 @@
+ fi
 
  # ── Claude credentials: persistent shared dir for meridian provider ──
 -export CLAUDE_DIR="${CLAUDE_DIR:-/app/claude}"
@@ -47,7 +59,7 @@
  mkdir -p "$OPENAI_CODEX_DIR"
 
  # ── Print config summary ────────────────────────────────────
-@@ -133,8 +133,8 @@
+@@ -302,8 +302,8 @@
    case ",${AI_PROVIDER_PRIORITY}," in
      *,meridian,*)
      echo "  Meridian Port:  ${MERIDIAN_PORT:-3457}"
@@ -58,7 +70,7 @@
        echo "  Claude Login:   detected"
      else
        echo "  Claude Login:   missing (complete OAuth from /admin)"
-@@ -147,8 +147,8 @@
+@@ -316,8 +316,8 @@
  case ",${AI_PROVIDER_PRIORITY}," in
    *,openai-codex,*)
    echo "  OpenAI Codex Model: ${OPENAI_CODEX_MODEL:-gpt-5.5}"
@@ -69,7 +81,7 @@
      echo "  ChatGPT Login:  detected"
    else
      echo "  ChatGPT Login:  missing (complete OAuth from /admin)"
-@@ -163,7 +163,7 @@
+@@ -332,7 +332,7 @@
    ;;
  esac
  echo "  Admin Email:    ${ADMIN_EMAIL:-not set}"

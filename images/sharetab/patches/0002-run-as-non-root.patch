@@ -1,14 +1,14 @@
 --- a/docker/Dockerfile
 +++ b/docker/Dockerfile
-@@ -35,14 +35,11 @@
+@@ -35,6 +35,7 @@
  FROM base AS runner
  WORKDIR /app
  ENV NODE_ENV=production
--
--# Install privilege switching helper
--# hadolint ignore=DL3018
--RUN apk add --no-cache su-exec
 +ENV HOME=/home/nextjs
+
+ # Install PostgreSQL
+ # hadolint ignore=DL3018
+@@ -42,7 +43,7 @@
 
  # Create users
  RUN addgroup --system --gid 1001 nodejs && \
@@ -17,14 +17,15 @@
 
  # Copy app
  COPY --from=builder /app/public ./public
-@@ -65,11 +62,15 @@
+@@ -65,12 +66,16 @@
  COPY docker/claude /usr/local/bin/claude
 
  # Create directories
--RUN mkdir -p /app/uploads/receipts /app/chatgpt && \
-+RUN mkdir -p /app/uploads/receipts /app/chatgpt /home/nextjs /app/.next/cache && \
+-RUN mkdir -p /app/uploads/receipts /app/chatgpt /var/lib/postgresql/data /run/postgresql && \
++RUN mkdir -p /app/uploads/receipts /app/chatgpt /home/nextjs /app/.next/cache /var/lib/postgresql/data /run/postgresql && \
      chown -R nextjs:nodejs /app/uploads && \
      chown -R nextjs:nodejs /app/chatgpt && \
+     chown -R postgres:postgres /var/lib/postgresql/data /run/postgresql && \
 +    chown -R nextjs:nodejs /home/nextjs /app/.next/cache && \
 +    touch /etc/machine-id && \
 +    chown nextjs:nodejs /etc/machine-id && \
@@ -36,7 +37,17 @@
  ENV HOSTNAME="0.0.0.0"
 --- a/docker/entrypoint.sh
 +++ b/docker/entrypoint.sh
-@@ -49,15 +49,14 @@
+@@ -20,6 +20,9 @@
+     echo "WARNING: could not write /etc/machine-id; the meridian AI provider will not start."
+   fi
+ fi
++
++# This image runs without privileges and requires an external database.
++: "${DATABASE_URL:?DATABASE_URL must point to the external PostgreSQL database}"
+
+ PGDATA="${PGDATA:-/var/lib/postgresql/data}"
+ DB_USER="${DB_USER:-sharetab}"
+@@ -74,9 +77,9 @@
    return "$step_status"
  }
 
@@ -47,14 +58,16 @@
 +  run_step node /app/db.mjs "$@"
  }
 
+ # A DATABASE_URL means an external PostgreSQL server: the bundled one isn't
+@@ -115,7 +118,6 @@
  # Ensure uploads directory exists and is writable by the app user (needed for host bind-mounts)
  UPLOAD_DIR="${UPLOAD_DIR:-/app/uploads}"
  mkdir -p "$UPLOAD_DIR/receipts"
 -chown -R nextjs:nodejs "$UPLOAD_DIR"
 
- # Use upstream's bounded wait, URL validation and schema safety checks.
- db_step wait
-@@ -89,15 +88,11 @@
+ # ── Start PostgreSQL (bundled mode) ─────────────────────────
+
+@@ -251,15 +253,11 @@
  # ── Claude credentials: persistent shared dir for meridian provider ──
  export CLAUDE_DIR="${CLAUDE_DIR:-/app/claude}"
  mkdir -p "$CLAUDE_DIR"
@@ -71,25 +84,24 @@
 
  # ── Print config summary ────────────────────────────────────
 
-@@ -107,7 +102,7 @@
+@@ -269,7 +267,7 @@
  echo "============================================"
  echo "  Version:        $(node -e "console.log(require('./package.json').version)" 2>/dev/null || echo 'unknown')"
  echo "  Commit:         $(cat .commit-sha 2>/dev/null || echo 'unknown')"
 -echo "  Database:       $DB_MODE, $(su-exec nextjs node /app/db.mjs target)"
 +echo "  Database:       $DB_MODE, $(node /app/db.mjs target)"
- echo "  Auth URL:       ${NEXTAUTH_URL:-not set}"
- echo "  Auth Trust:     ${AUTH_TRUST_HOST:-false}"
- AI_PROVIDER_PRIORITY="${AI_PROVIDER_PRIORITY:-openai}"
-@@ -205,10 +200,5 @@
+ if [ "$DB_MODE" = bundled ]; then
+   echo "  DB User:        ${DB_USER:-sharetab}"
+   echo "  DB Name:        ${DB_NAME:-sharetab}"
+@@ -371,10 +369,4 @@
  # ── Start App ───────────────────────────────────────────────
 
  echo "Starting ShareTab..."
 -export HOME=/home/nextjs
 -
 -# Run Node in the background so this script (PID 1) can forward signals
--# during startup and while the app is running.
+-# (see Signals above). The EXIT trap stops the bundled server after Node exits.
 -APP_EXIT=0
 -run_step su-exec nextjs node server.js || APP_EXIT=$?
 -exit "$APP_EXIT"
-+
 +exec node server.js
