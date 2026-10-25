@@ -6,11 +6,13 @@ on:
     paths:
       - .github/workflows/build-sharetab.yaml
       - images/sharetab/**
+      - scripts/test-sharetab-entrypoint.py
   push:
     branches: [main]
     paths:
       - .github/workflows/build-sharetab.yaml
       - images/sharetab/**
+      - scripts/test-sharetab-entrypoint.py
   workflow_dispatch:
 
 env:
@@ -41,6 +43,8 @@ jobs:
             echo "Applying $(basename "$patch")"
             git -C upstream apply "$patch"
           done
+      - name: Test patched startup
+        run: python3 scripts/test-sharetab-entrypoint.py upstream
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
       - name: Log in to GHCR
