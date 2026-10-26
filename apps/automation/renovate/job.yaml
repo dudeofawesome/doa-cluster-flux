@@ -7,7 +7,7 @@ spec:
   provider:
     name: github
   # No discovery filters: the GitHub App installation controls repository scope.
-  image: ghcr.io/renovatebot/renovate:44.182.0@sha256:17f13854b7cb739f9a1b041ce5eb5835a16e03ac2301872c6cc771a3f95c669a
+  image: ghcr.io/renovatebot/renovate:44.186.2@sha256:07cc53137718c142dcba8393d346d0e49dd3a2279d07c4f91bf82e51fb43e995
   parallelism: 2
   extraEnv:
     # Include tool installation output when artifact generation fails.
