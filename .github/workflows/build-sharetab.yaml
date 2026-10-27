@@ -16,7 +16,7 @@ on:
   workflow_dispatch:
 
 env:
-  SHARETAB_COMMIT: 36d7ea35d30a924408c8fc1ca7e3dbb126fdae5f
+  SHARETAB_COMMIT: 2e43fdb5c36e6aad4a0595f5261ac2368d6b050a
   IMAGE_REVISION: app1
 
 jobs:
