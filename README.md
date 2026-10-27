@@ -1,3 +1,4 @@
 # doa-cluster-flux
 
-[/docs/setup.md](/docs/setup.md)
+- [Setup](docs/setup.md)
+- [Storage architecture](docs/storage.md)
