@@ -2,6 +2,12 @@
   $schema: 'https://docs.renovatebot.com/renovate-schema.json',
 
   packageRules: [
+    {
+      matchDatasources: ['git-refs'],
+      matchDepNames: ['sw-carlos-cristobal/sharetab'],
+      sourceUrl: 'https://github.com/sw-carlos-cristobal/sharetab',
+      changelogUrl: '{{{sourceUrl}}}/compare/{{{currentDigest}}}...{{{newDigest}}}',
+    },
     // Image labels and variant tags do not always lead Renovate to release notes.
     {
       matchDatasources: ['docker'],
