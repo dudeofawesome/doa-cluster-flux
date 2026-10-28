@@ -1,0 +1,44 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+
+  minimumReleaseAge: '3 days',
+  minimumReleaseAgeBehaviour: 'timestamp-required',
+
+  packageRules: [
+    {
+      description: 'Exempt registries without supported release timestamps from the cooldown',
+      matchDatasources: ['docker'],
+      matchPackageNames: [
+        'codeberg.org/**',
+        'data.forgejo.org/**',
+        'ghcr.io/**',
+        'quay.io/**',
+        'registry.k8s.io/**',
+      ],
+      minimumReleaseAge: null,
+    },
+    {
+      description: 'Exempt datasources without release timestamps from the cooldown',
+      matchDatasources: [
+        'deb',
+        'git-refs',
+        'git-tags',
+        'kubernetes-api',
+        'python-version',
+      ],
+      minimumReleaseAge: null,
+    },
+    {
+      description: 'Exempt update types without release-age validation from the cooldown',
+      matchUpdateTypes: [
+        'pin',
+        'lockFileMaintenance',
+        'lockfileUpdate',
+        'bump',
+        'rollback',
+        'replacement',
+      ],
+      minimumReleaseAge: null,
+    },
+  ],
+}
