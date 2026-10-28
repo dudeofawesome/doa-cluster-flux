@@ -32,6 +32,9 @@ homeassistant:
 
 recorder:
   db_url: !env_var DB_URI
+  # Also tolerate transient failures after the init check or on container restart.
+  db_max_retries: 120
+  db_retry_wait: 5
   purge_keep_days: 30
 
 # minimal required config

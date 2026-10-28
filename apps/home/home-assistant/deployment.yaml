@@ -25,6 +25,47 @@ spec:
           volumeMounts:
             - name: ha-config-root
               mountPath: /config
+        # DNS and PostgreSQL can recover after this pod during cluster startup.
+        # Wait for an authenticated query, rather than just an open TCP port.
+        - name: wait-for-database
+          image: 'ghcr.io/home-assistant/home-assistant:2026.10.4@sha256:23f4dfbb69ce76315dbc4de7915504f1c2dcecd7ca2648113a493a385972e133'
+          command:
+            - python3
+            - -u
+            - -c
+            - |
+              import os
+              import time
+
+              import psycopg2
+
+              while True:
+                  try:
+                      connection = psycopg2.connect(
+                          os.environ['DB_URI'],
+                          connect_timeout=5,
+                          options='-c statement_timeout=5000',
+                          target_session_attrs='read-write',
+                      )
+                      try:
+                          connection.set_session(readonly=True, autocommit=True)
+                          with connection.cursor() as cursor:
+                              cursor.execute('SELECT 1')
+                      finally:
+                          connection.close()
+                  except psycopg2.Error:
+                      # Connection errors can contain credentials; do not log them.
+                      print('Waiting for PostgreSQL DNS, authentication, and readiness...')
+                      time.sleep(5)
+                  else:
+                      print('PostgreSQL is ready; starting Home Assistant.')
+                      break
+          env:
+            - name: DB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-app
+                  key: uri
       # securityContext:
       #   fsGroup: 33
       #   fsGroupChangePolicy: "OnRootMismatch"
