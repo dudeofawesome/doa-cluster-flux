@@ -1,0 +1,31 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+
+  packageRules: [
+    {
+      description: 'Automerge non-major Renovate image updates without CI',
+      matchDatasources: ['docker'],
+      matchPackageNames: ['ghcr.io/renovatebot/renovate'],
+      matchUpdateTypes: ['minor', 'patch', 'digest'],
+      automerge: true,
+      platformAutomerge: false,
+      // GHCR is exempt from the cooldown, and this image has no CI checks.
+      ignoreTests: true,
+    },
+    {
+      description: 'Automerge OLM catalog digest updates',
+      matchDatasources: ['docker'],
+      matchDepNames: ['quay.io/operatorhubio/catalog'],
+      matchUpdateTypes: ['digest'],
+      automerge: true,
+    },
+    {
+      description: 'Automerge patch updates to the reflector Helm release',
+      matchManagers: ['flux'],
+      matchDatasources: ['helm'],
+      matchDepNames: ['reflector'],
+      matchUpdateTypes: ['patch'],
+      automerge: true,
+    },
+  ],
+}

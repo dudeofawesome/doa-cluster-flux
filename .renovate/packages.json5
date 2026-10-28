@@ -1,0 +1,12 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+
+  packageRules: [
+    {
+      description: 'Ignore the broken catalogd v1.18.0 release',
+      matchDatasources: ['docker'],
+      matchDepNames: ['quay.io/operator-framework/catalogd'],
+      allowedVersions: '!/^v1\\.18\\.0$/',
+    },
+  ],
+}

@@ -1,0 +1,13 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+
+  extends: [
+    './cooldown.json5',
+    './managers.json5',
+    './changelogs.json5',
+    './updates.json5',
+    './groups.json5',
+    './packages.json5',
+    './automerge.json5',
+  ],
+}

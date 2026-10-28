@@ -1,0 +1,127 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+
+  customManagers: [
+    {
+      description: 'Sharetab upstream main branch commit',
+      customType: 'regex',
+      managerFilePatterns: ['/^\\.github/workflows/build-sharetab\\.ya?ml$/'],
+      matchStrings: [
+        'SHARETAB_COMMIT: (?<currentDigest>[a-f0-9]{40})(?:\\r?\\n|$)',
+      ],
+      depNameTemplate: 'sw-carlos-cristobal/sharetab',
+      packageNameTemplate: 'https://github.com/sw-carlos-cristobal/sharetab.git',
+      datasourceTemplate: 'git-refs',
+      currentValueTemplate: 'main',
+    },
+    {
+      description: 'avahi2dns source release',
+      customType: 'regex',
+      managerFilePatterns: ['/^images/avahi2dns/Containerfile$/'],
+      matchStrings: [
+        'ARG AVAHI2DNS_VERSION=(?<currentValue>[0-9]+[.][0-9]+[.][0-9]+)(?:\\r?\\n|$)',
+      ],
+      depNameTemplate: 'LouisBrunner/avahi2dns',
+      packageNameTemplate: 'https://github.com/LouisBrunner/avahi2dns.git',
+      datasourceTemplate: 'git-tags',
+      versioningTemplate: 'semver',
+    },
+    {
+      description: 'Forgejo runner label image tags and digests',
+      customType: 'regex',
+      managerFilePatterns: ['/^apps/forgejo/runner/config\\.ya?ml$/'],
+      matchStrings: [
+        '[ \\t]+- [^\\s:]+:docker://(?<depName>[^\\s@]+):(?<currentValue>[^\\s@:]+)(?:@(?<currentDigest>sha256:[a-f0-9]+))?(?:\\r?\\n|$)',
+      ],
+      datasourceTemplate: 'docker',
+      versioningTemplate: 'docker',
+    },
+    {
+      description: 'Hermes agent image tag and digest',
+      customType: 'regex',
+      managerFilePatterns: ['/^apps/home/hermes/instance\\.ya?ml$/'],
+      matchStrings: [
+        'image:\\s*\\r?\\n[ \\t]+repository: [\'"]?(?<depName>[^\\s\'"]+)[\'"]?\\r?\\n[ \\t]+tag: [\'"]?(?<currentValue>[^\\s\'"]+)[\'"]?\\r?\\n[ \\t]+digest: [\'"]?(?<currentDigest>sha256:[a-f0-9]+)[\'"]?',
+      ],
+      datasourceTemplate: 'docker',
+      versioningTemplate: 'docker',
+    },
+    {
+      description: 'annotated image references in nonstandard YAML fields',
+      customType: 'regex',
+      managerFilePatterns: [
+        '/^apps/monitoring/grafana/grafana\\.ya?ml$/',
+        '/^infrastructure/controllers/nfd/release\\.ya?ml$/',
+        '/^infrastructure/operators/kubeai/release\\.ya?ml$/',
+      ],
+      // Replace only the tag and digest within each annotated definition.
+      matchStringsStrategy: 'recursive',
+      matchStrings: [
+        '# renovate: datasource=docker depName=(?<depName>\\S+)(?: versioning=(?<versioning>\\S+))?\\r?\\n[ \\t]*[\\w-]+: [\'"]?(?:[^\\s@\'"]+:)?[^\\s@:\'"]+(?:@sha256:[a-f0-9]+)?',
+        '(?<currentValue>[^\\s@:\'"]+)(?:@(?<currentDigest>sha256:[a-f0-9]+))?$',
+      ],
+      autoReplaceStringTemplate: '{{{newValue}}}{{#if newDigest}}@{{{newDigest}}}{{else}}{{#if currentDigest}}@{{{currentDigest}}}{{/if}}{{/if}}',
+      datasourceTemplate: 'docker',
+      versioningTemplate: '{{#if versioning}}{{{versioning}}}{{else}}docker{{/if}}',
+    },
+    {
+      description: 'annotated operator version channels',
+      customType: 'regex',
+      managerFilePatterns: ['/^infrastructure/operators/.+[.]ya?ml$/'],
+      matchStrings: [
+        '# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+) extractVersion=(?<extractVersion>\\S+) versioning=(?<versioning>\\S+)\\n\\s*channels: \\[(?<currentValue>v[0-9]+)\\]',
+      ],
+      versioningTemplate: '{{{versioning}}}',
+    },
+    {
+      description: 'Zigbee2MQTT configuration file schema version',
+      customType: 'regex',
+      managerFilePatterns: [
+        '/^apps/home/zigbee2mqtt/z2m-configuration\\.ya?ml$/',
+      ],
+      matchStrings: [
+        '# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)(?: versioning=(?<versioning>\\S+))?\\n# yaml-language-server: \\$schema=https://raw\\.githubusercontent\\.com/[^/]+/[^/]+/refs/tags/(?<currentValue>[^/\\s]+)/lib/util/settings\\.schema\\.json',
+      ],
+      versioningTemplate: '{{#if versioning}}{{{versioning}}}{{else}}semver-coerced{{/if}}',
+    },
+    {
+      description: 'annotated operator versions',
+      customType: 'regex',
+      managerFilePatterns: ['/^infrastructure/operators/.+\\.ya?ml$/'],
+      matchStrings: [
+        '# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)(?: extractVersion=(?<extractVersion>\\S+))?(?: versioning=(?<versioning>\\S+))?\\n\\s*version: [\'"](?<currentValue>[^\'"]+)[\'"]',
+      ],
+      versioningTemplate: '{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}',
+    },
+    {
+      description: 'OLM catalog digests',
+      customType: 'regex',
+      managerFilePatterns: ['/^olm/catalogs\\.ya?ml$/'],
+      matchStrings: [
+        '# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)(?: versioning=(?<versioning>\\S+))?\\n\\s*ref: \\S+@(?<currentDigest>sha256:[a-f0-9]+)',
+      ],
+      currentValueTemplate: 'latest',
+      versioningTemplate: '{{#if versioning}}{{{versioning}}}{{else}}docker{{/if}}',
+    },
+  ],
+
+  kubernetes: {
+    managerFilePatterns: [
+      '/^apps/.+\\.ya?ml$/',
+      '/^infrastructure/.+\\.ya?ml$/',
+      '/^olm/.+\\.ya?ml$/',
+      '/^services/.+\\.ya?ml$/',
+      '/^sources/.+\\.ya?ml$/',
+    ],
+  },
+  flux: {
+    managerFilePatterns: [
+      '/^apps/.+\\.ya?ml$/',
+      '/^clusters/.+/gotk-components\\.ya?ml$/',
+      '/^infrastructure/.+\\.ya?ml$/',
+      '/^olm/.+\\.ya?ml$/',
+      '/^services/.+\\.ya?ml$/',
+      '/^sources/.+\\.ya?ml$/',
+    ],
+  },
+}

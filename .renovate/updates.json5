@@ -1,0 +1,35 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+
+  packageRules: [
+    {
+      description: 'Keep Flux HelmRelease chart versions free of digests',
+      matchManagers: ['flux'],
+      matchDatasources: ['docker'],
+      matchDepTypes: ['HelmChart'],
+      // OCIRepository references supply a template for their separate digest field.
+      matchJsonata: ['$not($exists(autoReplaceStringTemplate))'],
+      pinDigests: false,
+    },
+    {
+      description: 'Refresh Helm indexes when chart updates merge',
+      matchManagers: ['flux'],
+      matchDatasources: ['helm'],
+      postUpgradeTasks: {
+        commands: ['node scripts/renovate-helm-source-refresh.mjs'],
+        dataFileTemplate: '{{{toJSON upgrades}}}',
+        executionMode: 'branch',
+        fileFilters: ['sources/*.yaml'],
+      },
+    },
+    {
+      description: 'Refresh the avahi2dns source archive checksum after source updates',
+      matchManagers: ['custom.regex'],
+      matchDepNames: ['LouisBrunner/avahi2dns'],
+      postUpgradeTasks: {
+        commands: ['node scripts/renovate-avahi2dns-checksum.mjs'],
+        fileFilters: ['images/avahi2dns/Containerfile'],
+      },
+    },
+  ],
+}

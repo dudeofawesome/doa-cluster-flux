@@ -1,0 +1,88 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+
+  packageRules: [
+    // Image labels and variant tags do not always lead Renovate to release notes.
+    {
+      matchDatasources: ['docker'],
+      matchPackageNames: ['docker.io/grafana/grafana'],
+      sourceUrl: 'https://github.com/grafana/grafana',
+      changelogUrl: 'https://grafana.com/docs/grafana/latest/whatsnew/',
+    },
+    {
+      matchDatasources: ['docker'],
+      matchPackageNames: ['ghcr.io/utkuozdemir/nvidia_gpu_exporter'],
+      sourceUrl: 'https://github.com/utkuozdemir/nvidia_gpu_exporter',
+      changelogUrl: 'https://github.com/utkuozdemir/nvidia_gpu_exporter/releases',
+    },
+    {
+      matchDatasources: ['docker'],
+      matchPackageNames: ['ghcr.io/ggml-org/llama.cpp'],
+      sourceUrl: 'https://github.com/ggml-org/llama.cpp',
+      changelogUrl: 'https://github.com/ggml-org/llama.cpp/releases',
+    },
+    {
+      matchDatasources: ['docker'],
+      matchPackageNames: ['quay.io/operator-framework/catalogd'],
+      sourceUrl: 'https://github.com/operator-framework/catalogd',
+      changelogUrl: 'https://github.com/operator-framework/catalogd/releases',
+    },
+    {
+      matchDatasources: ['docker'],
+      matchPackageNames: ['quay.io/operator-framework/operator-controller'],
+      sourceUrl: 'https://github.com/operator-framework/operator-controller',
+      changelogUrl: 'https://github.com/operator-framework/operator-controller/releases',
+    },
+    {
+      matchDatasources: ['docker'],
+      matchPackageNames: ['docker.io/louislam/uptime-kuma'],
+      sourceUrl: 'https://github.com/louislam/uptime-kuma',
+      changelogUrl: 'https://github.com/louislam/uptime-kuma/releases',
+    },
+    {
+      matchDatasources: ['docker'],
+      matchPackageNames: ['ghcr.io/fire-devils/filaman-system'],
+      sourceUrl: 'https://github.com/Fire-Devils/filaman-system',
+      changelogUrl: 'https://github.com/Fire-Devils/filaman-system/releases',
+    },
+    {
+      matchDatasources: ['docker'],
+      matchPackageNames: ['ghcr.io/atuinsh/atuin'],
+      sourceUrl: 'https://github.com/atuinsh/atuin',
+      changelogUrl: 'https://github.com/atuinsh/atuin/releases',
+    },
+    {
+      matchDatasources: ['docker'],
+      matchPackageNames: ['docker.io/nousresearch/hermes-agent'],
+      sourceUrl: 'https://github.com/NousResearch/hermes-agent',
+      changelogUrl: 'https://github.com/NousResearch/hermes-agent/releases',
+    },
+    {
+      matchDatasources: ['docker'],
+      matchPackageNames: ['docker.io/library/node'],
+      sourceUrl: 'https://github.com/nodejs/node',
+      changelogUrl: 'https://nodejs.org/en/blog/release',
+    },
+    {
+      matchDatasources: ['docker'],
+      matchPackageNames: [
+        'docker.io/aguslr/cups',
+        'ghcr.io/dudeofawesome/cups',
+      ],
+      sourceUrl: 'https://github.com/aguslr/docker-cups',
+      changelogUrl: 'https://github.com/aguslr/docker-cups/commits/',
+    },
+    {
+      matchDatasources: ['docker'],
+      matchPackageNames: ['docker.io/aguslr/airsane'],
+      sourceUrl: 'https://github.com/aguslr/docker-airsane',
+      changelogUrl: 'https://github.com/aguslr/docker-airsane/commits/',
+    },
+    {
+      matchDatasources: ['docker'],
+      matchPackageNames: ['registry.k8s.io/nfd/node-feature-discovery'],
+      sourceUrl: 'https://github.com/kubernetes-sigs/node-feature-discovery',
+      changelogUrl: 'https://github.com/kubernetes-sigs/node-feature-discovery/releases',
+    },
+  ],
+}
