@@ -1,0 +1,23 @@
+apiVersion: resource.k8s.io/v1
+kind: DeviceClass
+metadata:
+  name: rtx3060.gpu.nvidia.com
+spec:
+  selectors:
+    - cel:
+        expression: >-
+          device.driver == 'gpu.nvidia.com' &&
+          device.attributes['gpu.nvidia.com'].type == 'gpu' &&
+          device.attributes['gpu.nvidia.com'].productName == 'NVIDIA GeForce RTX 3060'
+---
+apiVersion: resource.k8s.io/v1
+kind: DeviceClass
+metadata:
+  name: rtx3090.gpu.nvidia.com
+spec:
+  selectors:
+    - cel:
+        expression: >-
+          device.driver == 'gpu.nvidia.com' &&
+          device.attributes['gpu.nvidia.com'].type == 'gpu' &&
+          device.attributes['gpu.nvidia.com'].productName == 'NVIDIA GeForce RTX 3090'

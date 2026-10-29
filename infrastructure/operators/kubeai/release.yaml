@@ -5,6 +5,9 @@ metadata:
   namespace: kubeai-system
 spec:
   interval: 30m
+  dependsOn:
+    - name: nvidia-dra
+      namespace: nvidia-dra
   timeout: 5m
   install:
     crds: CreateReplace
@@ -70,19 +73,31 @@ spec:
         limits:
           cpu: '2'
           memory: 2Gi
-      # One allocation unit; models select rtx3060:1 or rtx3060:2.
+      # One full matching GPU per unit; models select rtx3060:1 or rtx3060:2.
+      # DRAExtendedResource must be enabled on the K3s host (Kubernetes 1.35).
       rtx3060:
         imageName: nvidia-gpu
-        runtimeClassName: nvidia
         nodeSelector:
           kubernetes.io/hostname: kings-canyon
-          feature.node.kubernetes.io/nvidia-runtime.configured: 'true'
+          feature.node.kubernetes.io/nvidia-dra.configured: 'true'
         requests:
-          nvidia.com/gpu: '1'
+          deviceclass.resource.kubernetes.io/rtx3060.gpu.nvidia.com: '1'
           cpu: '2'
           memory: 4Gi
         limits:
-          nvidia.com/gpu: '1'
+          deviceclass.resource.kubernetes.io/rtx3060.gpu.nvidia.com: '1'
+          memory: 16Gi
+      rtx3090:
+        imageName: nvidia-gpu
+        nodeSelector:
+          kubernetes.io/hostname: kings-canyon
+          feature.node.kubernetes.io/nvidia-dra.configured: 'true'
+        requests:
+          deviceclass.resource.kubernetes.io/rtx3090.gpu.nvidia.com: '1'
+          cpu: '2'
+          memory: 4Gi
+        limits:
+          deviceclass.resource.kubernetes.io/rtx3090.gpu.nvidia.com: '1'
           memory: 16Gi
     modelAutoscaling:
       interval: 10s

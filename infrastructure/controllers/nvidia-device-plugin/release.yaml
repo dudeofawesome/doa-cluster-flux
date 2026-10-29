@@ -23,6 +23,9 @@ spec:
     # Restrict DaemonSet targets as well as RuntimeClass pod scheduling.
     nodeSelector:
       feature.node.kubernetes.io/nvidia-runtime.configured: 'true'
+      # Retain an inert release because this Flux group has prune: false.
+      # DRA depends on this upgrade completing before it takes over GPUs.
+      orleans.io/gpu-device-plugin: enabled
     affinity: null
     deviceListStrategy: envvar
     deviceIDStrategy: index
