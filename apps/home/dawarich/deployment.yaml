@@ -29,7 +29,7 @@ spec:
         # Preserve the image's database files while providing writable paths.
         # fsGroup makes the volumes writable without a root/chown entrypoint.
         - name: initialize-storage
-          image: freikin/dawarich:1.17.0@sha256:207dc86f8baa8fcf5b585f31186bf81b55added9c102a96f308d640e964ea60f
+          image: freikin/dawarich:1.18.1@sha256:a2b93286a973b2e4b55d6a1ebd8009a65b8624639687ca95e909d0aac27324f5
           command: [/bin/sh, -ec]
           args:
             - |
@@ -53,7 +53,7 @@ spec:
               mountPath: /runtime-db
       containers:
         - name: web
-          image: freikin/dawarich:1.17.0@sha256:207dc86f8baa8fcf5b585f31186bf81b55added9c102a96f308d640e964ea60f
+          image: freikin/dawarich:1.18.1@sha256:a2b93286a973b2e4b55d6a1ebd8009a65b8624639687ca95e909d0aac27324f5
           command: [web-entrypoint.sh]
           args: [bin/rails, server, -p, '3000', -b, '0.0.0.0']
           securityContext: *securityContext
@@ -115,7 +115,7 @@ spec:
             - name: log
               mountPath: /var/app/log
         - name: sidekiq
-          image: freikin/dawarich:1.17.0@sha256:207dc86f8baa8fcf5b585f31186bf81b55added9c102a96f308d640e964ea60f
+          image: freikin/dawarich:1.18.1@sha256:a2b93286a973b2e4b55d6a1ebd8009a65b8624639687ca95e909d0aac27324f5
           # Wait for migrations and seeds, not just a database TCP connection.
           command: [/bin/sh, -ec]
           args:
