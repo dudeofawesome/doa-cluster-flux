@@ -1,21 +1,13 @@
 model:
   provider: local
-  default: qwen3.6-35b-a3b-iq4-xs
+  default: qwen3.8-27b-heretic-iq4-xs-mtp
 providers:
   local:
     api: http://kubeai.kubeai-system.svc.cluster.local/openai/v1
     transport: chat_completions
-    default_model: qwen3.6-35b-a3b-iq4-xs
+    default_model: qwen3.8-27b-heretic-iq4-xs-mtp
     # Match server allocations; the proxy does not expose runtime context.
     models:
-      llama-3.2-3b-instruct-q8:
-        context_length: 65536
-      qwen3.6-35b-a3b-iq4-xs:
-        context_length: 65536
-      qwen3.6-35b-a3b-iq4-xs-v2:
-        context_length: 262144
-      qwen3.8-27b-heretic-q4-k-m:
-        context_length: 65536
       qwen3.8-27b-heretic-iq4-xs-mtp:
         context_length: 131072
 display:
