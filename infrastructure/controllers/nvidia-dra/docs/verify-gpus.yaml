@@ -1,0 +1,64 @@
+# Manual rollout checks; deliberately excluded from kustomization.yaml.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dra-verify-3060
+  namespace: inference
+spec:
+  restartPolicy: Never
+  automountServiceAccountToken: false
+  nodeSelector:
+    kubernetes.io/hostname: kings-canyon
+  containers:
+    - name: verify
+      image: ghcr.io/ggml-org/llama.cpp:server-cuda13-b11552@sha256:48f87d72fb1d226ac6064e7c7ef9068ac305dc5014b7dc9251fa62e7f9f6ddc4
+      command: [nvidia-smi]
+      args: ['--query-gpu=name,memory.total', '--format=csv,noheader']
+      resources:
+        requests:
+          cpu: 10m
+          memory: 64Mi
+          deviceclass.resource.kubernetes.io/rtx3060.gpu.nvidia.com: '2'
+        limits:
+          memory: 256Mi
+          deviceclass.resource.kubernetes.io/rtx3060.gpu.nvidia.com: '2'
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: [ALL]
+        seccompProfile:
+          type: RuntimeDefault
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dra-verify-3090
+  namespace: inference
+spec:
+  restartPolicy: Never
+  automountServiceAccountToken: false
+  nodeSelector:
+    kubernetes.io/hostname: kings-canyon
+  containers:
+    - name: verify
+      image: ghcr.io/ggml-org/llama.cpp:server-cuda13-b11552@sha256:48f87d72fb1d226ac6064e7c7ef9068ac305dc5014b7dc9251fa62e7f9f6ddc4
+      command: [nvidia-smi]
+      args: ['--query-gpu=name,memory.total', '--format=csv,noheader']
+      resources:
+        requests:
+          cpu: 10m
+          memory: 64Mi
+          deviceclass.resource.kubernetes.io/rtx3090.gpu.nvidia.com: '1'
+        limits:
+          memory: 256Mi
+          deviceclass.resource.kubernetes.io/rtx3090.gpu.nvidia.com: '1'
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: [ALL]
+        seccompProfile:
+          type: RuntimeDefault
