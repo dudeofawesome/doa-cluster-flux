@@ -17,7 +17,7 @@ spec:
   # Omit replicas: KubeAI owns it through the scale subresource.
   minReplicas: 0
   maxReplicas: 1
-  targetRequests: 2
+  targetRequests: 1
   scaleDownDelaySeconds: 270
   env:
     HOME: /tmp
@@ -38,13 +38,17 @@ spec:
     - 'q8_0'
     - --spec-draft-type-v
     - 'q8_0'
-    # MTP keeps (1 + draft n-max) copies of each slot's recurrent state in
-    #   VRAM, so two slots leave room for 131072 tokens on 2x 12 GB.
+    # Each slot needs recurrent state for the target and speculative tokens.
+    # Use one slot to prioritize context capacity over concurrent requests.
     - --parallel
-    - '2'
+    - '1'
     - --kv-unified
     - --ctx-size
     - '131072'
+    # MTP inherits this physical batch size in the pinned llama.cpp build.
+    # Reduce both contexts' compute-buffer requirements before cutting context.
+    - --ubatch-size
+    - '128'
     # Checkpoints and the prompt cache live in host RAM; bound them per pod.
     - --ctx-checkpoints
     - '8'
@@ -52,8 +56,8 @@ spec:
     - '4096'
     - --split-mode
     - 'layer'
-    # The last GPU also holds the output layer, MTP head and draft KV (~1.2
-    #   GiB); shift a few layers to the first GPU to even out VRAM.
+    # The last GPU also holds the output layer and MTP allocations; shift
+    # a few layers to the first GPU to leave room for those allocations.
     - --tensor-split
     - '6,5'
     - --flash-attn
