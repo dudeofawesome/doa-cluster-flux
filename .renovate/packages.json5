@@ -3,6 +3,12 @@
 
   packageRules: [
     {
+      description: 'Treat New API release candidates as SemVer prereleases',
+      matchDatasources: ['docker'],
+      matchPackageNames: ['docker.io/calciumion/new-api'],
+      versioning: 'semver',
+    },
+    {
       description: 'Ignore the broken catalogd v1.18.0 release',
       matchDatasources: ['docker'],
       matchDepNames: ['quay.io/operator-framework/catalogd'],
