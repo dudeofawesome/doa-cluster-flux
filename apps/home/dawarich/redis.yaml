@@ -54,7 +54,7 @@ spec:
                   failureThreshold: 60
                   periodSeconds: 5
   robin:
-    image: ghcr.io/inditextech/redkey-robin:0.2.0@sha256:d174bab6d680e834dbc04e3c48a7ac8a7adab3b6aef4e8e88e8b387ec175f4e2
+    image: ghcr.io/inditextech/redkey-robin:0.2.2@sha256:981af5fa576564d10d9f0ba28935dd5fd8344ff36212f8b34320a7c072335cb9
     resources:
       requests:
         cpu: 50m
