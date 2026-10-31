@@ -7,6 +7,8 @@
       matchDatasources: ['docker'],
       matchPackageNames: ['docker.io/calciumion/new-api'],
       versioning: 'semver',
+      // Architecture and special-build suffixes are not newer release candidates.
+      allowedVersions: '/^v?\\d+\\.\\d+\\.\\d+(?:-rc\\.\\d+)?$/',
     },
     {
       description: 'Ignore the broken catalogd v1.18.0 release',
