@@ -16,4 +16,4 @@ spec:
       packageName: redkey-operator
       channels: [stable]
       # renovate: datasource=github-releases depName=InditexTech/redkey-operator extractVersion=^v?(?<version>\d+\.\d+\.\d+)$
-      version: '0.2.0'
+      version: '0.2.1'
