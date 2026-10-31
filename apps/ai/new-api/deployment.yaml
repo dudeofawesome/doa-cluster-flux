@@ -27,7 +27,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: new-api
-          image: docker.io/calciumion/new-api:v1.0.0-rc.44@sha256:67bf271602177ff31bbb4b34f20d5f33003d3108514bd23412cff66498c05a84
+          image: docker.io/calciumion/new-api:v1.0.0-rc.9-arm64@sha256:02b0187f8f9af9731dceb74e9ce4a9a5cce449393e037e582ecf721c311691a9
           args: ['--log-dir', '/data/logs']
           securityContext:
             readOnlyRootFilesystem: true
