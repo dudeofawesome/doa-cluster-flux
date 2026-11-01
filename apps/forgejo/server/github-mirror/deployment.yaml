@@ -31,7 +31,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: gitea-mirror
-          image: ghcr.io/raylabshq/gitea-mirror:v3.50.0@sha256:421a5ec419f8176c0205e76d505c9e3410a189cc79b189b1ee32df8ddf609fa5
+          image: ghcr.io/raylabshq/gitea-mirror:v3.51.0@sha256:755b6e3b3d63a00c247096e67ac8438f65cba2233ddee5e88e8c9763dc230a06
           imagePullPolicy: IfNotPresent
           env:
             - name: NODE_ENV
