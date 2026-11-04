@@ -28,7 +28,7 @@ spec:
         # DNS and PostgreSQL can recover after this pod during cluster startup.
         # Wait for an authenticated query, rather than just an open TCP port.
         - name: wait-for-database
-          image: 'ghcr.io/home-assistant/home-assistant:2026.10.4@sha256:23f4dfbb69ce76315dbc4de7915504f1c2dcecd7ca2648113a493a385972e133'
+          image: 'ghcr.io/home-assistant/home-assistant:2026.11.0@sha256:c6c1ca9931036bf3a2c4cc088d8db25dfea3b33935a5ecc83c40349462e2f69e'
           command:
             - python3
             - -u
@@ -71,7 +71,7 @@ spec:
       #   fsGroupChangePolicy: "OnRootMismatch"
       containers:
         - name: home-assistant-app
-          image: 'ghcr.io/home-assistant/home-assistant:2026.10.4@sha256:23f4dfbb69ce76315dbc4de7915504f1c2dcecd7ca2648113a493a385972e133'
+          image: 'ghcr.io/home-assistant/home-assistant:2026.11.0@sha256:c6c1ca9931036bf3a2c4cc088d8db25dfea3b33935a5ecc83c40349462e2f69e'
           imagePullPolicy: IfNotPresent
           securityContext:
             privileged: true
