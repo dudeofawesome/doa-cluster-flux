@@ -17,7 +17,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: enable-passkeys
-          image: 'ghcr.io/dudeofawesome/keycloak:26.8.1@sha256:24ca27acd8d6448ca9c9547e2c68c731c94c454085d99afe9e943dc7b741b46d'
+          image: 'ghcr.io/dudeofawesome/keycloak:26.8.2@sha256:f6335e2e28cde3b842358f60cedcd23ebc446f7acaaede28654f9cc7a2204ac4'
           command: ['/bin/bash', '-euc']
           args:
             - |
