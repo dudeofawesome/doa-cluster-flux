@@ -28,6 +28,34 @@ spec:
       orleans.io/gpu-device-plugin: enabled
     affinity: null
     deviceListStrategy: envvar
-    deviceIDStrategy: index
+    # The plugin only sees the GPUs listed in the patch below, and NVML numbers
+    #   them from 0 inside its container, so indexes would name the wrong host
+    #   GPUs. UUIDs need kings-canyon's CDI spec to include UUID device names
+    #   (nix-config hosts/nixos/kings-canyon/k3s-gpu.nix).
+    deviceIDStrategy: uuid
     migStrategy: none
     failOnInitError: true
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              group: apps
+              version: v1
+              kind: DaemonSet
+              name: nvidia-device-plugin
+            patch: |
+              apiVersion: apps/v1
+              kind: DaemonSet
+              metadata:
+                name: nvidia-device-plugin
+              spec:
+                template:
+                  spec:
+                    containers:
+                      - name: nvidia-device-plugin-ctr
+                        env:
+                          # The chart hardcodes `all`. Advertise only the
+                          #   kings-canyon RTX 3060s as nvidia.com/gpu; the RTX
+                          #   3090 is devic.es/rtx3090 (generic-device-plugin).
+                          - name: NVIDIA_VISIBLE_DEVICES
+                            value: GPU-0e5f94ee-b735-84ad-6e2f-61ab731b442f,GPU-8b0b486f-fe4e-78fc-597f-2eaa9ec0b7a3
