@@ -1,5 +1,5 @@
 # renovate: datasource=docker depName=docker.io/aguslr/cups
-ARG CUPS_VERSION=20261028@sha256:048ebcad446497ca4853d85eed4155e510fa980c1639999e6792fbc3186f76c9
+ARG CUPS_VERSION=20261106@sha256:ba3558290389f43bd15ce49293c568471b39c3bb15b34c3e07287b2347946492
 FROM docker.io/aguslr/cups:${CUPS_VERSION}
 
 RUN apt-get update \
