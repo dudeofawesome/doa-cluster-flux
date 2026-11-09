@@ -25,6 +25,8 @@ kubectl wait -n inference --for=condition=complete --timeout=2h job/prepare-hype
 
 Boot it with one request, then read `Available KV cache memory` from the pod log and add `--kv-cache-memory=<bytes, slightly under that value>` to the Model before measuring. An unpinned pool changes size with the state of the compile cache.
 
+The benchmark talks to the pod directly, and KubeAI only counts requests through its own proxy, so it won't keep the pod alive. Set `minReplicas: 1` on the Model in Git before benchmarking, and return it to `0` once both runs are finished and the logs are copied out of `/tmp/bench`.
+
 Run the benchmark twice and keep the second result:
 
 ```sh
