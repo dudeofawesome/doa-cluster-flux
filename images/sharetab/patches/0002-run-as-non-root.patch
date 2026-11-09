@@ -58,7 +58,7 @@
 +  run_step node /app/db.mjs "$@"
  }
 
- # A DATABASE_URL means an external PostgreSQL server: the bundled one isn't
+ # SHARETAB_MAINTENANCE=true starts the bundled database and nothing else, so
 @@ -115,7 +118,6 @@
  # Ensure uploads directory exists and is writable by the app user (needed for host bind-mounts)
  UPLOAD_DIR="${UPLOAD_DIR:-/app/uploads}"
