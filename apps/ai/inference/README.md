@@ -23,13 +23,34 @@ kubectl apply -f apps/ai/inference/docs/prepare-hyperqwen-weights.yaml
 kubectl wait -n inference --for=condition=complete --timeout=2h job/prepare-hyperqwen-weights
 ```
 
-Boot it with one request, then read `Available KV cache memory` from the pod log and add `--kv-cache-memory=<bytes, slightly under that value>` to the Model before measuring. An unpinned pool changes size with the state of the compile cache.
-
-The benchmark talks to the pod directly, and KubeAI only counts requests through its own proxy, so it won't keep the pod alive. Set `minReplicas: 1` on the Model in Git before benchmarking, and return it to `0` once both runs are finished and the logs are copied out of `/tmp/bench`.
-
-Run the benchmark twice and keep the second result:
+Start the benchmark client. It sends requests through KubeAI, so both Qwens are measured the same way and autoscaling sees the traffic:
 
 ```sh
-kubectl exec -n inference <model-pod> -- env VLLM_MODEL=qwen3.8-27b-uncensored-w4a16-hyperqwen \
-  HOST=127.0.0.1 PORT=8000 MODEL=/model OUT=/tmp/bench bash bench/run_benchmarks.sh single
+kubectl apply -f apps/ai/inference/docs/benchmark-client.yaml
+kubectl wait -n inference --for=condition=ready --timeout=30m pod/model-benchmark
+```
+
+Boot the model with one request, then read `Available KV cache memory` from the model pod's log and add `--kv-cache-memory=<bytes, slightly under that value>` to the Model before measuring. An unpinned pool changes size with the state of the compile cache.
+
+```sh
+kubectl exec -n inference model-benchmark -- curl -sS --max-time 1800 \
+  http://kubeai.kubeai-system.svc.cluster.local/openai/v1/completions \
+  -H 'Content-Type: application/json' \
+  -d '{"model":"qwen3.8-27b-uncensored-w4a16-hyperqwen","prompt":"Hello","max_tokens":1}'
+```
+
+Run the benchmark against each model, one at a time, when nothing else is using the GPUs:
+
+```sh
+for model in qwen3.8-27b-uncensored-w4a16-hyperqwen qwen3.8-27b-heretic-iq4-xs-mtp; do
+  kubectl exec -i -n inference model-benchmark -- bash -s "$model" \
+    < apps/ai/inference/docs/benchmark.sh
+done
+kubectl delete -f apps/ai/inference/docs/benchmark-client.yaml
+```
+
+The second model can't load until the first scales down, about five minutes later, and the benchmark waits for it. For HyperQwen's tokens per step, run this in the model pod before and after a run. It prints drafts and accepted tokens, and the result is `1 + accepted delta / drafts delta`:
+
+```sh
+kubectl exec -n inference <model-pod> -- env VLLM_API=http://127.0.0.1:8000 python3 bench/harness.py spec
 ```
