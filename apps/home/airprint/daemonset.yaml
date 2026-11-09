@@ -147,7 +147,7 @@ spec:
               mountPath: /config
               readOnly: true
         - name: airsane
-          image: docker.io/aguslr/airsane:20261028@sha256:09bb44290b019a7287a63ae594cf64b1ff4536d7ce2064c78f03a86cac6cf68e
+          image: docker.io/aguslr/airsane:20261106@sha256:40d9b4c2674421a0d976cfcfa5ba78cf18f141d8c7a6f784c96d62ca40d9e1f5
           securityContext:
             privileged: true
           args:
