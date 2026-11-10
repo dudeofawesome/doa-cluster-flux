@@ -26,7 +26,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: filaman
-          image: ghcr.io/fire-devils/filaman-system:v2.0.4@sha256:1c2e80348958f3075d42d6e4a2ca05a5dd8a85f73a6ab574ca55a96cca4aedc9
+          image: ghcr.io/fire-devils/filaman-system:v2.0.6@sha256:31272c6a1745068c770aefa92c0e163cfa7cc1320452b99bf621889917aa90d9
           imagePullPolicy: IfNotPresent
           workingDir: /app
           command: [python, /etc/filaman/startup.py]
