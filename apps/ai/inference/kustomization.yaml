@@ -9,4 +9,5 @@ resources:
   - network-policy.yaml
   - models/whisper-base-en.yaml
   - models/qwen3.8-27b-heretic-iq4-xs-mtp.yaml
+  - models/qwen3.8-27b-uncensored-w4a16-hyperqwen.yaml
   - models/gemma-4-31b-it-qat-q4-0.yaml

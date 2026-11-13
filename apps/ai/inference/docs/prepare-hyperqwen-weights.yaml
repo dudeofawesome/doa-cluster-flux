@@ -1,0 +1,67 @@
+# One-time weight preparation; deliberately excluded from kustomization.yaml.
+# The download can outlast apps-ai's health-check timeout.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: prepare-hyperqwen-weights
+  namespace: inference
+spec:
+  backoffLimit: 2
+  activeDeadlineSeconds: 7200
+  ttlSecondsAfterFinished: 86400
+  template:
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      nodeSelector:
+        kubernetes.io/hostname: kings-canyon
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: prepare
+          image: ghcr.io/syv-ai/hyperqwen:sha-6ab9bd0@sha256:f706b092aabb156c23fe98c312ba7912fb8dbc0c107d4f152382113e33762f1c
+          command: ['/bin/bash', '-euc']
+          args:
+            - |
+              dest=/models/qwen3.8-27b-uncensored-w4a16
+              # The repo also holds .bak copies of several tensors; skip them.
+              venv/bin/python - "$dest" <<'PY'
+              import sys
+              from huggingface_hub import snapshot_download
+              snapshot_download(
+                  "leminkozey/Qwen3.8-27B-Uncensored-W4A16-AutoRound",
+                  revision="745aa440e05f8fd1bcb4c81c415aba79b58b2655",
+                  local_dir=sys.argv[1],
+                  allow_patterns=["*.json", "*.jinja", "*.safetensors"],
+              )
+              PY
+              venv/bin/python prepare/build_draft_vocab.py "$dest" \
+                --ids prepare/draft_vocab_ids.json
+              venv/bin/python prepare/harden_chat_template.py "$dest"
+              venv/bin/python prepare/translate_chat_template.py "$dest"
+              mkdir -p "$dest/.home"
+          env:
+            - name: HOME
+              value: /tmp
+          resources:
+            requests:
+              cpu: '1'
+              memory: 4Gi
+            limits:
+              memory: 16Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - name: models
+              mountPath: /models
+      volumes:
+        - name: models
+          persistentVolumeClaim:
+            claimName: inference-models
