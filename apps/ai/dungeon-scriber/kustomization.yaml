@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# The admission policy is cluster-scoped, which kustomize's namespace field
+#   does not recognize; keep namespaces explicit.
+labels:
+  - pairs:
+      app: dungeon-scriber
+    # Preserve the CoreDNS NetworkPolicy peer selector.
+    includeSelectors: false
+resources:
+  - namespace.yaml
+  - resource-quota.yaml
+  - limit-range.yaml
+  - gpu-admission-policy.yaml
+  - service-account.yaml
+  - storage.yaml
+  - network-policy.yaml
