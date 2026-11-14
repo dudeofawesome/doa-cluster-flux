@@ -22,7 +22,7 @@ spec:
   chart:
     spec:
       chart: kubeai
-      version: '0.25.0'
+      version: '0.25.1'
       sourceRef:
         kind: HelmRepository
         name: kubeai
