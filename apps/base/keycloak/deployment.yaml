@@ -8,6 +8,9 @@ metadata:
   namespace: keycloak
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
+    rollingUpdate: null
   selector:
     matchLabels:
       component: app
