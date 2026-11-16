@@ -2,5 +2,6 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
+  - rtx3090.yaml
   - sonoff-zigbee-coordinator.yaml
   - water-meter-rtl-sdr.yaml

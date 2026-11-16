@@ -99,6 +99,23 @@ spec:
         limits:
           deviceclass.resource.kubernetes.io/rtx3090.gpu.nvidia.com: '1'
           memory: 16Gi
+      # The RTX 3090, shared first come first served with other GPU jobs;
+      #   models select rtx3090:1. Profiles cannot set env, so each model must
+      #   also pin NVIDIA_VISIBLE_DEVICES; see apps/ai/inference/README.md.
+      rtx3090:
+        imageName: nvidia-gpu
+        runtimeClassName: nvidia
+        nodeSelector:
+          kubernetes.io/hostname: kings-canyon
+          feature.node.kubernetes.io/nvidia-runtime.configured: 'true'
+        # Host resources match rtx3060:2, which has the same 24 GB of VRAM.
+        requests:
+          devic.es/rtx3090: '1'
+          cpu: '4'
+          memory: 8Gi
+        limits:
+          devic.es/rtx3090: '1'
+          memory: 32Gi
     modelAutoscaling:
       interval: 10s
       timeWindow: 30s
