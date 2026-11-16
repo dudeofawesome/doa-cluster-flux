@@ -1,0 +1,502 @@
+# Test pods for run.py. Never applied to the cluster: the gpu-admission
+#   kustomization doesn't list this directory.
+#
+# Each pod carries two annotations:
+#   test.gpu-admission/expect    `allow`, or the name of the policy that must
+#                                deny it
+#   test.gpu-admission/describe  what the case checks, in plain words
+#
+# A pod with ephemeralContainers is created without them first, then they are
+#   added the way `kubectl debug` does, and the expectation applies to that
+#   second step.
+#
+# The inference pods mirror what KubeAI 0.24 creates for this repo's
+#   resource profiles (see infrastructure/operators/kubeai/release.yaml).
+
+# --- inference: rtx3060 models (device plugin GPUs) ---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rtx3060-one-gpu
+  namespace: inference
+  annotations:
+    test.gpu-admission/expect: allow
+    test.gpu-admission/describe: An rtx3060:1 model leaves GPU selection to the device plugin.
+spec:
+  runtimeClassName: nvidia
+  nodeSelector:
+    kubernetes.io/hostname: kings-canyon
+    feature.node.kubernetes.io/nvidia-runtime.configured: 'true'
+  containers:
+    - name: server
+      image: ghcr.io/ggml-org/llama.cpp:server-cuda13
+      env:
+        - { name: HOME, value: /tmp }
+      resources:
+        requests: { nvidia.com/gpu: '1', cpu: '2', memory: 4Gi }
+        limits: { nvidia.com/gpu: '1', memory: 16Gi }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rtx3060-two-gpus
+  namespace: inference
+  annotations:
+    test.gpu-admission/expect: allow
+    test.gpu-admission/describe: An rtx3060:2 model leaves GPU selection to the device plugin.
+spec:
+  runtimeClassName: nvidia
+  containers:
+    - name: server
+      image: ghcr.io/ggml-org/llama.cpp:server-cuda13
+      env:
+        - { name: HOME, value: /tmp }
+      resources:
+        requests: { nvidia.com/gpu: '2', cpu: '4', memory: 8Gi }
+        limits: { nvidia.com/gpu: '2', memory: 32Gi }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rtx3060-sets-all
+  namespace: inference
+  annotations:
+    test.gpu-admission/expect: inference-device-plugin-gpus
+    test.gpu-admission/describe: Setting NVIDIA_VISIBLE_DEVICES=all would expose every GPU.
+spec:
+  runtimeClassName: nvidia
+  containers:
+    - name: server
+      image: ghcr.io/ggml-org/llama.cpp:server-cuda13
+      env:
+        - { name: NVIDIA_VISIBLE_DEVICES, value: all }
+      resources:
+        limits: { nvidia.com/gpu: '1' }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rtx3060-sets-rtx3090-uuid
+  namespace: inference
+  annotations:
+    test.gpu-admission/expect: inference-device-plugin-gpus
+    test.gpu-admission/describe: An rtx3060 model can't take the RTX 3090 by naming its UUID.
+spec:
+  runtimeClassName: nvidia
+  containers:
+    - name: server
+      image: ghcr.io/ggml-org/llama.cpp:server-cuda13
+      env:
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: GPU-6dda6c74-00cd-a40f-442e-e952e7c54db1
+      resources:
+        limits: { nvidia.com/gpu: '1' }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rtx3060-sets-rtx3060-uuid
+  namespace: inference
+  annotations:
+    test.gpu-admission/expect: inference-device-plugin-gpus
+    test.gpu-admission/describe: Even a 3060 UUID is rejected, since it may be the card another model holds.
+spec:
+  runtimeClassName: nvidia
+  containers:
+    - name: server
+      image: ghcr.io/ggml-org/llama.cpp:server-cuda13
+      env:
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: GPU-0e5f94ee-b735-84ad-6e2f-61ab731b442f
+      resources:
+        limits: { nvidia.com/gpu: '1' }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rtx3060-env-from
+  namespace: inference
+  annotations:
+    test.gpu-admission/expect: inference-device-plugin-gpus
+    test.gpu-admission/describe: envFrom could carry NVIDIA_VISIBLE_DEVICES where the policy can't see it.
+spec:
+  runtimeClassName: nvidia
+  containers:
+    - name: server
+      image: ghcr.io/ggml-org/llama.cpp:server-cuda13
+      envFrom:
+        - configMapRef: { name: model-settings }
+      resources:
+        limits: { nvidia.com/gpu: '1' }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nvidia-runtime-without-gpu
+  namespace: inference
+  annotations:
+    test.gpu-admission/expect: inference-device-plugin-gpus
+    test.gpu-admission/describe: The nvidia runtime without a GPU request would fall back to the image's `all`.
+spec:
+  runtimeClassName: nvidia
+  containers:
+    - name: server
+      image: ghcr.io/ggml-org/llama.cpp:server-cuda13
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: whisper-cpu
+  namespace: inference
+  annotations:
+    test.gpu-admission/expect: allow
+    test.gpu-admission/describe: CPU models without the nvidia runtime are untouched.
+spec:
+  containers:
+    - name: server
+      image: ghcr.io/ggml-org/whisper.cpp:main
+      resources:
+        requests: { cpu: 500m, memory: 512Mi }
+        limits: { cpu: '2', memory: 2Gi }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rtx3060-debug-container
+  namespace: inference
+  annotations:
+    test.gpu-admission/expect: allow
+    test.gpu-admission/describe: A debug container that leaves NVIDIA_VISIBLE_DEVICES alone is fine.
+spec:
+  runtimeClassName: nvidia
+  containers:
+    - name: server
+      image: ghcr.io/ggml-org/llama.cpp:server-cuda13
+      resources:
+        limits: { nvidia.com/gpu: '1' }
+  ephemeralContainers:
+    - name: debug
+      image: docker.io/library/busybox:1.37
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rtx3060-debug-container-sets-all
+  namespace: inference
+  annotations:
+    test.gpu-admission/expect: inference-device-plugin-gpus
+    test.gpu-admission/describe: A debug container can't widen the pod's GPUs to `all`.
+spec:
+  runtimeClassName: nvidia
+  containers:
+    - name: server
+      image: ghcr.io/ggml-org/llama.cpp:server-cuda13
+      resources:
+        limits: { nvidia.com/gpu: '1' }
+  ephemeralContainers:
+    - name: debug
+      image: docker.io/library/busybox:1.37
+      env:
+        - { name: NVIDIA_VISIBLE_DEVICES, value: all }
+
+# --- inference: rtx3090 models ---
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rtx3090-pinned
+  namespace: inference
+  annotations:
+    test.gpu-admission/expect: allow
+    test.gpu-admission/describe: An rtx3090:1 model that pins the 3090 by UUID.
+spec:
+  runtimeClassName: nvidia
+  nodeSelector:
+    kubernetes.io/hostname: kings-canyon
+    feature.node.kubernetes.io/nvidia-runtime.configured: 'true'
+  containers:
+    - name: server
+      image: ghcr.io/ggml-org/llama.cpp:server-cuda13
+      env:
+        - { name: HOME, value: /tmp }
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: GPU-6dda6c74-00cd-a40f-442e-e952e7c54db1
+        - { name: NVIDIA_DRIVER_CAPABILITIES, value: 'compute,utility' }
+      resources:
+        requests: { devic.es/rtx3090: '1', cpu: '4', memory: 8Gi }
+        limits: { devic.es/rtx3090: '1', memory: 32Gi }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rtx3090-unpinned
+  namespace: inference
+  annotations:
+    test.gpu-admission/expect: rtx3090-pinned
+    test.gpu-admission/describe: An rtx3090 model without the variable would see every GPU.
+spec:
+  runtimeClassName: nvidia
+  containers:
+    - name: server
+      image: ghcr.io/ggml-org/llama.cpp:server-cuda13
+      env:
+        - { name: HOME, value: /tmp }
+      resources:
+        limits: { devic.es/rtx3090: '1' }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rtx3090-sets-all
+  namespace: inference
+  annotations:
+    test.gpu-admission/expect: rtx3090-pinned
+    test.gpu-admission/describe: An rtx3090 model can't widen its view to `all`.
+spec:
+  runtimeClassName: nvidia
+  containers:
+    - name: server
+      image: ghcr.io/ggml-org/llama.cpp:server-cuda13
+      env:
+        - { name: NVIDIA_VISIBLE_DEVICES, value: all }
+      resources:
+        limits: { devic.es/rtx3090: '1' }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rtx3090-debug-container-unpinned
+  namespace: inference
+  annotations:
+    test.gpu-admission/expect: rtx3090-pinned
+    test.gpu-admission/describe: A debug container in a 3090 pod must pin the card too.
+spec:
+  runtimeClassName: nvidia
+  containers:
+    - name: server
+      image: ghcr.io/ggml-org/llama.cpp:server-cuda13
+      env:
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: GPU-6dda6c74-00cd-a40f-442e-e952e7c54db1
+      resources:
+        limits: { devic.es/rtx3090: '1' }
+  ephemeralContainers:
+    - name: debug
+      image: docker.io/library/busybox:1.37
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rtx3090-debug-container-pinned
+  namespace: inference
+  annotations:
+    test.gpu-admission/expect: allow
+    test.gpu-admission/describe: A debug container that pins the 3090 is fine.
+spec:
+  runtimeClassName: nvidia
+  containers:
+    - name: server
+      image: ghcr.io/ggml-org/llama.cpp:server-cuda13
+      env:
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: GPU-6dda6c74-00cd-a40f-442e-e952e7c54db1
+      resources:
+        limits: { devic.es/rtx3090: '1' }
+  ephemeralContainers:
+    - name: debug
+      image: docker.io/library/busybox:1.37
+      env:
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: GPU-6dda6c74-00cd-a40f-442e-e952e7c54db1
+
+# --- any other namespace ---
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rtx3090-pinned
+  namespace: default
+  annotations:
+    test.gpu-admission/expect: allow
+    test.gpu-admission/describe: A job anywhere on the cluster can use the 3090 when it pins the UUID.
+spec:
+  runtimeClassName: nvidia
+  containers:
+    - name: job
+      image: docker.io/library/python:3.13
+      env:
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: GPU-6dda6c74-00cd-a40f-442e-e952e7c54db1
+        - { name: NVIDIA_DRIVER_CAPABILITIES, value: 'compute,utility' }
+      resources:
+        limits: { devic.es/rtx3090: '1' }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rtx3090-env-from-and-pinned
+  namespace: default
+  annotations:
+    test.gpu-admission/expect: allow
+    test.gpu-admission/describe: envFrom is fine next to the pinned value, because an explicit env entry wins.
+spec:
+  runtimeClassName: nvidia
+  containers:
+    - name: job
+      image: docker.io/library/python:3.13
+      envFrom:
+        - configMapRef: { name: job-settings }
+      env:
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: GPU-6dda6c74-00cd-a40f-442e-e952e7c54db1
+      resources:
+        limits: { devic.es/rtx3090: '1' }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rtx3090-no-env
+  namespace: default
+  annotations:
+    test.gpu-admission/expect: rtx3090-pinned
+    test.gpu-admission/describe: The 3090 token without the variable would see every GPU.
+spec:
+  runtimeClassName: nvidia
+  containers:
+    - name: job
+      image: docker.io/library/python:3.13
+      resources:
+        limits: { devic.es/rtx3090: '1' }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rtx3090-value-from
+  namespace: default
+  annotations:
+    test.gpu-admission/expect: rtx3090-pinned
+    test.gpu-admission/describe: The value must be a literal, not read from a ConfigMap.
+spec:
+  runtimeClassName: nvidia
+  containers:
+    - name: job
+      image: docker.io/library/python:3.13
+      env:
+        - name: NVIDIA_VISIBLE_DEVICES
+          valueFrom:
+            configMapKeyRef: { name: gpu, key: uuid }
+      resources:
+        limits: { devic.es/rtx3090: '1' }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rtx3090-init-container-unpinned
+  namespace: default
+  annotations:
+    test.gpu-admission/expect: rtx3090-pinned
+    test.gpu-admission/describe: Init containers must pin the card as well.
+spec:
+  runtimeClassName: nvidia
+  initContainers:
+    - name: prepare
+      image: docker.io/library/python:3.13
+  containers:
+    - name: job
+      image: docker.io/library/python:3.13
+      env:
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: GPU-6dda6c74-00cd-a40f-442e-e952e7c54db1
+      resources:
+        limits: { devic.es/rtx3090: '1' }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rtx3090-and-rtx3060
+  namespace: default
+  annotations:
+    test.gpu-admission/expect: rtx3090-pinned
+    test.gpu-admission/describe: The pinned value would replace the 3060 the device plugin allocated.
+spec:
+  runtimeClassName: nvidia
+  containers:
+    - name: job
+      image: docker.io/library/python:3.13
+      env:
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: GPU-6dda6c74-00cd-a40f-442e-e952e7c54db1
+      resources:
+        limits: { devic.es/rtx3090: '1', nvidia.com/gpu: '1' }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rtx3090-default-runtime
+  namespace: default
+  annotations:
+    test.gpu-admission/expect: rtx3090-pinned
+    test.gpu-admission/describe: Without the nvidia runtime the pod would hold the card but get no GPU.
+spec:
+  containers:
+    - name: job
+      image: docker.io/library/python:3.13
+      env:
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: GPU-6dda6c74-00cd-a40f-442e-e952e7c54db1
+      resources:
+        limits: { devic.es/rtx3090: '1' }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rtx3090-other-runtime
+  namespace: default
+  annotations:
+    test.gpu-admission/expect: rtx3090-pinned
+    test.gpu-admission/describe: Other RuntimeClasses don't attach the GPU either.
+spec:
+  runtimeClassName: other
+  containers:
+    - name: job
+      image: docker.io/library/python:3.13
+      env:
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: GPU-6dda6c74-00cd-a40f-442e-e952e7c54db1
+      resources:
+        limits: { devic.es/rtx3090: '1' }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rtx3060-outside-inference
+  namespace: default
+  annotations:
+    test.gpu-admission/expect: allow
+    test.gpu-admission/describe: Outside inference, nvidia.com/gpu pods aren't restricted.
+spec:
+  runtimeClassName: nvidia
+  containers:
+    - name: job
+      image: docker.io/library/python:3.13
+      resources:
+        limits: { nvidia.com/gpu: '1' }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dcgm-exporter-style
+  namespace: default
+  annotations:
+    test.gpu-admission/expect: allow
+    test.gpu-admission/describe: >-
+      Known gap, kept on purpose: outside inference, a pod without a GPU request
+      can still see every GPU, which dcgm-exporter relies on for metrics.
+spec:
+  runtimeClassName: nvidia
+  containers:
+    - name: exporter
+      image: nvcr.io/nvidia/k8s/dcgm-exporter:4.4.1-4.6.0-ubuntu22.04
+      env:
+        - { name: NVIDIA_VISIBLE_DEVICES, value: all }
+        - { name: NVIDIA_DRIVER_CAPABILITIES, value: 'compute,utility' }
