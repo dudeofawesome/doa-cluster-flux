@@ -41,6 +41,8 @@ spec:
       containers:
         - name: generic-device-plugin
           image: docker.io/squat/generic-device-plugin:0.2.0@sha256:66c8d5c270eb2b721f1064c549b9b7898152a6d2f0163380a5d37dc7636c20ff
+          # /dev is a read-only host mount; keep the runtime's log mount outside it.
+          terminationMessagePath: /termination-log
           args:
             - --config=/etc/generic-device-plugin/config.yaml
             - --plugin-directory=/var/lib/kubelet/device-plugins
