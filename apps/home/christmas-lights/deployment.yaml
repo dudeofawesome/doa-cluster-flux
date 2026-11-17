@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: christmas-lights
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    # Release the exclusive serial device before starting its replacement.
+    type: Recreate
+  selector:
+    matchLabels:
+      component: app
+  template:
+    metadata:
+      labels:
+        component: app
+    spec:
+      automountServiceAccountToken: false
+      nodeSelector:
+        feature.node.kubernetes.io/christmas-lights-relay.present: 'true'
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        # NixOS dialout group owns the host serial device.
+        supplementalGroups: [27]
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: christmas-lights
+          image: ghcr.io/dudeofawesome/christmas-lights:sha-16974f69b99e0b63a9ff1a65ee7df411d06c7631@sha256:327b7648ce25416b09d9677ab2b60a59d53ddb404ff0a64b268e01c4ab55af19
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          envFrom:
+            - configMapRef:
+                name: configuration
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+              devic.es/christmas-lights-relay: '1'
+            limits:
+              cpu: '1'
+              memory: 256Mi
+              devic.es/christmas-lights-relay: '1'
+          # The image has no shell or HTTP endpoint. Use its running Node binary
+          # to verify that the controller opened the allocated serial device.
+          startupProbe:
+            exec:
+              command:
+                - /proc/1/exe
+                - -e
+                - &relay-check |
+                  const fs = require('node:fs');
+                  const device = fs.statSync(process.env.SERIAL_PORT);
+                  const opened = fs.readdirSync('/proc/1/fd').some(fd => {
+                    try {
+                      const stat = fs.statSync(`/proc/1/fd/${fd}`);
+                      return stat.isCharacterDevice() && stat.rdev === device.rdev;
+                    } catch { return false; }
+                  });
+                  process.exit(opened ? 0 : 1);
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 12
+          readinessProbe:
+            exec:
+              command: [/proc/1/exe, -e, *relay-check]
+            periodSeconds: 15
+            timeoutSeconds: 5
