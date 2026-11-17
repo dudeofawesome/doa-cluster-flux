@@ -6,9 +6,6 @@ kind: Deployment
 metadata:
   name: keycloak
   namespace: keycloak
-  annotations:
-    # Remove after the Recreate transition: SSA retains the live rollingUpdate fields.
-    kustomize.toolkit.fluxcd.io/force: enabled
 spec:
   replicas: 1
   strategy:
