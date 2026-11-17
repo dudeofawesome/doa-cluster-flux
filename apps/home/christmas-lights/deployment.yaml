@@ -29,7 +29,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: christmas-lights
-          image: ghcr.io/dudeofawesome/christmas-lights:sha-16974f69b99e0b63a9ff1a65ee7df411d06c7631@sha256:327b7648ce25416b09d9677ab2b60a59d53ddb404ff0a64b268e01c4ab55af19
+          image: ghcr.io/dudeofawesome/christmas-lights:latest@sha256:58a67eba2450bc6bd1032d78f31a0a5a7e5d8a9bedbca4ec41b2db4d64785933
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
