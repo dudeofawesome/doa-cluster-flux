@@ -7,3 +7,10 @@ devices:
           - vendor: '0bda'
             product: '2838'
             serial: '03938241'
+  - name: christmas-lights-relay
+    groups:
+      - count: 1
+        paths:
+          - path: /dev/serial/by-id/usb-SparkFun_Christmas_Lights_Relay_christmas-lights-001-if00
+            mountPath: /dev/christmas-lights-relay
+            permissions: rw

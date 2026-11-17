@@ -20,10 +20,19 @@ spec:
                   - key: orleans.io/maintenance
                     operator: NotIn
                     values: ['true']
+                  - key: feature.node.kubernetes.io/water-meter-rtl-sdr.present
+                    operator: In
+                    values: ['true']
+              - matchExpressions:
+                  - key: orleans.io/maintenance
+                    operator: NotIn
+                    values: ['true']
+                  - key: feature.node.kubernetes.io/christmas-lights-relay.present
+                    operator: In
+                    values: ['true']
       automountServiceAccountToken: false
       nodeSelector:
         kubernetes.io/os: linux
-        feature.node.kubernetes.io/water-meter-rtl-sdr.present: 'true'
       tolerations:
         - operator: Exists
           effect: NoSchedule
@@ -71,8 +80,9 @@ spec:
               readOnly: true
             - name: device-plugins
               mountPath: /var/lib/kubelet/device-plugins
-            - name: usb
-              mountPath: /dev/bus/usb
+            # Preserve by-id symlinks and their tty targets for serial discovery.
+            - name: host-dev
+              mountPath: /dev
               readOnly: true
       volumes:
         - name: configuration
@@ -82,7 +92,7 @@ spec:
           hostPath:
             path: /var/lib/kubelet/device-plugins
             type: Directory
-        - name: usb
+        - name: host-dev
           hostPath:
-            path: /dev/bus/usb
+            path: /dev
             type: Directory
