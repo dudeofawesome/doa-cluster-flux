@@ -3,6 +3,19 @@
 
   packageRules: [
     {
+      description: 'Replace the retired Python Matter Server with Matter.js Server',
+      matchDatasources: ['docker'],
+      matchPackageNames: ['ghcr.io/matter-js/python-matter-server'],
+      replacementName: 'ghcr.io/matter-js/matterjs-server',
+      replacementVersion: '1',
+      // Replace the tag once without matching digits inside the pinned digest.
+      autoReplaceGlobalMatch: false,
+      automerge: false,
+      prBodyNotes: [
+        'Review the [Matter.js Server migration guide](https://github.com/matter-js/matterjs-server/blob/main/docs/migration.md) before merging. The new image runs as UID 1000 and requires writable data-directory permissions; its first start migrates the existing data.',
+      ],
+    },
+    {
       description: 'Treat New API release candidates as SemVer prereleases',
       matchDatasources: ['docker'],
       matchPackageNames: ['docker.io/calciumion/new-api'],
