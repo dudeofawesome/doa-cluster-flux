@@ -1,0 +1,30 @@
+name: Validate manifests
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  kustomize:
+    name: Build Kustomize manifests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Render checked-in kustomizations
+        shell: bash
+        run: |
+          git ls-files -z -- \
+            ':(glob)**/kustomization.yaml' \
+            ':(glob)**/kustomization.yml' \
+            ':(glob)**/Kustomization' |
+            while IFS= read -r -d '' file; do
+              directory=$(dirname -- "$file")
+              printf 'Building %s\n' "$directory"
+              kustomize build "$directory" > /dev/null
+            done
