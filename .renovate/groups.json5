@@ -3,6 +3,12 @@
 
   packageRules: [
     {
+      description: 'Give each workload its own BusyBox rollout',
+      matchDatasources: ['docker'],
+      matchPackageNames: ['busybox'],
+      additionalBranchPrefix: '{{parentDir}}-',
+    },
+    {
       description: 'Group NFD chart and image updates',
       matchDepNames: [
         'node-feature-discovery',
