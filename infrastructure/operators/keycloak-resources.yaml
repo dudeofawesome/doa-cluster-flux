@@ -15,4 +15,4 @@ spec:
       packageName: edp-keycloak-operator
       channels: [stable]
       # renovate: datasource=github-releases depName=epam/edp-keycloak-operator extractVersion=^v(?<version>.+)$
-      version: '1.35.0'
+      version: '1.36.0'
