@@ -1,13 +1,7 @@
 name: Build images
 
 on:
-  pull_request:
-    branches: [main]
-    paths:
-      - images/avahi2dns/**
-      - images/cups/**
-      - images/keycloak/**
-      - .github/workflows/build-images.yaml
+  workflow_call:
   push:
     branches: [main]
     paths:

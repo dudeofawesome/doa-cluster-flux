@@ -1,0 +1,83 @@
+name: PR checks
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  changes:
+    name: Detect image build inputs
+    runs-on: ubuntu-latest
+    outputs:
+      images: ${{ steps.changes.outputs.images }}
+      sharetab: ${{ steps.changes.outputs.sharetab }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+
+      - name: Detect image build inputs
+        id: changes
+        shell: bash
+        run: |
+          # The first parent of GitHub's pull request merge commit is the base branch.
+          images=$(git diff --name-only --no-renames HEAD^1 HEAD -- \
+            images/avahi2dns images/cups images/keycloak .github/workflows/build-images.yaml)
+          sharetab=$(git diff --name-only --no-renames HEAD^1 HEAD -- \
+            images/sharetab scripts/test-sharetab-entrypoint.py .github/workflows/build-sharetab.yaml)
+
+          if [[ -n "$images" ]]; then
+            echo 'images=true' >> "$GITHUB_OUTPUT"
+          fi
+          if [[ -n "$sharetab" ]]; then
+            echo 'sharetab=true' >> "$GITHUB_OUTPUT"
+          fi
+
+  manifests:
+    name: Validate manifests
+    uses: ./.github/workflows/validate-manifests.yaml
+
+  images:
+    name: Build images
+    needs: changes
+    if: needs.changes.outputs.images == 'true'
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/build-images.yaml
+
+  sharetab:
+    name: Build ShareTab
+    needs: changes
+    if: needs.changes.outputs.sharetab == 'true'
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/build-sharetab.yaml
+
+  required:
+    name: All checks passed
+    needs: [changes, manifests, images, sharetab]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify manifest and applicable image build results
+        shell: bash
+        env:
+          CHANGES_RESULT: ${{ needs.changes.result }}
+          KUSTOMIZE_RESULT: ${{ needs.manifests.result }}
+          IMAGES_RESULT: ${{ needs.images.result }}
+          IMAGES_EXPECTED: ${{ needs.changes.outputs.images == 'true' && 'success' || 'skipped' }}
+          SHARETAB_RESULT: ${{ needs.sharetab.result }}
+          SHARETAB_EXPECTED: ${{ needs.changes.outputs.sharetab == 'true' && 'success' || 'skipped' }}
+        run: |
+          printf 'Change detection: %s\nKustomize: %s\nImages: %s (expected %s)\nShareTab: %s (expected %s)\n' \
+            "$CHANGES_RESULT" "$KUSTOMIZE_RESULT" "$IMAGES_RESULT" "$IMAGES_EXPECTED" "$SHARETAB_RESULT" "$SHARETAB_EXPECTED"
+          [[ "$CHANGES_RESULT" == success &&
+            "$KUSTOMIZE_RESULT" == success &&
+            "$IMAGES_RESULT" == "$IMAGES_EXPECTED" &&
+            "$SHARETAB_RESULT" == "$SHARETAB_EXPECTED" ]]
