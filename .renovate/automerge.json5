@@ -4,8 +4,8 @@
   // Only the approved updates below may merge unattended.
   automerge: false,
   automergeType: 'pr',
-  // GitHub has no required checks; let Renovate evaluate applicable checks.
   platformAutomerge: false,
+
   separateMinorPatch: true,
 
   packageRules: [
@@ -23,6 +23,7 @@
         'quay.io/keycloak/keycloak',
         'quay.io/operator-framework/catalogd',
         'quay.io/operator-framework/operator-controller',
+        'quay.io/operatorhubio/catalog',
         'registry.k8s.io/nfd/node-feature-discovery',
       ],
       matchUpdateTypes: ['patch', 'digest'],
@@ -87,12 +88,6 @@
       separateMultipleMinor: true,
     },
 
-    {
-      description: 'Automerge OperatorHub catalog digest refreshes',
-      matchPackageNames: ['quay.io/operatorhubio/catalog'],
-      matchUpdateTypes: ['digest'],
-      automerge: true,
-    },
     {
       description: 'Automerge only the adjacent cert-manager minor',
       matchManagers: ['flux'],
