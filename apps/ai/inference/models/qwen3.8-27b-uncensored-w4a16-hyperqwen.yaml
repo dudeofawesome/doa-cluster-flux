@@ -1,0 +1,85 @@
+apiVersion: kubeai.org/v1
+kind: Model
+metadata:
+  # A/B against qwen3.8-27b-heretic-iq4-xs-mtp; see ../README.md.
+  # Not exposed through New API until the comparison is done.
+  name: qwen3.8-27b-uncensored-w4a16-hyperqwen
+  annotations:
+    inference.orleans.io/source: https://huggingface.co/leminkozey/Qwen3.8-27B-Uncensored-W4A16-AutoRound/tree/745aa440e05f8fd1bcb4c81c415aba79b58b2655
+spec:
+  features: [TextGeneration]
+  engine: VLLM
+  # Prepared by ../docs/prepare-hyperqwen-weights.yaml.
+  url: pvc://inference-models/qwen3.8-27b-uncensored-w4a16
+  # vLLM 0.32 with HyperQwen's patches. The flags below mirror this commit's
+  # single-user/start_qwen.sh, which KubeAI's fixed command does not run.
+  image: ghcr.io/syv-ai/hyperqwen:sha-6ab9bd0@sha256:f706b092aabb156c23fe98c312ba7912fb8dbc0c107d4f152382113e33762f1c
+  # Two 3060s; the multiplier also gives vLLM's two workers a 32 GiB limit.
+  resourceProfile: rtx3060:2
+  # Omit replicas: KubeAI owns it through the scale subresource.
+  minReplicas: 0
+  maxReplicas: 1
+  targetRequests: 4
+  scaleDownDelaySeconds: 270
+  env:
+    # KubeAI runs python3 from PATH; the patched vLLM is in this venv.
+    PATH: /app/venv/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    # Keep JIT caches across scale-to-zero; a cold cache costs about 0.9 GiB
+    #   of KV headroom on the next boot.
+    HOME: /model/.home
+    # UID 1000 has no passwd entry, and torch's compile cache asks for a user.
+    USER: model
+    FLASHINFER_DISABLE_VERSION_CHECK: '1'
+    VLLM_USE_FLASHINFER_SAMPLER: '0'
+    VLLM_VISION_CPU_OFFLOAD_GB: '1'
+    PYTORCH_CUDA_ALLOC_CONF: expandable_segments:True
+  args:
+    # Each card holds half of every layer and both work at once.
+    - --tensor-parallel-size
+    - '2'
+    - --disable-custom-all-reduce
+    # 131072 is what two 12 GB cards ran with vision on (HyperQwen #205, #255).
+    # Pin --kv-cache-memory from the first boot's log before benchmarking.
+    - --max-model-len
+    - '131072'
+    - --gpu-memory-utilization
+    - '0.89'
+    - --kv-cache-dtype
+    - fp8
+    - --mamba-ssm-cache-dtype
+    - float16
+    - --max-num-seqs
+    - '4'
+    - --max-num-batched-tokens
+    - '2048'
+    - --async-scheduling
+    - --enable-prefix-caching
+    - --mamba-cache-mode
+    - align
+    - --prefix-cache-retention-interval
+    - None
+    - --speculative-config
+    - '{"method":"mtp","num_speculative_tokens":3,"draft_sample_method":"probabilistic"}'
+    - --compilation-config
+    - '{"max_cudagraph_capture_size":32,"custom_ops":["+rms_norm","+silu_and_mul"]}'
+    # One image per prompt, capped so the encoder's peak stays small.
+    - --limit-mm-per-prompt
+    - '{"image":{"count":1}}'
+    - --mm-processor-kwargs
+    - '{"size":{"shortest_edge":65536,"longest_edge":2097152}}'
+    - --reasoning-parser
+    - qwen3
+    - --enable-auto-tool-choice
+    # qwen3_xml, not the launcher's qwen3_coder default; see HyperQwen #68.
+    - --tool-call-parser
+    - qwen3_xml
+    - --tool-strict-level
+    - parameter
+    - --enable-prompt-tokens-details
+    - --sse-keep-alive-interval
+    - '30'
+    # The benchmark's tokens-per-step column needs these.
+    - --enable-per-request-metrics
+    - --enable-force-include-usage
+    - --per-request-spec-decode-metrics
+    - summary
