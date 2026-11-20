@@ -15,6 +15,8 @@ spec:
       labels:
         component: app
     spec:
+      securityContext:
+        fsGroup: 1000
       containers:
         - name: matter-server
           image: ghcr.io/matter-js/matterjs-server:1@sha256:9eb98c839d0b4b07f9230b96ad52de570f7f2a7c286c5992b4c04b6b26c08a3f
@@ -25,8 +27,6 @@ spec:
           args:
             - --storage-path
             - /data
-            - --paa-root-cert-dir
-            - /data/credentials
             - --bluetooth-adapter
             - '0'
           ports:
