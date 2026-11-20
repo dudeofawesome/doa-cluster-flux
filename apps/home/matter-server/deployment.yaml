@@ -21,14 +21,10 @@ spec:
         - name: matter-server
           image: ghcr.io/matter-js/matterjs-server:1@sha256:9eb98c839d0b4b07f9230b96ad52de570f7f2a7c286c5992b4c04b6b26c08a3f
           imagePullPolicy: IfNotPresent
-          securityContext:
-            # Bluetooth commissioning is exposed through the host D-Bus socket.
-            privileged: true
           args:
             - --storage-path
             - /data
-            - --bluetooth-adapter
-            - '0'
+            - --ble-proxy
           ports:
             - name: websocket
               containerPort: 5580
@@ -58,9 +54,6 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /data
-            - name: dbus
-              mountPath: /run/dbus
-              readOnly: true
       restartPolicy: Always
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
@@ -68,7 +61,3 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: data
-        - name: dbus
-          hostPath:
-            path: /run/dbus
-            type: Directory
