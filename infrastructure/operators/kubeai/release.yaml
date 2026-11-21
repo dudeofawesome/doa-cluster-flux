@@ -63,7 +63,7 @@ spec:
         images:
           # Shared image pin for all llama.cpp models using the GPU profile.
           # renovate: datasource=docker depName=ghcr.io/ggml-org/llama.cpp versioning=regex:^server-cuda13-b(?<patch>[0-9]+)$
-          nvidia-gpu: ghcr.io/ggml-org/llama.cpp:server-cuda13-b11552@sha256:48f87d72fb1d226ac6064e7c7ef9068ac305dc5014b7dc9251fa62e7f9f6ddc4
+          nvidia-gpu: ghcr.io/ggml-org/llama.cpp:server-cuda13-b12602@sha256:936fb902b76d651b1f855ae1a716b9f9ab7ba046b18ba644b4088bf5cdb65c85
     resourceProfiles:
       whisper-cpu:
         imageName: cpu
