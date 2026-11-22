@@ -36,11 +36,14 @@
       matchPackageNames: [
         'docker.io/allangood/rtlamr2mqtt',
         'docker.io/binwiederhier/ntfy',
+        'docker.io/everythingsmarthome/everything-presence-mmwave-configurator',
         'docker.io/freikin/dawarich',
         'docker.io/grafana/grafana',
         'docker.io/library/node',
         'docker.io/louislam/uptime-kuma',
         'docker.io/mauriceboe/trek',
+        'docker.io/rhasspy/wyoming-piper',
+        'docker.io/rhasspy/wyoming-whisper',
         'docker.io/tobiasehlert/teslamateapi',
         'ghcr.io/atuinsh/atuin',
         'ghcr.io/dudeofawesome/avahi2dns',
@@ -95,6 +98,27 @@
       matchUpdateTypes: ['minor'],
       matchJsonata: ['$number($split(currentValue, ".")[1]) + 1 = newMinor'],
       automerge: true,
+    },
+
+    {
+      description: 'Merge windowed workloads and their helpers during a planned window',
+      matchFileNames: [
+        'apps/ai/wyoming/**',
+        'apps/games/valheim/**',
+        'apps/home/airprint/**',
+        'apps/home/hermes/**',
+        'apps/home/home-assistant/**',
+        'apps/home/matter-server/**',
+        'apps/home/mosquitto/**',
+        'apps/home/music-assistant/deployment.yaml',
+        'apps/home/teslamate/deployment.yaml',
+        'apps/home/zigbee2mqtt/**',
+      ],
+      automerge: false, // remove this line when windowing is configured
+      platformAutomerge: false,
+      prBodyNotes: [
+        'Merge during the planned maintenance window for this workload.',
+      ],
     },
   ],
 }
