@@ -28,7 +28,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: whisper
-          image: rhasspy/wyoming-whisper:3.9.0@sha256:3cc01f646c8b149fe47b2a5e8bfaf31866e1bc18faffadb26c9b8be58cbe5703
+          image: docker.io/rhasspy/wyoming-whisper:3.9.0@sha256:3cc01f646c8b149fe47b2a5e8bfaf31866e1bc18faffadb26c9b8be58cbe5703
           args:
             - --stt-library
             - faster-whisper
