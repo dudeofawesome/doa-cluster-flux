@@ -32,8 +32,8 @@ spec:
       - jboss-logging
   sessions:
     ssoSessionSettings:
-      idleTimeout: 604800 # 7 days
-      maxLifespan: 2592000 # 30 days
+      idleTimeout: 2592000 # 30 days
+      maxLifespan: 7776000 # 90 days
   passwordPolicy:
     - type: notUsername
       value: 'true'
