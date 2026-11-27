@@ -26,6 +26,13 @@ spec:
           podSelector:
             matchLabels:
               app: new-api
+        # The manual client in apps/ai/inference/docs/benchmark-client.yaml.
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: inference
+          podSelector:
+            matchLabels:
+              inference.orleans.io/benchmark-client: 'true'
       ports:
         - port: 8000
           protocol: TCP
