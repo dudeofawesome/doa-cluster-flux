@@ -8,4 +8,4 @@ spec:
     type: Image
     image:
       # renovate: datasource=docker depName=quay.io/operatorhubio/catalog
-      ref: quay.io/operatorhubio/catalog@sha256:111fa8a2a0c602904a4281a14af2d772a6f5c859fa9d8627bc0383546dca0b70
+      ref: quay.io/operatorhubio/catalog@sha256:1c2f21cda28874b73b16fab1332d4d51e94f8dd8aa8ecdc3cf011148a14337f5
