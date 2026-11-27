@@ -23,6 +23,7 @@ spec:
     inline: |
       {
         "allowedCommands": [
+          "^nix --extra-experimental-features 'nix-command flakes' flake lock$",
           "^node scripts/renovate-nix-packages-update[.]mjs$",
           "^node scripts/renovate-avahi2dns-checksum[.]mjs$",
           "^node scripts/renovate-helm-source-refresh[.]mjs$"
